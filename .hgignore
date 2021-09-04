@@ -1,0 +1,16 @@
+# use glob syntax.
+syntax: glob
+
+build
+tags
+cscope.out
+cscope.files
+core.*
+.svn
+*.pyc
+*~
+.*.swp
+
+# switch to regexp syntax.
+#syntax: regexp
+#^\.pc/

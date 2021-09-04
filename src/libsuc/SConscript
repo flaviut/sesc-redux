@@ -1,0 +1,17 @@
+Import('*')
+
+Source('TQueue.cpp', lib='suc')
+Source('Config.cpp', lib='suc')
+Source('nanassert.cpp', lib='suc')
+Source('GStats.cpp', lib='suc')
+Source('callback.cpp', lib='suc cmp')
+Source('Snippets.cpp', lib='suc')
+Source('Port.cpp', lib='suc')
+Source('ReportGen.cpp', lib='suc')
+Source('CacheCore.cpp', lib='suc')
+Source('SescConf.cpp', lib='suc')
+Source('SCTable.cpp', lib='suc')
+Source('BloomFilter.cpp', lib='suc')
+
+YaccSource('conflex.y', lib='suc', opt='-p yyConf')
+LexSource('conflex.l', lib='suc', opt='-Cemr')

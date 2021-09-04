@@ -1,0 +1,14 @@
+Import('*')
+all_libs.append('booksim')
+all_libs_cpppath['booksim'] = [
+        'libbooksim',
+        'libbooksim/allocators',
+        'libbooksim/arbiters',
+        'libbooksim/networks',
+        'libbooksim/power',
+        'libbooksim/routers',
+        ]
+
+all_networks.extend([
+		'BOOKSIM'
+		])

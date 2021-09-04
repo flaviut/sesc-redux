@@ -1,0 +1,21 @@
+Import('*')
+
+if env['SYSTEM'] != 'SMP':
+    Return()
+
+if env['NETWORK'] != 'BOOKSIM':
+    Return()
+
+Source('cmp.cpp', main=True, skip_lib=True)
+
+Source('SMPCache.cpp', lib='cmp')
+Source('SMPSystemBus.cpp', lib='cmp')
+Source('SMemorySystem.cpp', lib='cmp')
+Source('SMPProtocol.cpp', lib='cmp')
+Source('SMPMemRequest.cpp', lib='cmp')
+
+Source('DMESIProtocol.cpp', lib='cmp')
+Source('SMPMemCtrl.cpp', lib='cmp')
+Source('SMPNOC.cpp', lib='cmp')
+Source('SMPRouter.cpp', lib='cmp')
+Source('SMPSliceCache.cpp', lib='cmp')

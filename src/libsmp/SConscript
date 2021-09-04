@@ -1,0 +1,16 @@
+Import('*')
+
+if env['SYSTEM'] != 'SMP':
+    Return()
+
+if env['NETWORK'] != 'BUS':
+    Return()
+
+Source('smp.cpp', main=True, skip_lib=True)
+
+Source('SMPCache.cpp', lib='smp')
+Source('SMPSystemBus.cpp', lib='smp')
+Source('SMemorySystem.cpp', lib='smp')
+Source('MESIProtocol.cpp', lib='smp')
+Source('SMPProtocol.cpp', lib='smp')
+Source('SMPMemRequest.cpp', lib='smp')

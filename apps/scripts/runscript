@@ -1,0 +1,150 @@
+#!/usr/bin/env perl
+
+#Determine the name of the script
+my $bitWidth="";
+my $scriptName=$0;
+if($scriptName=~/\/([^\/]*)$/){
+  $scriptName=$1;
+  if($scriptName=~/^(.*)([36][24])$/){
+    $scriptName=$1;
+    $bitWidth=$2;
+  }
+}
+# Set up command line depending on whether this is a debugging run
+($scriptName=~/^(dbg|run)(.*)$/)
+  or die "Script name must be dbg* or run*";
+my $simExeName="";
+if($1 eq "run"){
+  $simExeName="sesc.opt";
+}else{
+  $simExeName="sesc.debug";
+}
+if($2 eq "sim"){
+}else{
+  die "Script name must be (dbg|run)sim";
+}
+&DoBoth();
+
+sub DoBoth{
+    open Makefile,"< Makefile"
+	or die $scriptName . " needs a Makefile to work";
+    while(<Makefile>){
+	if(/^TARGET\s*=\s*(.*)\s*$/){
+	    &DoRuns();
+	}
+	if(/^DIRS\s*=\s*(.*)\s*$/){
+	    &DoDirs($1);
+	}
+    }
+    close Makefile;
+}
+
+sub DoDirs{
+  my $DirNames=$_[0];
+  while($DirNames=~/([^\s]+)\s*(.*)$/){
+    $DirNames=$2;
+    chdir $1;
+    &DoBoth();
+    chdir "..";
+  }
+}
+
+sub ExpandItem{
+  local($run,$ctl,$strtab,$currun) = @_;
+  while(!exists $$strtab{$ctl}{$currun}){
+    if($currun eq ""){
+      die "Run $run needs a valid base\n";
+    }elsif($currun eq "all"){
+      return "";
+    }elsif(!exists $$strtab{"base"}{$currun}){
+      $currun="all";
+    }else{
+      $currun=$$strtab{"base"}{$currun};
+    }
+  }
+  local($ret)=$$strtab{$ctl}{$currun};
+  while($ret=~/^(.*)<(\w*)>(.*)$/){
+    local($pre,$ref,$suf)=($1,$2,$3);
+    if($ref eq ""){
+      if(!exists $$strtab{"base"}{$currun}){
+	$ref="all";
+      }else{
+	$ref = $$strtab{"base"}{$currun};
+      }
+    }
+    $ret = $pre . &ExpandItem($run,$ctl,$strtab,$ref) . $suf;
+  }
+  while($ret=~/^(.*)\[(\w+)\](.*)$/){
+    local($pre,$ref,$suf)=($1,$2,$3);
+    $ret = $pre . &ExpandItem($run,$ref,$strtab,$run) . $suf;
+  }
+  return $ret;
+}
+
+sub ReadMakefile{
+  local($fname,$strtab) = @_;
+  local *Makefile;
+  open Makefile, "< $fname";
+  while(<Makefile>){
+    if(/^\s*include\s+(.*\S)\s*$/){
+      &ReadMakefile($1,$strtab);
+    }elsif(/^TARGET\s*=\s*(\S+)\s*$/){
+      if(! exists $$strtab{"appname"}{"all"}){
+	$$strtab{"appname"}{"all"}=$1 . ".mipseb";
+      }
+    }elsif(/^(.*)\.(base|setup|simpfx|simopts|appname|params|test|cleanup|numcpu|numthread|str\w+)\s*=\s*(.*)\s*$/){
+      local ($run,$ctl,$val)=($1,$2,$3);
+      while($val=~/^(.*)\\$/){
+        $val = $1 . " ";
+        my $Line=<Makefile> or die "$run.$ctl unfinished at end of file.";
+        $Line=~/^\s*(.*)\s*$/;
+        $val = $val . $1;
+      }
+      $$strtab{"exist"}{$run}="";
+      $$strtab{$ctl}{$run}=$val;
+    }
+  }
+  close(Makefile);
+}
+
+sub DoRuns{
+  my %strTable;
+  &ReadMakefile("Makefile",\%strTable);
+  (@ARGV > 0) or die "Must specify a run name.";
+  my $runName =$ARGV[0];
+  my $runTemp="";
+  foreach my $runIter (@ARGV){
+    (exists $strTable{"exist"}{$runIter})
+      or die "Run $runIter does not exist.";
+    if($runTemp ne ""){
+      $strTable{"base"}{$runTemp} =$runIter;
+    }
+    $runTemp=$runIter;
+  }
+  my $setLine=&ExpandItem($runName,"setup",\%strTable,$runName);
+  print "Setup line:\n$setLine\n";
+  ($setLine eq "")||(!system $setLine)||
+    die "Error executing setup line for $curRunName: $setLine";
+  my $simPrefix= &ExpandItem($runName,"simpfx",\%strTable,$runName);
+  if($simPrefix=~/^\s*(.*[^\s])\s*$/){
+    $simPrefix=$1." ";
+  }else{
+    $simPrefix="";
+  }
+  my $cmdLine = &ExpandItem($runName,"simpfx",\%strTable,$runName) . " " .
+    "~/sesc" . $bitWidth . "/" . $simExeName  . " " .
+    &ExpandItem($runName,"simopts",\%strTable,$runName) . " " .
+    &ExpandItem($runName,"appname",\%strTable,$runName) . " " . &ExpandItem($runName,"params",\%strTable,$runName);
+  print "Command line:\n$cmdLine\n";
+  (!system $cmdLine)||
+    die "Execution of command line for $runName failed. No cleanup.";
+  my $tstLine=&ExpandItem($runName,"test",\%strTable,$runName);
+  print "Test line:\n$tstLine\n";
+  ($tstLine eq "")||(!system $tstLine)||
+    die "Test for $runName failed: '$tstLine'. No cleanup.";
+  my $clrLine=&ExpandItem($runName,"cleanup",\%strTable,$runName);
+  print "Cleanup line:\n$clrLine\n";
+  ($clrLine eq "")||(!system $clrLine)||
+    die "Error executing cleanup line for $runName.";
+  print "All tests passed and cleanup complete\n";
+}

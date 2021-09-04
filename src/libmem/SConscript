@@ -1,0 +1,12 @@
+Import('*')
+
+Source('MemorySystem.cpp', lib='mem')
+Source('Cache.cpp', lib='mem')
+Source('Bank.cpp', lib='mem')
+Source('MemCtrl.cpp', lib='mem')
+Source('Bus.cpp', lib='mem')
+Source('MemoryOS.cpp', lib='mem')
+Source('TLB.cpp', lib='mem')
+Source('StridePrefetcher.cpp', lib='mem')
+Source('AddressPrefetcher.cpp', lib='mem')
+Source('PriorityBus.cpp', lib='mem')

@@ -1,0 +1,8 @@
+import os
+
+Import('*')
+
+all_systems.extend(['SMP'])
+all_networks.extend(['BUS'])
+all_libs.append('smp')
+#protocol_dirs.append(Dir('.').abspath)

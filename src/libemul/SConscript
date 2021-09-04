@@ -1,0 +1,11 @@
+Import('*')
+
+Source('AddressSpace.cpp', lib="emul")
+Source('EmulInit.cpp', lib="emul")
+Source('ElfObject.cpp', lib="emul")
+Source('InstDesc.cpp', lib="emul")
+Source('LinuxSys.cpp', lib="emul")
+Source('SignalHandling.cpp', lib="emul")
+Source('FileSys.cpp', lib="emul")
+
+#Source('X86InstDesc.cpp')

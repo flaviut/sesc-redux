@@ -1,0 +1,10 @@
+Import('*')
+all_libs.append('cmp')
+all_libs_cpppath['cmp'] = [
+        'libbooksim',
+        'libbooksim/allocators',
+        'libbooksim/arbiters',
+        'libbooksim/networks',
+        'libbooksim/power',
+        'libbooksim/routers',
+        ]

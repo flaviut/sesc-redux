@@ -1,0 +1,4 @@
+Import('*')
+all_libs.append('mem')
+
+all_memory.append('None')

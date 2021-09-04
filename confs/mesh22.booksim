@@ -1,0 +1,100 @@
+// $Id: mesh88_lat 5188 2012-08-30 00:31:31Z dub $
+
+// Copyright (c) 2007-2012, Trustees of The Leland Stanford Junior University
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+
+//4X4 mesh with 20 flits per packet under injection mode
+//injection rate here is packet per cycle, NOT flit per cycle
+
+///////////////////////////////////////////////////////
+// Topology                                          //
+//   --k: nodes per dimension                        //
+//   --n: # of dimensions                            //
+//   --NOTE: booksim_config have many default values //
+//           for unspecified files                   //
+///////////////////////////////////////////////////////
+topology = mesh;
+k = 2;
+n = 2;
+
+
+/////////////
+// Routing //
+/////////////
+routing_function = dor;
+latency_thres = 2000.0;
+
+
+//////////////////
+// Flow control //
+//////////////////
+speculative = 1;
+num_vcs     = 4;
+vc_buf_size = 24;
+
+
+//////////////////////////////
+// Router architecture     //
+//   -- Default router: iq //
+/////////////////////////////
+vc_allocator = separable_input_first;
+sw_allocator = separable_input_first;
+
+
+/////////////////////
+// General options //
+/////////////////////
+credit_delay   = 2;
+routing_delay  = 0;
+internal_speedup  = 1.0;
+
+
+////////////////////////////////////////////
+// Control of virtual channel speculation //
+////////////////////////////////////////////
+vc_alloc_delay = 1;
+sw_alloc_delay = 1;
+input_speedup     = 1;
+output_speedup    = 1;
+wait_for_tail_credit = 0;
+
+
+/////////////
+// Traffic //
+/////////////
+priority = age; // Message priority
+
+
+/////////////////////////////////////////////////////
+// Simulation                                      //
+//   -- sim_type: Needed to initialize NOC         //
+//   -- print_activity: Output buffer/switch usage //
+//                      at the end of simulation   //
+//   -- viewer_trace: Print out every activity     //
+//   -- watch_out: output object, '-' is cout      //
+/////////////////////////////////////////////////////
+sim_type       = latency;
+print_activity = 0;
+// viewer_trace = 1;
+watch_out = -;
