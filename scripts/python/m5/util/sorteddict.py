@@ -87,7 +87,7 @@ class SortedDict(dict):
 
     def __repr__(self):
         return 'SortedDict({%s})' % ', '.join('%r: %r' % item
-                                              for item in self.iteritems())
+                                              for item in self.items())
     def __setitem__(self, key, item):
         dict.__setitem__(self, key, item)
         self._del_keys()
@@ -108,10 +108,10 @@ class SortedDict(dict):
         return self._keys[:]
 
     def values(self):
-        return list(self.itervalues())
+        return list(self.values())
 
     def items(self):
-        return list(self.iteritems())
+        return list(self.items())
 
     def iterkeys(self):
         return iter(self._keys)
@@ -181,21 +181,21 @@ class SortedDict(dict):
 
 if __name__ == '__main__':
     def display(d):
-        print d
-        print d.keys()
-        print list(d.iterkeys())
-        print d.values()
-        print list(d.itervalues())
-        print d.items()
-        print list(d.iteritems())
+        print(d)
+        print(list(d.keys()))
+        print(list(d.keys()))
+        print(list(d.values()))
+        print(list(d.values()))
+        print(list(d.items()))
+        print(list(d.items()))
 
     d = SortedDict(x=24,e=5,j=4,b=2,z=26,d=4)
     display(d)
 
-    print 'popitem', d.popitem()
+    print('popitem', d.popitem())
     display(d)
 
-    print 'pop j'
+    print('pop j')
     d.pop('j')
     display(d)
 
@@ -212,9 +212,9 @@ if __name__ == '__main__':
     d['y'] = 26
     display(d)
 
-    print `d`
+    print(repr(d))
 
-    print d.copy()
+    print(d.copy())
 
     for k,v in d.itemrange('d', 'z', inclusive=True):
-        print k,v
+        print(k,v)

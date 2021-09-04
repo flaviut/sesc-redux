@@ -724,7 +724,7 @@ class DecodeInst {
             : std::vector<OpData>(src), mask(mask) {
         }
         OpEntry &operator<<(const OpData &datum) {
-            push_back(datum);
+            this->push_back(datum);
             return *this;
         }
     };
@@ -735,7 +735,7 @@ class DecodeInst {
     public:
         OpMap(void);
         const OpEntry &operator[](RawInst raw) const {
-            typename OpMapBase::const_iterator it=find(OpKey(0,0));
+            typename OpMapBase::const_iterator it= this ->find(OpKey(0,0));
             while(true) {
                 const OpEntry &curEntry=it->second;
                 if(!curEntry.mask)

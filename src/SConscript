@@ -35,7 +35,7 @@ class SourceMeta(type):
         '''Find all files that match the specified guards.  If a source
         file does not specify a flag, the default is False'''
         for src in cls.all:
-            for flag,value in guards.iteritems():
+            for flag,value in list(guards.items()):
                 # if the flag is found and has a different value, skip
                 # this file
                 if src.all_guards.get(flag, False) != value:
@@ -43,13 +43,12 @@ class SourceMeta(type):
             else:
                 yield src
 
-class SourceFile(object):
+class SourceFile(object, metaclass=SourceMeta):
     '''Base object that encapsulates the notion of a source file.
     This includes, the source node, target node, various manipulations
     of those.  A source file also specifies a set of guards which
     describing which builds the source file applies to.  A parent can
     also be specified to get default guards from'''
-    __metaclass__ = SourceMeta
     def __init__(self, source, parent=None, **guards):
         self.guards = guards
         self.parent = parent
@@ -345,7 +344,7 @@ if env['GCC']:
         ccflags[target] += ['-O3']
         ldflags[target] += ['-O3']
 else:
-    print 'Unknown compiler, please fix compiler options'
+    print('Unknown compiler, please fix compiler options')
     Exit(1)
 
 # To speed things up, we only instantiate the build environments we
@@ -360,7 +359,7 @@ def identifyTarget(t):
     ext = t.split('.')[-1]
     if ext in target_types:
         return ext
-    if obj2target.has_key(ext):
+    if ext in obj2target:
         return obj2target[ext]
     match = re.search(r'/tests/([^/]+)/', t)
     if match and match.group(1) in target_types:

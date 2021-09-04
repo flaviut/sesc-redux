@@ -24,7 +24,7 @@ sys.path[1:1] = extra_python_paths
 from m5.util import compareVersions, readCommand
 from m5.util.terminal import get_termcap
 
-print "SESC Simulator"
+print("SESC Simulator")
 
 help_texts = {
     "options" : "",
@@ -65,7 +65,7 @@ use_vars = set([ 'AS', 'AR', 'CC', 'CXX', 'HOME', 'LD_LIBRARY_PATH',
 
 
 use_env = {}
-for key,val in os.environ.iteritems():
+for key,val in os.environ.items():
     if key in use_vars:
         use_env[key] = val
 
@@ -74,16 +74,16 @@ main.Decider('MD5-timestamp')
 main.root = Dir(".")      
 main.srcdir = Dir("src")  
 
-main_dict_keys = main.Dictionary().keys()
+main_dict_keys = list(main.Dictionary().keys())
 
 # Check that we have a C/C++ compiler
 if not ('CC' in main_dict_keys and 'CXX' in main_dict_keys):
-    print "No C++ compiler installed (package g++ on Ubuntu and RedHat)"
+    print("No C++ compiler installed (package g++ on Ubuntu and RedHat)")
     Exit(1)
 
 # Check that swig is present
 if not 'SWIG' in main_dict_keys:
-    print "swig is not installed (package swig on Ubuntu and RedHat)"
+    print("swig is not installed (package swig on Ubuntu and RedHat)")
     Exit(1)
 
 #Default(environ.get('SESC_DEFAULT_BINARY', 'build/SMP_BUS/sesc.opt'))
@@ -96,7 +96,7 @@ def rfind(l, elt, offs = -1):
     for i in range(len(l)+offs, 0, -1):
         if l[i] == elt:
             return i
-    raise ValueError, "element not found"
+    raise ValueError("element not found")
 
 def makePathListAbsolute(path_list, root=GetLaunchDir()):
     return [abspath(joinpath(root, expanduser(str(p))))
@@ -112,15 +112,15 @@ for t in BUILD_TARGETS:
     try:
         build_top = rfind(path_dirs, 'build', -2)
     except:
-        print "Error: no non-leaf 'build' dir found on target path", t
+        print("Error: no non-leaf 'build' dir found on target path", t)
         Exit(1)
     this_build_root = joinpath('/',*path_dirs[:build_top+1])
     if not build_root:
         build_root = this_build_root
     else:
         if this_build_root != build_root:
-            print "Error: build targets not under same build root\n"\
-                  "  %s\n  %s" % (build_root, this_build_root)
+            print("Error: build targets not under same build root\n"\
+                  "  %s\n  %s" % (build_root, this_build_root))
             Exit(1)
     variant_path = joinpath('/',*path_dirs[:build_top+2])
     if variant_path not in variant_paths:
@@ -174,10 +174,10 @@ class Transform(object):
         def strip(f):
             return strip_build_path(str(f), env)
         if len(source) > 0:
-            srcs = map(strip, source)
+            srcs = list(map(strip, source))
         else:
             srcs = ['']
-        tgts = map(strip, target)
+        tgts = list(map(strip, target))
         # surprisingly, os.path.commonprefix is a dumb char-by-char string
         # operation that has nothing to do with paths.
         com_pfx = os.path.commonprefix(srcs + tgts)
@@ -214,7 +214,7 @@ class Transform(object):
         # recalculate length in case com_pfx was modified
         com_pfx_len = len(com_pfx)
         def fmt(files):
-            f = map(lambda s: s[com_pfx_len:], files)
+            f = [s[com_pfx_len:] for s in files]
             return ', '.join(f)
         return self.format % (com_pfx, fmt(srcs), fmt(tgts))
 
@@ -267,8 +267,8 @@ if main['GCC']:
     # support. See http://gcc.gnu.org/projects/cxx0x.html for details
     gcc_version = readCommand([main['CXX'], '-dumpversion'], exception=False)
     if compareVersions(gcc_version, "4.4") < 0:
-        print 'Error: gcc version 4.4 or newer required.'
-        print '       Installed version:', gcc_version
+        print('Error: gcc version 4.4 or newer required.')
+        print('       Installed version:', gcc_version)
         Exit(1)
 
     main['GCC_VERSION'] = gcc_version
@@ -276,7 +276,7 @@ if main['GCC']:
     # Check for versions with bugs
     if not compareVersions(gcc_version, '4.4.1') or \
        not compareVersions(gcc_version, '4.4.2'):
-        print 'Info: Tree vectorizer in GCC 4.4.1 & 4.4.2 is buggy, disabling.'
+        print('Info: Tree vectorizer in GCC 4.4.1 & 4.4.2 is buggy, disabling.')
         main.Append(CCFLAGS=['-fno-tree-vectorize'])
 else:
     Exit(1)
@@ -290,13 +290,13 @@ main['YACCHXXFILESUFFIX'] = '.hh'
 
 
 # Check for YACC
-if not main.has_key('YACC'):
-    print 'Error: YACC utility not found.'
+if 'YACC' not in main:
+    print('Error: YACC utility not found.')
     Exit(1)
 
 # Check for LEX
-if not main.has_key('LEX'):
-    print 'Error: LEX utility not found.'
+if 'LEX' not in main:
+    print('Error: LEX utility not found.')
     Exit(1)
 
 
@@ -341,15 +341,15 @@ Export('all_libs_cpppath')
 # Walk the tree and execute all SConsopts scripts that wil add to the
 # above variables
 if not GetOption('verbose'):
-    print "Reading SConsopts"
+    print("Reading SConsopts")
 for bdir in [ base_dir ]:
     if not isdir(bdir):
-        print "Error: directory '%s' does not exist" % bdir
+        print("Error: directory '%s' does not exist" % bdir)
         Exit(1)
     for root, dirs, files in os.walk(bdir):
         if 'SConsopts' in files:
             if GetOption('verbose'):
-                print "Reading", joinpath(root, 'SConsopts')
+                print("Reading", joinpath(root, 'SConsopts'))
             SConscript(joinpath(root, 'SConsopts'))
 
 
@@ -370,7 +370,7 @@ export_vars += [ 'SYSTEM', 'NETWORK', 'MEMORY'] #'PROTOCOL',
 
 
 for variant_path in variant_paths:
-    print "Building in", variant_path
+    print("Building in", variant_path)
 
     # Make a copy of the build-root environment to use for this config.
     env = main.Clone()
@@ -417,15 +417,15 @@ for variant_path in variant_paths:
 
     opts_dir = joinpath(main.root.abspath, 'build_opts')
     default_vars_files = [joinpath(opts_dir, variant_dir)]
-    existing_files = filter(isfile, default_vars_files)
+    existing_files = list(filter(isfile, default_vars_files))
     if existing_files:
         default_vars_file = existing_files[0]
         sticky_vars.files.append(default_vars_file)
-        print "Using variable in %s" \
-              % (default_vars_file)
+        print("Using variable in %s" \
+              % (default_vars_file))
     else:
-        print "Error: cannot find variables file %s" \
-              % (default_vars_files)
+        print("Error: cannot find variables file %s" \
+              % (default_vars_files))
         Exit(1)
 
     # Apply current variable settings to env

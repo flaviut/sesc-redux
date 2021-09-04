@@ -77,24 +77,24 @@ if __name__ == '__main__':
     x = attrdict()
     x.y = 1
     x['z'] = 2
-    print x['y'], x.y
-    print x['z'], x.z
-    print dir(x)
-    print x
+    print(x['y'], x.y)
+    print(x['z'], x.z)
+    print(dir(x))
+    print(x)
 
-    print
+    print()
 
     del x['y']
     del x.z
-    print dir(x)
+    print(dir(x))
     print(x)
 
-    print
-    print "multiattrdict"
+    print()
+    print("multiattrdict")
     x = multiattrdict()
     x.x.x.x = 9
     x.y.z = 9
-    print x
-    print x.y
-    print x.y.z
-    print x.z.z
+    print(x)
+    print(x.y)
+    print(x.y.z)
+    print(x.z.z)

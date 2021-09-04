@@ -42,8 +42,8 @@
 # dict to be strings.
 
 
-from convert import *
-from attrdict import attrdict
+from .convert import *
+from .attrdict import attrdict
 
 class Variable(str):
     """Intelligent proxy class for SmartDict.  Variable will use the
@@ -55,7 +55,7 @@ class Variable(str):
         return toLong(str(self))
     def __float__(self):
         return toFloat(str(self))
-    def __nonzero__(self):
+    def __bool__(self):
         return toBool(str(self))
     def convert(self, other):
         t = type(other)
@@ -63,8 +63,8 @@ class Variable(str):
             return bool(self)
         if t == int:
             return int(self)
-        if t == long:
-            return long(self)
+        if t == int:
+            return int(self)
         if t == float:
             return float(self)
         return str(self)
@@ -107,7 +107,7 @@ class UndefinedVariable(object):
     """Placeholder class to represent undefined variables.  Will
     generally cause an exception whenever it is used, but evaluates to
     zero for boolean truth testing such as in an if statement"""
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
 class SmartDict(attrdict):

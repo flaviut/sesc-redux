@@ -30,4 +30,4 @@
 # script.  This is mostly to keep backward compatibility with existing
 # scripts while allowing new SCons code to operate properly.
 
-import util
+from . import util

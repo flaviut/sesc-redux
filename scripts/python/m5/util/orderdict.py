@@ -28,9 +28,7 @@
 
 __all__ = [ 'orderdict' ]
 
-from UserDict import DictMixin
-
-class orderdict(dict, DictMixin):
+class orderdict(dict):
     def __init__(self, *args, **kwargs):
         if len(args) > 1:
             raise TypeError("expected at most one argument, got %d" % \
@@ -46,6 +44,13 @@ class orderdict(dict, DictMixin):
     def __delitem__(self, key):
         super(orderdict, self).__delitem__(key)
         self._keys.remove(key)
+
+    def __len__(self):
+        return len(self.mylist)
+
+    def __iter__(self):
+        for i in self.mylist:
+            yield i
 
     def clear(self):
         super(orderdict, self).clear()

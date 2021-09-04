@@ -246,7 +246,7 @@ public:
 
 
     bool hasEntry(Addr_t paddr) {
-        return hasLineReq(calcLineAddr(paddr));
+        return hasLineReq(this->calcLineAddr(paddr));
     }
 
     virtual bool hasLineReq(Addr_t paddr) = 0; //Expects a line address only
@@ -703,14 +703,14 @@ public:
     }
 
     int32_t getUsedReads(Addr_t paddr) {
-        MSHRit it = ms.find(calcLineAddr(paddr));
+        MSHRit it = ms.find(this->calcLineAddr(paddr));
         I(it != ms.end());
 
         return (*it).second.getUsedReads();
     }
 
     int32_t getUsedWrites(Addr_t paddr) {
-        MSHRit it = ms.find(calcLineAddr(paddr));
+        MSHRit it = ms.find(this->calcLineAddr(paddr));
         I(it != ms.end());
 
         return (*it).second.getUsedWrites();
@@ -767,7 +767,7 @@ private:
     bool checkingOverflow;
 
     int32_t calcBankIndex(Addr_t paddr) const {
-        paddr = calcLineAddr(paddr);
+        paddr = this->calcLineAddr(paddr);
         Addr_t idx = (paddr >> (16 - Log2LineSize/2)) ^ (paddr & 0x0000ffff);
         return  idx % nBanks;  // TODO:move to a mask
     }

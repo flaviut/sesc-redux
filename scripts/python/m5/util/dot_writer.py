@@ -75,7 +75,7 @@ def dot_create_nodes(simNode, callgraph):
     cluster = dot_create_cluster(simNode, full_path, label)
 
     # create nodes per port
-    for port_name in simNode._ports.keys():
+    for port_name in list(simNode._ports.keys()):
         port = simNode._port_refs.get(port_name, None)
         if port != None:
             full_port_name = full_path + "_" + port_name
@@ -96,7 +96,7 @@ def dot_create_nodes(simNode, callgraph):
 
 # create all edges according to memory hierarchy
 def dot_create_edges(simNode, callgraph):
-    for port_name in simNode._ports.keys():
+    for port_name in list(simNode._ports.keys()):
         port = simNode._port_refs.get(port_name, None)
         if port != None:
             full_path = re.sub('\.', '_', simNode.path())

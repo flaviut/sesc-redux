@@ -54,7 +54,7 @@ exbi = pebi * 1024
 # memory size configuration stuff
 def toFloat(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     if value.endswith('Ei'):
         return float(value[:-2]) * exbi
@@ -95,9 +95,9 @@ def toFloat(value):
 
 def toInteger(value):
     value = toFloat(value)
-    result = long(value)
+    result = int(value)
     if value != result:
-        raise ValueError, "cannot convert '%s' to integer" % value
+        raise ValueError("cannot convert '%s' to integer" % value)
 
     return result
 
@@ -108,17 +108,17 @@ _bool_dict = {
 
 def toBool(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     value = value.lower()
     result = _bool_dict.get(value, None)
     if result == None:
-        raise ValueError, "cannot convert '%s' to bool" % value
+        raise ValueError("cannot convert '%s' to bool" % value)
     return result
 
 def toFrequency(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     if value.endswith('THz'):
         return float(value[:-3]) * tera
@@ -131,11 +131,11 @@ def toFrequency(value):
     elif value.endswith('Hz'):
         return float(value[:-2])
 
-    raise ValueError, "cannot convert '%s' to frequency" % value
+    raise ValueError("cannot convert '%s' to frequency" % value)
 
 def toLatency(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     if value.endswith('ps'):
         return float(value[:-2]) * pico
@@ -148,13 +148,13 @@ def toLatency(value):
     elif value.endswith('s'):
         return float(value[:-1])
 
-    raise ValueError, "cannot convert '%s' to latency" % value
+    raise ValueError("cannot convert '%s' to latency" % value)
 
 def anyToLatency(value):
     """result is a clock period"""
 
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     try:
         val = toFrequency(value)
@@ -170,13 +170,13 @@ def anyToLatency(value):
     except ValueError:
         pass
 
-    raise ValueError, "cannot convert '%s' to clock period" % value
+    raise ValueError("cannot convert '%s' to clock period" % value)
 
 def anyToFrequency(value):
     """result is a clock period"""
 
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     try:
         val = toFrequency(value)
@@ -192,11 +192,11 @@ def anyToFrequency(value):
     except ValueError:
         pass
 
-    raise ValueError, "cannot convert '%s' to clock period" % value
+    raise ValueError("cannot convert '%s' to clock period" % value)
 
 def toNetworkBandwidth(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     if value.endswith('Tbps'):
         return float(value[:-4]) * tera
@@ -211,11 +211,11 @@ def toNetworkBandwidth(value):
     else:
         return float(value)
 
-    raise ValueError, "cannot convert '%s' to network bandwidth" % value
+    raise ValueError("cannot convert '%s' to network bandwidth" % value)
 
 def toMemoryBandwidth(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     if value.endswith('PB/s'):
         return float(value[:-4]) * pebi
@@ -230,52 +230,52 @@ def toMemoryBandwidth(value):
     elif value.endswith('B/s'):
         return float(value[:-3])
 
-    raise ValueError, "cannot convert '%s' to memory bandwidth" % value
+    raise ValueError("cannot convert '%s' to memory bandwidth" % value)
 
 def toMemorySize(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     if value.endswith('PB'):
-        return long(value[:-2]) * pebi
+        return int(value[:-2]) * pebi
     elif value.endswith('TB'):
-        return long(value[:-2]) * tebi
+        return int(value[:-2]) * tebi
     elif value.endswith('GB'):
-        return long(value[:-2]) * gibi
+        return int(value[:-2]) * gibi
     elif value.endswith('MB'):
-        return long(value[:-2]) * mebi
+        return int(value[:-2]) * mebi
     elif value.endswith('kB'):
-        return long(value[:-2]) * kibi
+        return int(value[:-2]) * kibi
     elif value.endswith('B'):
-        return long(value[:-1])
+        return int(value[:-1])
 
-    raise ValueError, "cannot convert '%s' to memory size" % value
+    raise ValueError("cannot convert '%s' to memory size" % value)
 
 def toIpAddress(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     bytes = value.split('.')
     if len(bytes) != 4:
-        raise ValueError, 'invalid ip address %s' % value
+        raise ValueError('invalid ip address %s' % value)
 
     for byte in bytes:
         if not 0 <= int(byte) <= 0xff:
-            raise ValueError, 'invalid ip address %s' % value
+            raise ValueError('invalid ip address %s' % value)
 
     return (int(bytes[0]) << 24) | (int(bytes[1]) << 16) | \
            (int(bytes[2]) << 8)  | (int(bytes[3]) << 0)
 
 def toIpNetmask(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     (ip, netmask) = value.split('/')
     ip = toIpAddress(ip)
     netmaskParts = netmask.split('.')
     if len(netmaskParts) == 1:
         if not 0 <= int(netmask) <= 32:
-            raise ValueError, 'invalid netmask %s' % netmask
+            raise ValueError('invalid netmask %s' % netmask)
         return (ip, int(netmask))
     elif len(netmaskParts) == 4:
         netmaskNum = toIpAddress(netmask)
@@ -286,16 +286,16 @@ def toIpNetmask(value):
             testVal |= (1 << (31 - i))
             if testVal == netmaskNum:
                 return (ip, i + 1)
-        raise ValueError, 'invalid netmask %s' % netmask
+        raise ValueError('invalid netmask %s' % netmask)
     else:
-        raise ValueError, 'invalid netmask %s' % netmask
+        raise ValueError('invalid netmask %s' % netmask)
 
 def toIpWithPort(value):
     if not isinstance(value, str):
-        raise TypeError, "wrong type '%s' should be str" % type(value)
+        raise TypeError("wrong type '%s' should be str" % type(value))
 
     (ip, port) = value.split(':')
     ip = toIpAddress(ip)
     if not 0 <= int(port) <= 0xffff:
-        raise ValueError, 'invalid port %s' % port
+        raise ValueError('invalid port %s' % port)
     return (ip, int(port))
