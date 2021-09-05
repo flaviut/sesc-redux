@@ -1,4 +1,4 @@
-TUPLE ?= mips-unknown-linux-gnu-
+TUPLE ?= mips-unknown-linux-uclibc-
 CC := $(TUPLE)cc
 CXX := $(TUPLE)cxx
 

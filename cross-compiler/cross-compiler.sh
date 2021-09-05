@@ -7,6 +7,5 @@ git checkout 4de586cd2ee8fe7de53bc0ede6ab25e3c71412cd
 ./configure --enable-local
 make "-j$(nproc)"
 
-# this is mips-unknown-linux-uclibc with glibc
-./ct-ng mips-unknown-linux-gnu
+./ct-ng mips-unknown-linux-uclibc
 ./ct-ng build
