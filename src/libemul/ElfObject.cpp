@@ -114,8 +114,6 @@ ExecMode _getExecMode(FileSys::SeekableDescription *fdesc) {
     switch(ehdr.e_machine) {
     case EM_MIPS: {
         if((ehdr.e_flags&EF_MIPS_ABI)==EF_MIPS_ABI_O32) {
-            if((ehdr.e_flags&EF_MIPS_32BITMODE)==0)
-                fail("EF_MIPS_32BITMODE not set for EF_MIPS_ABI_O32\n");
             if((ehdr.e_flags&EF_MIPS_ABI2)!=0)
                 fail("EF_MIPS_ABI2 is set for EF_MIPS_ABI_O32\n");
             mmode=ExecModeArchMips;
