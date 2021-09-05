@@ -41,6 +41,8 @@ using std::cout;
 using std::endl;
 
 #include <algorithm>
+#include <wordexp.h>
+
 using std::min;
 using std::max;
 
@@ -643,6 +645,18 @@ OpenFiles::OpenFiles(ChkReader &in) {
     }
 }
 
+
+static const string wordExp(const string &path) {
+    wordexp_t exp_result;
+    wordexp(path.c_str(), &exp_result, WRDE_NOCMD | WRDE_UNDEF);
+    if (exp_result.we_wordc != 1) {
+        fail("path %s expanded into multiple words\n");
+    }
+    string result(exp_result.we_wordv[0]);
+    wordfree(&exp_result);
+    return result;
+}
+
 NameSpace::NameSpace(const string &mtlist) : GCObject(), mounts() {
     string::size_type bpos=0;
     while(bpos!=string::npos) {
@@ -650,7 +664,7 @@ NameSpace::NameSpace(const string &mtlist) : GCObject(), mounts() {
         string::size_type epos=mtlist.find(':',bpos);
         string targpath(mtlist,bpos,mpos-bpos);
         string hostpath(mtlist,mpos+1,epos-mpos-1);
-        mounts[normalize("",targpath)]=normalize("",hostpath);
+        mounts[normalize("",targpath)]=normalize("",wordExp(hostpath));
         bpos=epos+((epos==string::npos)?0:1);
     }
     if(mounts.find("/")==mounts.end())
