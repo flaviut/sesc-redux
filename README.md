@@ -6,7 +6,8 @@ the MIPS instructions set.
 
 This version has been updated to support modern compilers, libraries, and
 operating systems. It is derived from the version published by Milos Prvulovic
-for the Georgia Tech CS 6290 class. The upstream version appears to have some
+for the Georgia Tech CS 6290 class. [The upstream
+version](https://github.com/flaviut/sesc-mirror) appears to have some
 additional functionallity, but it has also been last updated a long time ago
 (2009).
 
