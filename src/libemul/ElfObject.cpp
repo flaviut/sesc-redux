@@ -154,22 +154,23 @@ ExecMode _getExecMode(FileSys::SeekableDescription *fdesc) {
 ExecMode getExecMode(FileSys::SeekableDescription *fdesc) {
     // Read the e_ident part of the ELF header
     unsigned char e_ident[EI_NIDENT];
-    if(fdesc->pread(e_ident,EI_NIDENT,(off_t)0)!=EI_NIDENT)
-        return ExecModeNone;
-    if((e_ident[0]!=ELFMAG0)||(e_ident[1]!=ELFMAG1)||
-            (e_ident[2]!=ELFMAG2)||(e_ident[3]!=ELFMAG3))
-        return ExecModeNone;
-    if(e_ident[EI_VERSION]!=EV_CURRENT)
-        return ExecModeNone;
-    switch(e_ident[EI_OSABI]) {
-    case ELFOSABI_NONE:
-        break;
-    default:
-        return ExecModeNone;
+    if(fdesc->pread(e_ident,EI_NIDENT,(off_t)0)!=EI_NIDENT) {
+        fail("getExecMode: file too short to be ELF\n");
     }
-    if(e_ident[EI_ABIVERSION]!=0)
-        return ExecModeNone;
-    ExecMode wmode=ExecModeNone;
+    if((e_ident[0]!=ELFMAG0)||(e_ident[1]!=ELFMAG1)||
+            (e_ident[2]!=ELFMAG2)||(e_ident[3]!=ELFMAG3)) {
+        fail("getExecMode: file missing magic ELF number\n");
+    }
+    if (e_ident[EI_VERSION] != EV_CURRENT) {
+        fail("getExecMode: unexpected ELF version %d doesn't match %d\n", e_ident[EI_VERSION], EV_CURRENT);
+    }
+    if (e_ident[EI_OSABI] != ELFOSABI_NONE) {
+        fail("getExecMode: only ABI none is supported, got %d\n", e_ident[EI_OSABI]);
+    }
+    if(e_ident[EI_ABIVERSION]!=0 && e_ident[EI_ABIVERSION]!=1) {
+        fail("getExecMode: only ABI v0 is supported, got %d\n", e_ident[EI_ABIVERSION]);
+    }
+    ExecMode wmode;
     switch(e_ident[EI_CLASS]) {
     case ELFCLASS32:
         wmode=ExecModeBits32;
@@ -178,9 +179,9 @@ ExecMode getExecMode(FileSys::SeekableDescription *fdesc) {
         wmode=ExecModeBits64;
         break;
     default:
-        return ExecModeNone;
+        fail("getExecMode: unsupported ELF class\n");
     }
-    ExecMode emode=ExecModeNone;
+    ExecMode emode;
     switch(e_ident[EI_DATA]) {
     case ELFDATA2LSB:
         emode=ExecModeEndianLittle;
@@ -189,7 +190,7 @@ ExecMode getExecMode(FileSys::SeekableDescription *fdesc) {
         emode=ExecModeEndianBig;
         break;
     default:
-        return ExecModeNone;
+        fail("getExecMode: unsupported endianness\n");
     }
     if(wmode==ExecModeBits32)
         if(emode==ExecModeEndianLittle)
