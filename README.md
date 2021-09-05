@@ -20,7 +20,7 @@ actually build the simulator.
 
 You will need a c++ compiler, make, Bison, and Flex installed.
 
-```
+```console
 $ make -j$(nproc)
 ```
 
@@ -41,3 +41,18 @@ a new `mips-unknown-linux-uclibc` toolchain.
 This toolchain is by default installed in `~/x-tools`, and you must run
 something like `export PATH=$PATH:$HOME/x-tools/mips-unknown-linux-uclibc/bin/`
 before building any of the MIPS binaries.
+
+## Usage
+
+Some example usage:
+
+```console
+$ pushd apps/Splash2/lu
+$ make
+$ popd
+$ ./build/sesc -fn64.rpt -c ./confs/cmp4-noc.conf -olu.out -elu.err apps/Splash2/lu/build/lu.mipseb -n64 -p1
+```
+
+Stderr can be found in `lu.err`, stdout in `lu.out`, and various statistics in
+`sesc_lu.mipseb.n64.rpt`. A slightly more readable statistics report can be
+show using `./scripts/report.pl sesc_lu.mipseb.n64.rpt`
