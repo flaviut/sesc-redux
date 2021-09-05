@@ -75,6 +75,8 @@ Node *Node::lookup(const std::string &name) {
             node=new LinkNode(lbuf,stbuf);
         }
         break;
+        case S_IFBLK:
+        case S_IFCHR:
         case S_IFREG:
             node=new FileNode(stbuf);
             break;
