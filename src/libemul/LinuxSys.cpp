@@ -4400,8 +4400,8 @@ void RealLinuxSys<mode>::sysUname(ThreadContext *context, InstDesc *inst, int ar
         return setSysErr(context,VEFAULT);
     strcpy((char *)(bufBuf.sysname),"GNU/Linux");
     strcpy((char *)(bufBuf.nodename),"sesc");
-    strcpy((char *)(bufBuf.release),"5.1.1");
-    strcpy((char *)(bufBuf.version),"#1 SMP Thu, 26 Aug 2021 19:14:36 +0000");
+    strcpy((char *)(bufBuf.release),"3.2.0");
+    strcpy((char *)(bufBuf.version),"#1 SMP Tue Jun 4 16:05:29 CDT 2002");
     strcpy((char *)(bufBuf.machine),"mips");
     bufBuf.write(context,buf);
     return setSysRet(context);
