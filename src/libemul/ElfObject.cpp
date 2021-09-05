@@ -428,7 +428,7 @@ VAddr _loadElfObjectE(ThreadContext *context, FileSys::SeekableDescription *fdes
         return _loadElfObject<ExecMode(bmode|ExecModeArchMips)>(context,fdesc,addr,false);
     case ExecModeArchMips64:
         return _loadElfObject<ExecMode(bmode|ExecModeArchMips64)>(context,fdesc,addr,false);
-defualt:
+    default:
         fail("loadElfObject: ExecModeEndian is not Little or Big\n");
     }
     return VAddr(-1);
@@ -441,7 +441,7 @@ VAddr _loadElfObjectB(ThreadContext *context, FileSys::SeekableDescription *fdes
         return _loadElfObjectE<ExecMode(bmode|ExecModeEndianBig)>(context,fdesc,addr,mode);
     case ExecModeEndianLittle:
         return _loadElfObjectE<ExecMode(bmode|ExecModeEndianLittle)>(context,fdesc,addr,mode);
-defualt:
+    default:
         fail("loadElfObject: ExecModeEndian is not Little or Big\n");
     }
     return VAddr(-1);
@@ -453,7 +453,7 @@ VAddr loadElfObject(ThreadContext *context, FileSys::SeekableDescription *fdesc,
         return _loadElfObjectB<ExecModeBits32>(context,fdesc,addr,mode);
     case ExecModeBits64:
         return _loadElfObjectB<ExecModeBits64>(context,fdesc,addr,mode);
-defualt:
+    default:
         fail("loadElfObject: ExecModeBits is not 32 or 64\n");
     }
     return VAddr(-1);

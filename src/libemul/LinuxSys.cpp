@@ -4366,7 +4366,7 @@ void RealLinuxSys<mode>::sysGetRLimit(ThreadContext *context, InstDesc *inst, in
     case VRLIMIT_CORE:
         buf.rlim_cur=buf.rlim_max=0;
         break;
-defualt:
+    default:
         printf("sysCall32_getrlimit called for unknown resource %d. Return RLIM_INFINITY.\n",resource);
     }
     buf.write(context,rlim);
