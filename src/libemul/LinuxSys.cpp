@@ -275,8 +275,6 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     const static decltype(Base::VCLONE_UNTRACED) VCLONE_UNTRACED = Base::VCLONE_UNTRACED;
     const static decltype(Base::VCLONE_CHILD_SETTID) VCLONE_CHILD_SETTID = Base::VCLONE_CHILD_SETTID;
     const static decltype(Base::VCLONE_STOPPED) VCLONE_STOPPED = Base::VCLONE_STOPPED;
-    const static decltype(Base::V__NR_linux) V__NR_linux = Base::V__NR_linux;
-    InstDesc * sysLinux(ThreadContext *context, InstDesc *inst);
     const static decltype(Base::V__NR_clone) V__NR_clone = Base::V__NR_clone;
     void sysClone(ThreadContext *context, InstDesc *inst, int argPos);
     const static decltype(Base::V__NR_fork) V__NR_fork = Base::V__NR_fork;
@@ -794,8 +792,12 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
         if(fmode&VS_IXOTH) retVal|=S_IXOTH;
         return retVal;
     }
+    void openCommon(ThreadContext *context, Tint dirfd, Tpointer_t pathp, Tint flags, Tmode_t fmode);
+
     const static decltype(Base::V__NR_open) V__NR_open = Base::V__NR_open;
     void sysOpen(ThreadContext *context, InstDesc *inst, int argPos);
+    const static decltype(Base::V__NR_openat) V__NR_openat = Base::V__NR_openat;
+    void sysOpenAt(ThreadContext *context, InstDesc *inst, int argPos);
     const static decltype(Base::V__NR_pipe) V__NR_pipe = Base::V__NR_pipe;
     void sysPipe(ThreadContext *context, InstDesc *inst, int argPos);
     const static decltype(Base::V__NR_dup) V__NR_dup = Base::V__NR_dup;
@@ -2131,20 +2133,6 @@ void RealLinuxSys<mode>::setProgArgs(ThreadContext *context, int argc, char **ar
 #include "libcore/OSSim.h"
 
 template<ExecMode mode>
-InstDesc * RealLinuxSys<mode>::sysLinux(ThreadContext *context, InstDesc *inst) {
-    Tint       sysCallNum;
-    /*  Tpointer_t addr;
-      Tint arg1;
-      Tint arg2;
-      Tint arg3;
-      CallArgs(context, argPos) >> sysCallNum >> addr >> arg1>>arg2>>arg3;*/
-    CallArgs(context, 0) >> sysCallNum;
-    return sysCallExecute(context,inst, sysCallNum, 1);
-//  printf("SYSLinux params %i %#x  %i %i %i\n", sysCallNum, addr, arg1, arg2, arg3);
-// fail("SYSLinux unsuported \n");
-}
-
-template<ExecMode mode>
 void RealLinuxSys<mode>::sysClone(ThreadContext *context, InstDesc *inst, int argPos) {
     Tint       flags;
     Tpointer_t child_stack;
@@ -3426,12 +3414,8 @@ void RealLinuxSys<mode>::sysMProtect(ThreadContext *context, InstDesc *inst, int
 }
 
 template<ExecMode mode>
-void RealLinuxSys<mode>::sysOpen(ThreadContext *context, InstDesc *inst, int argPos) {
-    Tpointer_t pathp;
-    Tint       flags;
-    Tmode_t    fmode;
-    CallArgs(context, argPos) >> pathp >> flags >> fmode;
-    Tstr path(context,pathp);
+void RealLinuxSys<mode>::openCommon(ThreadContext *context, Tint dirfd, Tpointer_t pathp, Tint flags, Tmode_t fmode) {
+    Tstr path(context, pathp);
     if(!path)
         return;
     std::string natPath(context->getFileSys()->toHost((const char *)path));
@@ -3475,6 +3459,25 @@ void RealLinuxSys<mode>::sysOpen(ThreadContext *context, InstDesc *inst, int arg
 #endif
     openFiles->openDescriptor(newfd,description);
     setSysRet(context,newfd);
+}
+
+template<ExecMode mode>
+void RealLinuxSys<mode>::sysOpen(ThreadContext *context, InstDesc *inst, int argPos) {
+    Tpointer_t pathp;
+    Tint       flags;
+    Tmode_t    fmode;
+    CallArgs(context, argPos) >> pathp >> flags >> fmode;
+    openCommon(context, 0, pathp, flags, fmode);
+}
+
+template<ExecMode mode>
+void RealLinuxSys<mode>::sysOpenAt(ThreadContext *context, InstDesc *inst, int argPos) {
+    Tint       dirfd;
+    Tpointer_t pathp;
+    Tint       flags;
+    Tmode_t    fmode;
+    CallArgs(context, argPos) >> dirfd >> pathp >> flags >> fmode;
+    openCommon(context, dirfd, pathp, flags, fmode);
 }
 template<ExecMode mode>
 void RealLinuxSys<mode>::sysPipe(ThreadContext *context, InstDesc *inst, int argPos) {
@@ -4554,9 +4557,6 @@ InstDesc *RealLinuxSys<mode>::sysCallExecute(ThreadContext *context, InstDesc *i
 //   }
     switch(sysCallNum) {
         // Thread/process creation and destruction system calls
-    case V__NR_linux:
-        return sysLinux(context,inst);
-        break;
     case V__NR_clone:
         sysClone(context,inst, argPos);
         break;
@@ -4808,6 +4808,9 @@ InstDesc *RealLinuxSys<mode>::sysCallExecute(ThreadContext *context, InstDesc *i
     case V__NR_open:
         sysOpen(context,inst, argPos);
         break;
+    case V__NR_openat:
+        sysOpenAt(context,inst, argPos);
+        break;
     case V__NR_pipe:
         sysPipe(context,inst, argPos);
         break;
@@ -4940,18 +4943,18 @@ InstDesc *RealLinuxSys<mode>::sysCallExecute(ThreadContext *context, InstDesc *i
         sysConnect(context,inst, argPos);
         break;
         //  case V__NR_send:            sysSend(context,inst); break;
-        /*
-        case 4171: sysCall32_getpeername(inst,context); break;
-        case 4172: sysCall32_getsockname(inst,context); break;
-        case 4173: sysCall32_getsockopt(inst,context); break;
-        case 4174: sysCall32_listen(inst,context); break;
-        case 4175: sysCall32_recv(inst,context); break;
-        case 4176: sysCall32_recvfrom(inst,context); break;
-        case 4177: sysCall32_recvmsg(inst,context); break;
-        case 4179: sysCall32_sendmsg(inst,context); break;
-        case 4180: sysCall32_sendto(inst,context); break;
-        case 4181: sysCall32_setsockopt(inst,context); break;
-        */
+/*
+case V__NR_getpeername: sysCall32_getpeername(inst,context); break;
+case V__NR_getsockname: sysCall32_getsockname(inst,context); break;
+case V__NR_getsockopt: sysCall32_getsockopt(inst,context); break;
+case V__NR_listen: sysCall32_listen(inst,context); break;
+case V__NR_recv: sysCall32_recv(inst,context); break;
+case V__NR_recvfrom: sysCall32_recvfrom(inst,context); break;
+case V__NR_recvmsg: sysCall32_recvmsg(inst,context); break;
+case V__NR_sendmsg: sysCall32_sendmsg(inst,context); break;
+case V__NR_sendto: sysCall32_sendto(inst,context); break;
+case V__NR_setsockopt: sysCall32_setsockopt(inst,context); break;
+*/
         // Process info system calls
     case V__NR_setrlimit:
         sysSetRLimit(context,inst, argPos);
@@ -4970,189 +4973,111 @@ InstDesc *RealLinuxSys<mode>::sysCallExecute(ThreadContext *context, InstDesc *i
         sysSysCtl(context,inst, argPos);
         break;
 
-//  case 4000: sysCall32_syscall(inst,context); break;
-//  case 4008: sysCall32_creat(inst,context); break;
-//  case 4009: sysCall32_link(inst,context); break;
-//  case 4014: sysCall32_mknod(inst,context); break;
-//  case 4016: sysCall32_lchown(inst,context); break;
-//  case 4017: sysCall32_break(inst,context); break;
-//  case 4018: sysCall32_oldstat(inst,context); break;
-//  case 4021: sysCall32_mount(inst,context); break;
-//  case 4022: sysCall32_umount(inst,context); break;
-//  case 4025: sysCall32_stime(inst,context); break;
-//  case 4026: sysCall32_ptrace(inst,context); break;
-//  case 4028: sysCall32_oldfstat(inst,context); break;
-//  case 4029: sysCall32_pause(inst,context); break;
-//  case 4030: sysCall32_utime(inst,context); break;
-//  case 4031: sysCall32_stty(inst,context); break;
-//  case 4032: sysCall32_gtty(inst,context); break;
-//  case 4034: sysCall32_nice(inst,context); break;
-//  case 4035: sysCall32_ftime(inst,context); break;
-//  case 4036: sysCall32_sync(inst,context); break;
-//  case 4044: sysCall32_prof(inst,context); break;
-//  case 4051: sysCall32_acct(inst,context); break;
-//  case 4052: sysCall32_umount2(inst,context); break;
-//  case 4053: sysCall32_lock(inst,context); break;
-//  case 4056: sysCall32_mpx(inst,context); break;
-//  case 4057: sysCall32_setpgid(inst,context); break;
-//  case 4058: sysCall32_ulimit(inst,context); break;
-//  case 4059: sysCall32_unused59(inst,context); break;
-//  case 4061: sysCall32_chroot(inst,context); break;
-//  case 4062: sysCall32_ustat(inst,context); break;
-//  case 4068: sysCall32_sgetmask(inst,context); break;
-//  case 4069: sysCall32_ssetmask(inst,context); break;
-//  case 4074: sysCall32_sethostname(inst,context); break;
-//  case 4082: sysCall32_reserved82(inst,context); break;
-//  case 4084: sysCall32_oldlstat(inst,context); break;
-//  case 4086: sysCall32_uselib(inst,context); break;
-//  case 4087: sysCall32_swapon(inst,context); break;
-//  case 4088: sysCall32_reboot(inst,context); break;
-//  case 4089: sysCall32_readdir(inst,context); break;
-//  case 4094: sysCall32_fchmod(inst,context); break;
-//  case 4095: sysCall32_fchown(inst,context); break;
-//  case 4098: sysCall32_profil(inst,context); break;
-//  case 4099: sysCall32_statfs(inst,context); break;
-//  case 4101: sysCall32_ioperm(inst,context); break;
-//  case 4102: sysCall32_socketcall(inst,context); break;
-//  case 4103: sysCall32_syslog(inst,context); break;
-//  case 4109: sysCall32_unused109(inst,context); break;
-//  case 4110: sysCall32_iopl(inst,context); break;
-//  case 4111: sysCall32_vhangup(inst,context); break;
-//  case 4112: sysCall32_idle(inst,context); break;
-//  case 4113: sysCall32_vm86(inst,context); break;
-//  case 4115: sysCall32_swapoff(inst,context); break;
-//  case 4116: sysCall32_sysinfo(inst,context); break;
+//  case V__NR_syscall: sysCall32_syscall(inst,context); break;
+//  case V__NR_creat: sysCall32_creat(inst,context); break;
+//  case V__NR_link: sysCall32_link(inst,context); break;
+//  case V__NR_mknod: sysCall32_mknod(inst,context); break;
+//  case V__NR_lchown: sysCall32_lchown(inst,context); break;
+//  case V__NR_break: sysCall32_break(inst,context); break;
+//  case V__NR_oldstat: sysCall32_oldstat(inst,context); break;
+//  case V__NR_mount: sysCall32_mount(inst,context); break;
+//  case V__NR_umount: sysCall32_umount(inst,context); break;
+//  case V__NR_stime: sysCall32_stime(inst,context); break;
+//  case V__NR_ptrace: sysCall32_ptrace(inst,context); break;
+//  case V__NR_oldfstat: sysCall32_oldfstat(inst,context); break;
+//  case V__NR_pause: sysCall32_pause(inst,context); break;
+//  case V__NR_utime: sysCall32_utime(inst,context); break;
+//  case V__NR_stty: sysCall32_stty(inst,context); break;
+//  case V__NR_gtty: sysCall32_gtty(inst,context); break;
+//  case V__NR_nice: sysCall32_nice(inst,context); break;
+//  case V__NR_ftime: sysCall32_ftime(inst,context); break;
+//  case V__NR_sync: sysCall32_sync(inst,context); break;
+//  case V__NR_prof: sysCall32_prof(inst,context); break;
+//  case V__NR_acct: sysCall32_acct(inst,context); break;
+//  case V__NR_umount2: sysCall32_umount2(inst,context); break;
+//  case V__NR_lock: sysCall32_lock(inst,context); break;
+//  case V__NR_mpx: sysCall32_mpx(inst,context); break;
+//  case V__NR_setpgid: sysCall32_setpgid(inst,context); break;
+//  case V__NR_ulimit: sysCall32_ulimit(inst,context); break;
+//  case V__NR_unused59: sysCall32_unused59(inst,context); break;
+//  case V__NR_chroot: sysCall32_chroot(inst,context); break;
+//  case V__NR_ustat: sysCall32_ustat(inst,context); break;
+//  case V__NR_sgetmask: sysCall32_sgetmask(inst,context); break;
+//  case V__NR_ssetmask: sysCall32_ssetmask(inst,context); break;
+//  case V__NR_sethostname: sysCall32_sethostname(inst,context); break;
+//  case V__NR_reserved82: sysCall32_reserved82(inst,context); break;
+//  case V__NR_oldlstat: sysCall32_oldlstat(inst,context); break;
+//  case V__NR_uselib: sysCall32_uselib(inst,context); break;
+//  case V__NR_swapon: sysCall32_swapon(inst,context); break;
+//  case V__NR_reboot: sysCall32_reboot(inst,context); break;
+//  case V__NR_readdir: sysCall32_readdir(inst,context); break;
+//  case V__NR_fchmod: sysCall32_fchmod(inst,context); break;
+//  case V__NR_fchown: sysCall32_fchown(inst,context); break;
+//  case V__NR_profil: sysCall32_profil(inst,context); break;
+//  case V__NR_statfs: sysCall32_statfs(inst,context); break;
+//  case V__NR_ioperm: sysCall32_ioperm(inst,context); break;
+//  case V__NR_socketcall: sysCall32_socketcall(inst,context); break;
+//  case V__NR_syslog: sysCall32_syslog(inst,context); break;
+//  case V__NR_unused109: sysCall32_unused109(inst,context); break;
+//  case V__NR_iopl: sysCall32_iopl(inst,context); break;
+//  case V__NR_vhangup: sysCall32_vhangup(inst,context); break;
+//  case V__NR_idle: sysCall32_idle(inst,context); break;
+//  case V__NR_vm86: sysCall32_vm86(inst,context); break;
+//  case V__NR_swapoff: sysCall32_swapoff(inst,context); break;
+//  case V__NR_sysinfo: sysCall32_sysinfo(inst,context); break;
 // If you implement ipc() you must handle CLONE_SYSVSEM in clone()
-//  case 4117: sysCall32_ipc(inst,context); break;
-//  case 4118: sysCall32_fsync(inst,context); break;
-//  case 4119: sysCall32_sigreturn(inst,context); break;
-//  case 4121: sysCall32_setdomainname(inst,context); break;
-//  case 4123: sysCall32_modify_ldt(inst,context); break;
-//  case 4124: sysCall32_adjtimex(inst,context); break;
-//  case 4127: sysCall32_create_module(inst,context); break;
-//  case 4128: sysCall32_init_module(inst,context); break;
-//  case 4129: sysCall32_delete_module(inst,context); break;
-//  case 4130: sysCall32_get_kernel_syms(inst,context); break;
-//  case 4131: sysCall32_quotactl(inst,context); break;
-//  case 4133: sysCall32_fchdir(inst,context); break;
-//  case 4134: sysCall32_bdflush(inst,context); break;
-//  case 4135: sysCall32_sysfs(inst,context); break;
-//  case 4136: sysCall32_personality(inst,context); break;
-//  case 4137: sysCall32_afs_syscall(inst,context); break;
-//  case 4142: sysCall32__newselect(inst,context); break;
-//  case 4143: sysCall32_flock(inst,context); break;
-//  case 4144: sysCall32_msync(inst,context); break;
-//  case 4145: sysCall32_readv(inst,context); break;
-//  case 4147: sysCall32_cacheflush(inst,context); break;
-//  case 4148: sysCall32_cachectl(inst,context); break;
-//  case 4149: sysCall32_sysmips(inst,context); break;
-//  case 4150: sysCall32_unused150(inst,context); break;
-//  case 4152: sysCall32_fdatasync(inst,context); break;
-//  case 4154: sysCall32_mlock(inst,context); break;
-//  case 4155: sysCall32_munlock(inst,context); break;
-//  case 4156: sysCall32_mlockall(inst,context); break;
-//  case 4157: sysCall32_munlockall(inst,context); break;
-//  case 4182: sysCall32_shutdown(inst,context); break;
-//  case 4187: sysCall32_query_module(inst,context); break;
-//  case 4189: sysCall32_nfsservctl(inst,context); break;
-//  case 4192: sysCall32_prctl(inst,context); break;
-//  case 4200: sysCall32_pread64(inst,context); break;
-//  case 4201: sysCall32_pwrite64(inst,context); break;
-//  case 4202: sysCall32_chown(inst,context); break;
-//  case 4204: sysCall32_capget(inst,context); break;
-//  case 4205: sysCall32_capset(inst,context); break;
-//  case 4207: sysCall32_sendfile(inst,context); break;
-//  case 4208: sysCall32_getpmsg(inst,context); break;
-//  case 4209: sysCall32_putpmsg(inst,context); break;
-//  case 4216: sysCall32_root_pivot(inst,context); break;
-//  case 4217: sysCall32_mincore(inst,context); break;
-//  case 4218: sysCall32_madvise(inst,context); break;
+//  case V__NR_ipc: sysCall32_ipc(inst,context); break;
+//  case V__NR_fsync: sysCall32_fsync(inst,context); break;
+//  case V__NR_sigreturn: sysCall32_sigreturn(inst,context); break;
+//  case V__NR_setdomainname: sysCall32_setdomainname(inst,context); break;
+//  case V__NR_modify_ldt: sysCall32_modify_ldt(inst,context); break;
+//  case V__NR_adjtimex: sysCall32_adjtimex(inst,context); break;
+//  case V__NR_create_module: sysCall32_create_module(inst,context); break;
+//  case V__NR_init_module: sysCall32_init_module(inst,context); break;
+//  case V__NR_delete_module: sysCall32_delete_module(inst,context); break;
+//  case V__NR_get_kernel_syms: sysCall32_get_kernel_syms(inst,context); break;
+//  case V__NR_quotactl: sysCall32_quotactl(inst,context); break;
+//  case V__NR_fchdir: sysCall32_fchdir(inst,context); break;
+//  case V__NR_bdflush: sysCall32_bdflush(inst,context); break;
+//  case V__NR_sysfs: sysCall32_sysfs(inst,context); break;
+//  case V__NR_personality: sysCall32_personality(inst,context); break;
+//  case V__NR_afs_syscall: sysCall32_afs_syscall(inst,context); break;
+//  case V__NR__newselect: sysCall32__newselect(inst,context); break;
+//  case V__NR_flock: sysCall32_flock(inst,context); break;
+//  case V__NR_msync: sysCall32_msync(inst,context); break;
+//  case V__NR_readv: sysCall32_readv(inst,context); break;
+//  case V__NR_cacheflush: sysCall32_cacheflush(inst,context); break;
+//  case V__NR_cachectl: sysCall32_cachectl(inst,context); break;
+//  case V__NR_sysmips: sysCall32_sysmips(inst,context); break;
+//  case V__NR_unused150: sysCall32_unused150(inst,context); break;
+//  case V__NR_fdatasync: sysCall32_fdatasync(inst,context); break;
+//  case V__NR_mlock: sysCall32_mlock(inst,context); break;
+//  case V__NR_munlock: sysCall32_munlock(inst,context); break;
+//  case V__NR_mlockall: sysCall32_mlockall(inst,context); break;
+//  case V__NR_munlockall: sysCall32_munlockall(inst,context); break;
+//  case V__NR_shutdown: sysCall32_shutdown(inst,context); break;
+//  case V__NR_query_module: sysCall32_query_module(inst,context); break;
+//  case V__NR_nfsservctl: sysCall32_nfsservctl(inst,context); break;
+//  case V__NR_prctl: sysCall32_prctl(inst,context); break;
+//  case V__NR_pread64: sysCall32_pread64(inst,context); break;
+//  case V__NR_pwrite64: sysCall32_pwrite64(inst,context); break;
+//  case V__NR_chown: sysCall32_chown(inst,context); break;
+//  case V__NR_capget: sysCall32_capget(inst,context); break;
+//  case V__NR_capset: sysCall32_capset(inst,context); break;
+//  case V__NR_sendfile: sysCall32_sendfile(inst,context); break;
+//  case V__NR_getpmsg: sysCall32_getpmsg(inst,context); break;
+//  case V__NR_putpmsg: sysCall32_putpmsg(inst,context); break;
+//  case V__NR_root_pivot: sysCall32_root_pivot(inst,context); break;
+//  case V__NR_mincore: sysCall32_mincore(inst,context); break;
+//  case V__NR_madvise: sysCall32_madvise(inst,context); break;
     case V__NR_madvise :
         madvise(context, inst, argPos);
         break;
-//#define __NR_reserved221                (__NR_Linux + 221)
-//#define __NR_readahead                  (__NR_Linux + 223)
-//#define __NR_setxattr                   (__NR_Linux + 224)
-//#define __NR_lsetxattr                  (__NR_Linux + 225)
-//#define __NR_fsetxattr                  (__NR_Linux + 226)
-//#define __NR_getxattr                   (__NR_Linux + 227)
-//#define __NR_lgetxattr                  (__NR_Linux + 228)
-//#define __NR_fgetxattr                  (__NR_Linux + 229)
-//#define __NR_listxattr                  (__NR_Linux + 230)
-//#define __NR_llistxattr                 (__NR_Linux + 231)
-//#define __NR_flistxattr                 (__NR_Linux + 232)
-//#define __NR_removexattr                (__NR_Linux + 233)
-//#define __NR_lremovexattr               (__NR_Linux + 234)
-//#define __NR_fremovexattr               (__NR_Linux + 235)
-//#define __NR_sendfile64                 (__NR_Linux + 237)
-//#define __NR_io_setup                   (__NR_Linux + 241)
-//#define __NR_io_destroy                 (__NR_Linux + 242)
-//#define __NR_io_getevents               (__NR_Linux + 243)
-//#define __NR_io_submit                  (__NR_Linux + 244)
-//#define __NR_io_cancel                  (__NR_Linux + 245)
-//#define __NR_lookup_dcookie             (__NR_Linux + 247)
-//#define __NR_epoll_create               (__NR_Linux + 248)
-//#define __NR_epoll_ctl                  (__NR_Linux + 249)
-//#define __NR_epoll_wait                 (__NR_Linux + 250)
-//#define __NR_remap_file_pages           (__NR_Linux + 251)
-//#define __NR_restart_syscall            (__NR_Linux + 253)
-//#define __NR_fadvise64                  (__NR_Linux + 254)
-//#define __NR_statfs64                   (__NR_Linux + 255)
-//#define __NR_timer_create               (__NR_Linux + 257)
-//#define __NR_timer_settime              (__NR_Linux + 258)
-//#define __NR_timer_gettime              (__NR_Linux + 259)
-//#define __NR_timer_getoverrun           (__NR_Linux + 260)
-//#define __NR_timer_delete               (__NR_Linux + 261)
-//#define __NR_mbind                      (__NR_Linux + 268)
-//#define __NR_get_mempolicy              (__NR_Linux + 269)
-//#define __NR_set_mempolicy              (__NR_Linux + 270)
-//#define __NR_mq_open                    (__NR_Linux + 271)
-//#define __NR_mq_unlink                  (__NR_Linux + 272)
-//#define __NR_mq_timedsend               (__NR_Linux + 273)
-//#define __NR_mq_timedreceive            (__NR_Linux + 274)
-//#define __NR_mq_notify                  (__NR_Linux + 275)
-//#define __NR_mq_getsetattr              (__NR_Linux + 276)
-//#define __NR_vserver                    (__NR_Linux + 277)
-//#define __NR_waitid                     (__NR_Linux + 278)
-//#define __NR___NR_setaltroot             (__NR_Linux + 279)
-//#define __NR_add_key                    (__NR_Linux + 280)
-//#define __NR_request_key                (__NR_Linux + 281)
-//#define __NR_keyctl                     (__NR_Linux + 282)
-//#define __NR_inotify_init               (__NR_Linux + 284)
-//#define __NR_inotify_add_watch          (__NR_Linux + 285)
-//#define __NR_inotify_rm_watch           (__NR_Linux + 286)
-//#define __NR_migrate_pages              (__NR_Linux + 287)
-//#define __NR_openat                     (__NR_Linux + 288)
-//#define __NR_mkdirat                    (__NR_Linux + 289)
-//#define __NR_mknodat                    (__NR_Linux + 290)
-//#define __NR_fchownat                   (__NR_Linux + 291)
-//#define __NR_futimesat                  (__NR_Linux + 292)
-//#define __NR_fstatat64                  (__NR_Linux + 293)
-//#define __NR_unlinkat                   (__NR_Linux + 294)
-//#define __NR_renameat                   (__NR_Linux + 295)
-//#define __NR_linkat                     (__NR_Linux + 296)
-//#define __NR_symlinkat                  (__NR_Linux + 297)
-//#define __NR_readlinkat                 (__NR_Linux + 298)
-//#define __NR_fchmodat                   (__NR_Linux + 299)
-//#define __NR_faccessat                  (__NR_Linux + 300)
-//#define __NR_pselect6                   (__NR_Linux + 301)
-//#define __NR_ppoll                      (__NR_Linux + 302)
-//#define __NR_unshare                    (__NR_Linux + 303)
-//#define __NR_splice                     (__NR_Linux + 304)
-//#define __NR_sync_file_range            (__NR_Linux + 305)
-//#define __NR_tee                        (__NR_Linux + 306)
-//#define __NR_vmsplice                   (__NR_Linux + 307)
-//#define __NR_move_pages                 (__NR_Linux + 308)
-//#define __NR_kexec_load                 (__NR_Linux + 311)
-//#define __NR_getcpu                     (__NR_Linux + 312)
-//#define __NR_epoll_pwait                (__NR_Linux + 313)
-//#define __NR_ioprio_set                 (__NR_Linux + 314)
-//#define __NR_ioprio_get                 (__NR_Linux + 315)
-//#define __NR_utimensat                  (__NR_Linux + 316)
-//#define __NR_timerfd                    (__NR_Linux + 318)
-//#define __NR_eventfd                    (__NR_Linux + 319)
     default:
-        fail("Unknown Mips32 syscall %d at 0x%08x\n",sysCallNum,context->getIAddr());
+#if (defined DEBUG_SYSCALLS)
+        printf("Unknown Mips32 syscall %d at 0x%08lx\n",sysCallNum,context->getIAddr());
+#endif
+        setSysErr(context, VENOSYS);
     }
 #if (defined DEBUG_SYSCALLS)
     printf("[%d] sysCall %d\n",context->gettid(),sysCallNum);
