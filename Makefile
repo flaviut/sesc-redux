@@ -26,8 +26,11 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 D_FLAGS := -DLINUX -DPOSIX_MEMALIGN -DMIPS_EMUL -DSESC_SMP -DSESC_CMP -DCHECK_STALL
 
 CPPFLAGS ?= $(D_FLAGS) $(INC_FLAGS) -MMD -MP
-CXXFLAGS ?= -std=c++11 -Wmissing-field-initializers -Woverloaded-virtual -Wmissing-declarations -Wdelete-non-virtual-dtor -Wall -Wno-unused -Wno-sign-compare -O3 -fno-strict-aliasing -ffast-math
+CXXFLAGS ?= -g -std=c++11 -Wmissing-field-initializers -Woverloaded-virtual -Wmissing-declarations -Wdelete-non-virtual-dtor -Wall -Wno-unused -Wno-sign-compare -O3 -fno-strict-aliasing -ffast-math
 LDFLAGS ?= $(CXXFLAGS) -lm -lstdc++
+
+.PHONY: all
+all: $(BUILD_DIR)/$(TARGET_EXEC)
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
