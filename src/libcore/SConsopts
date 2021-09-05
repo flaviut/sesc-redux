@@ -1,2 +1,0 @@
-Import('*')
-all_libs.append('core')
