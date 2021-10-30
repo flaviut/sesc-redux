@@ -63,7 +63,7 @@ private:
     char *thermFile;
 
     timeval stTime;
-    double  frequency;
+    double frequency;
 
     char *benchRunning;
     char *benchSection;
@@ -85,11 +85,11 @@ private:
         unsigned long total;
         unsigned long begin;
         unsigned long end;
-        bool  mtMarks;
+        bool mtMarks;
     } SimulationMark_t;
 
     SimulationMark_t simMarks;
-    std::map<int32_t,SimulationMark_t> idSimMarks;
+    std::map<int32_t, SimulationMark_t> idSimMarks;
 
     int32_t numIdSimMarks;
     int32_t waitBeginIdSimMarks;
@@ -101,23 +101,25 @@ protected:
     void processParams(int32_t argc, char **argv, char **envp);
 
 public:
-	Time_t clockFreq;
+    Time_t clockFreq;
 
     RunningProcs cpus;
+
     OSSim(int32_t argc, char **argv, char **envp);
+
     virtual ~OSSim();
 
     void report(const char *str);
 
     GProcessor *pid2GProcessor(Pid_t pid);
+
     ProcessIdState getState(Pid_t pid);
+
     GProcessor *id2GProcessor(CPU_t cpu);
 
     bool trace() const {
         return (traceFile != 0);
     }
-
-
 
 
     virtual void preEvent(Pid_t pid, int32_t vaddr, int32_t type, void *sptr) {
@@ -130,11 +132,11 @@ public:
         // backend tryies to modify (give data back) to the application
         // through the postEvent, it would NOT WORK. Instead use preEvent
         // to pass data from the backend to the application.
-        MSG("postevent(%d, %d, %p) pid %d @%lld", vaddr, type, sptr, pid, (long long)globalClock);
+        MSG("postevent(%d, %d, %p) pid %d @%lld", vaddr, type, sptr, pid, (long long) globalClock);
     }
 
     virtual void memBarrierEvent(Pid_t pid, int32_t vaddr, int32_t type, const void *sptr) {
-        MSG("membarrier(%d, %d, %p) pid %d @%lld", vaddr, type, sptr, pid, (long long)globalClock);
+        MSG("membarrier(%d, %d, %p) pid %d @%lld", vaddr, type, sptr, pid, (long long) globalClock);
     }
 
     // Those functions are only callable through the events. Not
@@ -146,43 +148,60 @@ public:
 
     // Spawns a new process newPid with given flags
     // If stopped is true, the new process will not be made runnable
-    void eventSpawn(Pid_t curPid, Pid_t newPid, int32_t flags, bool stopped=false);
+    void eventSpawn(Pid_t curPid, Pid_t newPid, int32_t flags, bool stopped = false);
+
     void eventSysconf(Pid_t curPid, Pid_t targPid, int32_t flags);
+
     int32_t eventGetconf(Pid_t curPid, Pid_t targPid);
+
     void eventExit(Pid_t cpid, int32_t err);
+
     void tryWakeupParent(Pid_t cpid);
+
     void eventWait(Pid_t cpid);
+
     int32_t eventSuspend(Pid_t cpid, Pid_t tid);
+
     int32_t eventResume(Pid_t cpid, Pid_t tid);
+
     int32_t eventYield(Pid_t cpid, Pid_t yieldID);
+
     void eventSaveContext(Pid_t pid);
+
     void eventLoadContext(Pid_t pid);
+
     void eventSetPPid(Pid_t pid, Pid_t ppid);
+
     Pid_t eventGetPPid(Pid_t pid);
 
     void eventSimulationMark() {
         simMarks.total++;
     }
-    void eventSimulationMark(int32_t id,Pid_t pid) {
-        if(idSimMarks.find(id)==idSimMarks.end()) {
+
+    void eventSimulationMark(int32_t id, Pid_t pid) {
+        if (idSimMarks.find(id) == idSimMarks.end()) {
             idSimMarks[id].total = 0;
             idSimMarks[id].begin = 0;
-            idSimMarks[id].end = (uint)((~0UL)-1);
+            idSimMarks[id].end = (uint) ((~0UL) - 1);
         }
 
         idSimMarks[id].total++;
-        idSimMarks[id].pid=pid;
-        idSimMarks[id].mtMarks=true;
+        idSimMarks[id].pid = pid;
+        idSimMarks[id].mtMarks = true;
     }
+
     uint32_t getSimulationMark() const {
         return simMarks.total;
     }
+
     uint32_t getSimulationMark1() const {
         return simMarks.begin;
     }
+
     uint32_t getSimulationMark2() const {
         return simMarks.end;
     }
+
     // If marks are not used but -w option is, total and begin are both zero
     // and there are never enough marks to exit simulation. I changed the comparison
     // to >= from >. If this does not work, please fix it in a way that does not break
@@ -190,52 +209,59 @@ public:
     bool enoughMarks1() const {
         return simMarks.total >= simMarks.begin;
     }
+
     bool enoughMarks2() const {
         return simMarks.total > simMarks.end;
     }
 
     uint32_t getSimulationMark(int32_t id) const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
         return (*it).second.total;
     }
+
     uint32_t getSimulationMark1(int32_t id) const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
         return (*it).second.begin;
     }
+
     uint32_t getSimulationMark2(int32_t id) const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
         return (*it).second.end;
     }
+
     bool enoughMarks1(int32_t id) const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
         return (*it).second.total > (*it).second.begin;
     }
+
     bool enoughMarks2(int32_t id) const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
         return (*it).second.total > (*it).second.end;
     }
-    bool enoughMTMarks1() const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.begin();
 
-        bool ret=true;
-        for(it=idSimMarks.begin(); it!=idSimMarks.end(); it++) {
-            ret = (ret && enoughMarks1( (*it).first ));
+    bool enoughMTMarks1() const {
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.begin();
+
+        bool ret = true;
+        for (it = idSimMarks.begin(); it != idSimMarks.end(); it++) {
+            ret = (ret && enoughMarks1((*it).first));
         }
 
         return ret;
     }
-    bool enoughMTMarks1(int32_t pid,bool justMe) const {
-        std::map<int32_t,SimulationMark_t>::const_iterator it = idSimMarks.begin();
-        bool me=false;
-        bool ret=true;
-        for(it=idSimMarks.begin(); it!=idSimMarks.end(); it++) {
-            if( (*it).second.pid != pid )
-                ret = (ret && enoughMarks1( (*it).first ));
-            else if( (*it).second.mtMarks )
-                me = enoughMarks1( (*it).first );
+
+    bool enoughMTMarks1(int32_t pid, bool justMe) const {
+        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.begin();
+        bool me = false;
+        bool ret = true;
+        for (it = idSimMarks.begin(); it != idSimMarks.end(); it++) {
+            if ((*it).second.pid != pid)
+                ret = (ret && enoughMarks1((*it).first));
+            else if ((*it).second.mtMarks)
+                me = enoughMarks1((*it).first);
         }
-        if(justMe)
-            ret=me;
+        if (justMe)
+            ret = me;
 
         return ret;
     }
@@ -243,15 +269,16 @@ public:
     ThreadContext *getContext(Pid_t pid);
 
     void suspend(Pid_t pid) {
-        eventSuspend(-1,pid);
+        eventSuspend(-1, pid);
     }
 
     void resume(Pid_t pid) {
-        eventResume(-1,pid);
+        eventResume(-1, pid);
     }
 
     // Makes a runnable process stopped
     void stop(Pid_t pid);
+
     // Makes a stopped process runnable
     void unstop(Pid_t pid);
 
@@ -269,6 +296,7 @@ public:
     // some fault tolerance freak needs this feature. In that case, he/she
     // should implemented it.
     void registerProc(GProcessor *core);
+
     void unRegisterProc(GProcessor *core);
 
     static const char *getBenchName() {
@@ -284,7 +312,9 @@ public:
     }
 
     void initBoot();
+
     void preBoot();
+
     void postBoot();
 
     void simFinish();
@@ -295,11 +325,11 @@ public:
     virtual void boot() {
         initBoot();
         preBoot();
-        if(!justTest)
+        if (!justTest)
             postBoot();
     }
 
-    void reportOnTheFly(const char *file=0);
+    void reportOnTheFly(const char *file = 0);
 
     double getFrequency() const {
         return frequency;
@@ -312,6 +342,7 @@ public:
     void stopSimulation() {
         cpus.finishWorkNow();
     }
+
     void switchOut(CPU_t id, ProcessId *procId) {
         cpus.switchOut(id, procId);
     }
@@ -319,9 +350,11 @@ public:
     long long getnInst2Sim() const {
         return nInst2Sim;
     }
+
     long long getnInst2Skip() const {
         return nInst2Skip;
     }
+
     long long getnInstCommited2Sim() const {
         return nInstCommited2Sim;
     }
@@ -339,5 +372,7 @@ public:
 typedef CallbackMember4<OSSim, Pid_t, int32_t, int32_t, const void *, &OSSim::postEvent> postEventCB;
 
 extern OSSim *osSim;
+
 extern double etop(double energy);
+
 #endif   // OSSim_H

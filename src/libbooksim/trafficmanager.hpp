@@ -50,8 +50,7 @@
 //register the requests to a node
 class PacketReplyInfo;
 
-class TrafficManager : public Module
-{
+class TrafficManager : public Module {
 
 private:
 
@@ -59,8 +58,8 @@ private:
     vector<vector<int> > _packet_size_rate;
     vector<int> _packet_size_max_val;
 
-	// JJ
-	list<pair<void *, pair<int, int> > > *_returnPackets;
+    // JJ
+    list<pair<void *, pair<int, int> > > *_returnPackets;
 
 protected:
     int _nodes;
@@ -72,7 +71,7 @@ protected:
 
     // ============ Traffic ============
 
-    int    _classes;
+    int _classes;
 
     vector<double> _load;
 
@@ -95,7 +94,16 @@ protected:
 
     // ============ Message priorities ============
 
-    enum ePriority { class_based, age_based, network_age_based, local_age_based, queue_length_based, hop_count_based, sequence_based, none };
+    enum ePriority {
+        class_based,
+        age_based,
+        network_age_based,
+        local_age_based,
+        queue_length_based,
+        hop_count_based,
+        sequence_based,
+        none
+    };
 
     ePriority _pri_type;
 
@@ -210,23 +218,25 @@ protected:
 
     // ============ Simulation parameters ============
 
-    enum eSimState { warming_up, running, draining, done };
+    enum eSimState {
+        warming_up, running, draining, done
+    };
     eSimState _sim_state;
 
     bool _measure_latency;
 
-    BTime_t   _reset_time;
-    BTime_t   _drain_time;
+    BTime_t _reset_time;
+    BTime_t _drain_time;
 
-    int   _total_sims;
-    int   _sample_period;
-    int   _max_samples;
-    int   _warmup_periods;
+    int _total_sims;
+    int _sample_period;
+    int _max_samples;
+    int _warmup_periods;
 
-    int   _include_queuing;
+    int _include_queuing;
 
     vector<int> _measure_stats;
-	bool _pair_stats;
+    bool _pair_stats;
 
     vector<double> _latency_thres;
 
@@ -247,7 +257,7 @@ protected:
     bool _print_csv_results;
 
     //flits to watch
-    ostream * _stats_out;
+    ostream *_stats_out;
 
 #ifdef TRACK_FLOWS
     vector<vector<int> > _injected_flits;
@@ -270,111 +280,128 @@ protected:
     // ============ Internal methods ============
 protected:
 
-    virtual void _RetireFlit( Flit *f, int dest );
+    virtual void _RetireFlit(Flit *f, int dest);
 
     //void _Inject();
     //void _Step( );
 
-    bool _PacketsOutstanding( ) const;
+    bool _PacketsOutstanding() const;
 
     //virtual int  _IssuePacket( int source, int cl );
-    void _GeneratePacket( int source, int size, int cl, int time );
+    void _GeneratePacket(int source, int size, int cl, int time);
 
-    virtual void _ClearStats( );
+    virtual void _ClearStats();
 
-    void _ComputeStats( const vector<int> & stats, int *sum, int *min = NULL, int *max = NULL, int *min_pos = NULL, int *max_pos = NULL ) const;
+    void _ComputeStats(const vector<int> &stats, int *sum, int *min = NULL, int *max = NULL, int *min_pos = NULL,
+                       int *max_pos = NULL) const;
 
     //virtual bool _SingleSim( );
 
-    void _DisplayRemaining( ostream & os = cout ) const;
+    void _DisplayRemaining(ostream &os = cout) const;
 
-    void _LoadWatchList(const string & filename);
+    void _LoadWatchList(const string &filename);
 
     virtual void _UpdateOverallStats();
 
     virtual string _OverallStatsCSV(int c = 0) const;
 
     int _GetNextPacketSize(int cl) const;
+
     double _GetAveragePacketSize(int cl) const;
 
-	// JJ
+    // JJ
     void _InjectPacket();
-	class SESCPacket {
-		public:
-			SESCPacket() {};
-			static SESCPacket* Get(int from, int to, int cls, int msgSize, void *pkt);
-			void Set(int from, int to, int cls, int msgSize, void *pkt);
-			void Free();
 
-			int GetSize() { return _msgSize; };  // Size in Bytes
-			int GetDest() { return _to; };
-			void *GetSESCPkt() { return _pkt; };
-		private:
-			static pool<SESCPacket> rPool;
-			friend class pool<SESCPacket>;
+    class SESCPacket {
+    public:
+        SESCPacket() {};
 
-			int _from;
-			int _to;
-			int _cls;
-			int _msgSize;
-			void *_pkt;
-	};
+        static SESCPacket *Get(int from, int to, int cls, int msgSize, void *pkt);
+
+        void Set(int from, int to, int cls, int msgSize, void *pkt);
+
+        void Free();
+
+        int GetSize() { return _msgSize; };  // Size in Bytes
+        int GetDest() { return _to; };
+
+        void *GetSESCPkt() { return _pkt; };
+    private:
+        static pool<SESCPacket> rPool;
+
+        friend class pool<SESCPacket>;
+
+        int _from;
+        int _to;
+        int _cls;
+        int _msgSize;
+        void *_pkt;
+    };
+
     vector<vector<list<SESCPacket *> > > _packetBuffer;
 
-	void _GenerateSESCPacket( int source, int cl, SESCPacket *p, BTime_t time );
-	double _channel_width;
-	double _channel_width_byte;
+    void _GenerateSESCPacket(int source, int cl, SESCPacket *p, BTime_t time);
 
-	vector<double> prev_latency;
-	vector<double> prev_accepted;
-	int total_phases;
+    double _channel_width;
+    double _channel_width_byte;
 
-	ofstream *_os_out;
+    vector<double> prev_latency;
+    vector<double> prev_accepted;
+    int total_phases;
+
+    ofstream *_os_out;
 
 public:
 
-    static TrafficManager * New(Configuration const & config,
-                                vector<Network *> const & net);
+    static TrafficManager *New(Configuration const &config,
+                               vector<Network *> const &net);
 
-    TrafficManager( const Configuration &config, const vector<Network *> & net );
-    virtual ~TrafficManager( );
+    TrafficManager(const Configuration &config, const vector<Network *> &net);
+
+    virtual ~TrafficManager();
 
     //bool Run( );
 
-	// New Funcs
-	void Init(list<pair<void *, pair<int, int> > > *returnPackets, ofstream *os_out);
-	bool Checkpoint();
-	void Finish();
-	void CallEveryCycle();
-	bool IsFlitInFlight() const;
-	void BufferPacket(int f, int t, int c, int msgSize, void *pkt);
-	// 
+    // New Funcs
+    void Init(list<pair<void *, pair<int, int> > > *returnPackets, ofstream *os_out);
 
-    virtual void WriteStats( ostream & os = cout ) const ;
-    virtual void UpdateStats( ) ;
-    virtual void DisplayStats( ostream & os = cout ) const ;
-    virtual void DisplayOverallStats( ostream & os = cout ) const ;
-    virtual void DisplayOverallStatsCSV( ostream & os = cout ) const ;
+    bool Checkpoint();
 
-    inline BTime_t getTime()
-    {
+    void Finish();
+
+    void CallEveryCycle();
+
+    bool IsFlitInFlight() const;
+
+    void BufferPacket(int f, int t, int c, int msgSize, void *pkt);
+    //
+
+    virtual void WriteStats(ostream &os = cout) const;
+
+    virtual void UpdateStats();
+
+    virtual void DisplayStats(ostream &os = cout) const;
+
+    virtual void DisplayOverallStats(ostream &os = cout) const;
+
+    virtual void DisplayOverallStatsCSV(ostream &os = cout) const;
+
+    inline BTime_t getTime() {
         return _time;
     }
-    Stats * getStats(const string & name)
-    {
+
+    Stats *getStats(const string &name) {
         return _stats[name];
     }
 
 };
 
 template<class T>
-ostream & operator<<(ostream & os, const vector<T> & v)
-{
-    for(size_t i = 0; i < v.size() - 1; ++i)
-    {
+ostream &operator<<(ostream &os, const vector<T> &v) {
+    for (size_t i = 0; i < v.size() - 1; ++i) {
         os << v[i] << ",";
     }
-    os << v[v.size()-1];
+    os << v[v.size() - 1];
     return os;
 }
 

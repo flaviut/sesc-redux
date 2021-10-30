@@ -31,10 +31,11 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "Resource.h"
 #include "Cluster.h"
 #include "DInst.h"
+
 #if (defined SESC_CMP)
-#define stringify( name ) # name 
+#define stringify(name) # name
 enum MemReqSrc {
-    reqICache	= 0,
+    reqICache = 0,
     reqD1Cache,
     reqL2S
 };
@@ -61,9 +62,13 @@ enum MemOperation {
 #endif
 
 #include "MemObj.h"
+
 class MemObj;
+
 class GMemorySystem;
+
 class GProcessor;
+
 class IBucket;
 
 #ifdef SESC_SMP_DEBUG
@@ -107,23 +112,26 @@ public:
 class MemRequest {
 private:
     virtual void destroy() = 0;
+
 protected:
 
     ID(static int32_t numMemReqs;)
 
     // Called through callback
     void access();
-    void returnAccess();
-    std::stack<MemObj*> memStack;
 
-    std::stack<Time_t>  clockStack;
+    void returnAccess();
+
+    std::stack<MemObj *> memStack;
+
+    std::stack<Time_t> clockStack;
     Time_t currentClockStamp;
 
     DInst *dinst;
     GProcessor *gproc;
 
     MemObj *currentMemObj;
-    PAddr  pAddr; // physical address
+    PAddr pAddr; // physical address
     MemOperation memOp;
 
     int32_t priority;
@@ -141,8 +149,8 @@ protected:
 
     void setFields(DInst *d, MemOperation mop, MemObj *mo) {
         dinst = d;
-        if(d) {
-            if(d->getResource())
+        if (d) {
+            if (d->getResource())
                 gproc = d->getResource()->getCluster()->getGProcessor();
         } else {
             gproc = 0;
@@ -156,6 +164,7 @@ protected:
     ID(int32_t reqId;) // It can be used as a printf trigger
 
     MemRequest();
+
     virtual ~MemRequest();
 
     StaticCallbackMember0<MemRequest, &MemRequest::access> accessCB;
@@ -169,6 +178,7 @@ public:
     MemOperation getMemOperation() const {
         return memOp;
     }
+
     //Call for WB cache BEFORE pushing next level
     void mutateWriteToRead() {
         if (memOp == MemWrite) {
@@ -179,25 +189,28 @@ public:
     }
 
     void mutateReadToWrite() { // Justification for this in SMPCache.cpp
-        if (wToRLevel == (short)memStack.size()) {
+        if (wToRLevel == (short) memStack.size()) {
             memOp = MemWrite;
             wToRLevel = -1;
         }
     }
 
-    void   setL2MissDetection(Time_t time) {
+    void setL2MissDetection(Time_t time) {
         l2MissDetection = time;
     }
-    Time_t getL2MissDetection()            {
+
+    Time_t getL2MissDetection() {
         return l2MissDetection;
     }
 
     bool isDataReq() const {
         return dataReq;
     }
+
     bool isPrefetch() const {
         return prefetch;
     }
+
     void markPrefetch() {
         I(!prefetch);
         prefetch = true;
@@ -206,7 +219,8 @@ public:
     void setPriority(int32_t p) {
         priority = p;
     }
-    int32_t  getPriority() {
+
+    int32_t getPriority() {
         return priority;
     }
 
@@ -259,20 +273,23 @@ public:
         return memStack.empty();
     }
 
-#if (defined SESC_CMP) 
+#if (defined SESC_CMP)
+
     void stitchMemObj(MemObj *obj) {
         MemObj *t = memStack.top();
         memStack.pop();
         memStack.push(obj);
     }
 
-	MemObj* getMemStackTop() {
-		if(memStack.empty()) {
-			return NULL;
-		}
-		return memStack.top();
-	}
+    MemObj *getMemStackTop() {
+        if (memStack.empty()) {
+            return NULL;
+        }
+        return memStack.top();
+    }
+
 #endif
+
     void goUp(TimeDelta_t lat) {
 
         if (memStack.empty()) {
@@ -344,12 +361,14 @@ public:
     PAddr getPAddr() const {
         return pAddr;
     }
-    void  setPAddr(PAddr a) {
+
+    void setPAddr(PAddr a) {
         pAddr = a;
     }
 
-    virtual VAddr getVaddr() const=0;
-    virtual void ack(TimeDelta_t lat) =0;
+    virtual VAddr getVaddr() const = 0;
+
+    virtual void ack(TimeDelta_t lat) = 0;
 
 #ifdef SESC_SMP_DEBUG
     void registerVisit(MemObj *memobj, const char *action, Time_t time)
@@ -423,9 +442,11 @@ class DMemRequest : public MemRequest {
     // MemRequest specialized for dcache
 private:
     static pool<DMemRequest, true> actPool;
+
     friend class pool<DMemRequest, true>;
 
     void destroy();
+
     static void dinstAck(DInst *dinst, MemOperation memOp, TimeDelta_t lat);
 
 protected:
@@ -433,6 +454,7 @@ public:
     static void create(DInst *dinst, GMemorySystem *gmem, MemOperation mop);
 
     VAddr getVaddr() const;
+
     void ack(TimeDelta_t lat);
 };
 
@@ -440,6 +462,7 @@ class IMemRequest : public MemRequest {
     // MemRequest specialed for icache
 private:
     static pool<IMemRequest, true> actPool;
+
     friend class pool<IMemRequest, true>;
 
     IBucket *buffer;
@@ -451,6 +474,7 @@ public:
     static void create(DInst *dinst, GMemorySystem *gmem, IBucket *buffer);
 
     VAddr getVaddr() const;
+
     void ack(TimeDelta_t lat);
 };
 
@@ -458,6 +482,7 @@ class CBMemRequest : public MemRequest {
     // Callback MemRequest. Ideal for internal memory requests
 private:
     static pool<CBMemRequest, true> actPool;
+
     friend class pool<CBMemRequest, true>;
 
     CallbackBase *cb;
@@ -466,10 +491,10 @@ private:
 
 protected:
 public:
-    static CBMemRequest *create(TimeDelta_t lat, MemObj *m
-                                ,MemOperation mop, PAddr addr, CallbackBase *cb);
+    static CBMemRequest *create(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr, CallbackBase *cb);
 
     VAddr getVaddr() const;
+
     void ack(TimeDelta_t lat);
 };
 
@@ -488,14 +513,15 @@ public:
     void launch(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr);
 
     VAddr getVaddr() const;
+
     void ack(TimeDelta_t lat);
 };
 
 class MemRequestHashFunc {
 public:
     size_t operator()(const MemRequest *mreq) const {
-        size_t val = (size_t)mreq;
-        return val>>2;
+        size_t val = (size_t) mreq;
+        return val >> 2;
     }
 };
 

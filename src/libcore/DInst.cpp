@@ -81,13 +81,10 @@ GStatsHist *DInst::brdistHist1 = 0;
 #endif
 
 DInst::DInst()
-    :doAtSimTimeCB(this)
-    ,doAtSelectCB(this)
-    ,doAtExecutedCB(this)
-{
+        : doAtSimTimeCB(this), doAtSelectCB(this), doAtExecutedCB(this) {
     pend[0].init(this);
     pend[1].init(this);
-    I(MAX_PENDING_SOURCES==2);
+    I(MAX_PENDING_SOURCES == 2);
     nDeps = 0;
 #ifdef DINST_TRACK_PHYS
     static ushort max_preg = 1;
@@ -146,9 +143,8 @@ DInst::DInst()
 #endif
 }
 
-void DInst::dump(const char *str)
-{
-    fprintf(stderr,"%s:(%d)  DInst: vaddr=0x%x ", str, cId, (int)vaddr);
+void DInst::dump(const char *str) {
+    fprintf(stderr, "%s:(%d)  DInst: vaddr=0x%x ", str, cId, (int) vaddr);
     if (executed) {
         fprintf(stderr, " executed");
     } else if (issued) {
@@ -166,9 +162,8 @@ void DInst::dump(const char *str)
     inst->dump("");
 }
 
-void DInst::doAtSimTime()
-{
-    I( resource );
+void DInst::doAtSimTime() {
+    I(resource);
 
     I(!isExecuted());
 
@@ -184,25 +179,22 @@ void DInst::doAtSimTime()
     resource->simTime(this);
 }
 
-void DInst::doAtSelect()
-{
+void DInst::doAtSelect() {
     I(resource->getCluster());
     resource->getCluster()->select(this);
 }
 
-void DInst::doAtExecuted()
-{
+void DInst::doAtExecuted() {
     I(RATEntry);
-    if ( (*RATEntry) == this )
+    if ((*RATEntry) == this)
         *RATEntry = 0;
 
-    I( resource );
+    I(resource);
     resource->executed(this);
 }
 
 
-DInst *DInst::createDInst(const Instruction *inst, VAddr va, int32_t cId, ThreadContext *context)
-{
+DInst *DInst::createDInst(const Instruction *inst, VAddr va, int32_t cId, ThreadContext *context) {
 #ifdef SESC_MISPATH
     if (inst->isType(iOpInvalid))
         return 0;
@@ -210,7 +202,7 @@ DInst *DInst::createDInst(const Instruction *inst, VAddr va, int32_t cId, Thread
 
     DInst *i = dInstPool.out();
 
-    i->context=context;
+    i->context = context;
     context->addDInst();
 
 #ifdef SESC_BAAD
@@ -222,26 +214,26 @@ DInst *DInst::createDInst(const Instruction *inst, VAddr va, int32_t cId, Thread
     i->exeTime      = 0;
 #endif
 
-    i->inst       = inst;
+    i->inst = inst;
     Prefetch(i->inst);
-    i->cId        = cId;
+    i->cId = cId;
     i->wakeUpTime = 0;
-    i->vaddr      = va;
-    i->first      = 0;
+    i->vaddr = va;
+    i->first = 0;
 #ifdef DEBUG
     i->ID = currentID++;
 #endif
-    i->resource  = 0;
-    i->RATEntry  = 0;
+    i->resource = 0;
+    i->RATEntry = 0;
     i->pendEvent = 0;
     i->fetch = 0;
-    i->loadForwarded= false;
-    i->issued       = false;
-    i->executed     = false;
+    i->loadForwarded = false;
+    i->issued = false;
+    i->executed = false;
     i->depsAtRetire = false;
-    i->deadStore    = false;
-    i->resolved     = false;
-    i->deadInst     = false;
+    i->deadStore = false;
+    i->resolved = false;
+    i->deadInst = false;
     i->waitOnMemory = false;
 #ifdef SESC_MISPATH
     i->fake         = false;
@@ -267,14 +259,12 @@ DInst *DInst::createDInst(const Instruction *inst, VAddr va, int32_t cId, Thread
     return i;
 }
 
-DInst *DInst::createInst(InstID pc, VAddr va, int32_t cId, ThreadContext *context)
-{
+DInst *DInst::createInst(InstID pc, VAddr va, int32_t cId, ThreadContext *context) {
     const Instruction *inst = Instruction::getInst(pc);
     return createDInst(inst, va, cId, context);
 }
 
-DInst *DInst::clone()
-{
+DInst *DInst::clone() {
     DInst *newDInst = createDInst(inst, vaddr, cId, context);
 
 #ifdef SESC_BAAD
@@ -284,10 +274,9 @@ DInst *DInst::clone()
     return newDInst;
 }
 
-void DInst::killSilently()
-{
-    I(getPendEvent()==0);
-    I(getResource()==0);
+void DInst::killSilently() {
+    I(getPendEvent() == 0);
+    I(getResource() == 0);
 
 #ifdef SESC_BAAD
     if (fetch2Time == 0) {
@@ -307,7 +296,7 @@ void DInst::killSilently()
 
     markIssued();
     markExecuted();
-    if( getFetch() ) {
+    if (getFetch()) {
         getFetch()->unBlockFetch();
         IS(setFetch(0));
     }
@@ -352,12 +341,11 @@ void DInst::killSilently()
 
     I(!getFetch());
     context->delDInst();
-    context=0;
+    context = 0;
     dInstPool.in(this);
 }
 
-void DInst::scrap()
-{
+void DInst::scrap() {
     I(nDeps == 0);   // No deps src
     I(first == 0);   // no dependent instructions
 
@@ -374,13 +362,12 @@ void DInst::scrap()
 
     I(!getFetch());
     context->delDInst();
-    context=0;
+    context = 0;
 
     dInstPool.in(this);
 }
 
-void DInst::destroy()
-{
+void DInst::destroy() {
     I(nDeps == 0);   // No deps src
 
     I(!fetch); // if it block the fetch engine. it is unblocked again
@@ -392,23 +379,23 @@ void DInst::destroy()
 
     I(first == 0);   // no dependent instructions
     if (first) {
-        LOG("Instruction pc=0x%x failed first is pc=0x%x",(int)inst->getAddr(),(int)first->getDInst()->inst->getAddr());
+        LOG("Instruction pc=0x%x failed first is pc=0x%x", (int) inst->getAddr(),
+            (int) first->getDInst()->inst->getAddr());
     }
 
     scrap();
 }
 
-void DInst::awakeRemoteInstructions()
-{
+void DInst::awakeRemoteInstructions() {
     while (hasPending()) {
         DInst *dstReady = getNextPending();
 
         I(inst->isStore());
-        I( dstReady->inst->isLoad());
+        I(dstReady->inst->isLoad());
         I(!dstReady->isExecuted());
-        I( dstReady->hasDepsAtRetire());
+        I(dstReady->hasDepsAtRetire());
 
-        I( dstReady->isSrc2Ready()); // LDSTBuffer queue in src2, free by now
+        I(dstReady->isSrc2Ready()); // LDSTBuffer queue in src2, free by now
 
         dstReady->clearDepsAtRetire();
         if (dstReady->isIssued() && !dstReady->hasDeps()) {

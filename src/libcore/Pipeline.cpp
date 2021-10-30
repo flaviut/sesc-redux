@@ -25,15 +25,10 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "Pipeline.h"
 
 IBucket::IBucket(size_t size, Pipeline *p, bool clean)
-    : FastQueue<DInst *>(size)
-    ,cleanItem(clean)
-    ,pipeLine(p)
-    ,markFetchedCB(this)
-{
+        : FastQueue<DInst *>(size), cleanItem(clean), pipeLine(p), markFetchedCB(this) {
 }
 
-void IBucket::markFetched()
-{
+void IBucket::markFetched() {
     I(fetched == false);
     IS(fetched = true); // Only called once
 
@@ -46,17 +41,13 @@ void IBucket::markFetched()
     pipeLine->readyItem(this);
 }
 
-bool PipeIBucketLess::operator()(const IBucket *x, const IBucket *y) const
-{
+bool PipeIBucketLess::operator()(const IBucket *x, const IBucket *y) const {
     return x->getPipelineId() > y->getPipelineId();
 }
 
 Pipeline::Pipeline(size_t s, size_t fetch, int32_t maxReqs)
-    : PipeLength(s)
-    ,bucketPoolMaxSize(s+1+maxReqs)
-    ,MaxIRequests(maxReqs)
-    ,nIRequests(maxReqs)
-    ,buffer(2*s+1+maxReqs)  // double s for the cleanMarks
+        : PipeLength(s), bucketPoolMaxSize(s + 1 + maxReqs), MaxIRequests(maxReqs), nIRequests(maxReqs),
+          buffer(2 * s + 1 + maxReqs)  // double s for the cleanMarks
 {
     maxItemCntr = 0;
     minItemCntr = 0;
@@ -66,8 +57,8 @@ Pipeline::Pipeline(size_t s, size_t fetch, int32_t maxReqs)
     bucketPool.reserve(bucketPoolMaxSize);
     I(bucketPool.empty());
 
-    for(size_t i=0; i<bucketPoolMaxSize; i++) {
-        IBucket *ib = new IBucket(fetch+1, this); // +1 fake instructions
+    for (size_t i = 0; i < bucketPoolMaxSize; i++) {
+        IBucket *ib = new IBucket(fetch + 1, this); // +1 fake instructions
         bucketPool.push_back(ib);
 
         ib = new IBucket(4, this, true);
@@ -77,28 +68,26 @@ Pipeline::Pipeline(size_t s, size_t fetch, int32_t maxReqs)
     I(bucketPool.size() == bucketPoolMaxSize);
 }
 
-Pipeline::~Pipeline()
-{
-    while(!bucketPool.empty()) {
+Pipeline::~Pipeline() {
+    while (!bucketPool.empty()) {
         delete bucketPool.back();
         bucketPool.pop_back();
     }
-    while(!cleanBucketPool.empty()) {
+    while (!cleanBucketPool.empty()) {
         delete cleanBucketPool.back();
         cleanBucketPool.pop_back();
     }
-    while(!buffer.empty()) {
+    while (!buffer.empty()) {
         delete buffer.top();
         buffer.pop();
     }
-    while(!received.empty()) {
+    while (!received.empty()) {
         delete received.top();
         received.pop();
     }
 }
 
-void Pipeline::cleanMark()
-{
+void Pipeline::cleanMark() {
     nCleanMarks++;
 
     I(!cleanBucketPool.empty());
@@ -115,12 +104,11 @@ void Pipeline::cleanMark()
     readyItem(b);
 }
 
-void Pipeline::readyItem(IBucket *b)
-{
+void Pipeline::readyItem(IBucket *b) {
     b->setClock();
     nIRequests++;
 
-    if( b->getPipelineId() != minItemCntr ) {
+    if (b->getPipelineId() != minItemCntr) {
         received.push(b);
         return;
     }
@@ -129,7 +117,7 @@ void Pipeline::readyItem(IBucket *b)
     // receive structure (remember that a cache can respond
     // out-of-order the memory requests)
     minItemCntr++;
-    if( b->empty() )
+    if (b->empty())
         doneItem(b);
     else
         buffer.push(b);
@@ -137,27 +125,25 @@ void Pipeline::readyItem(IBucket *b)
     clearItems(); // Try to insert on minItem reveiced (OoO) buckets
 }
 
-void Pipeline::clearItems()
-{
-    while( !received.empty() ) {
+void Pipeline::clearItems() {
+    while (!received.empty()) {
         IBucket *b = received.top();
 
-        if(b->getPipelineId() != minItemCntr)
+        if (b->getPipelineId() != minItemCntr)
             break;
 
         received.pop();
 
         minItemCntr++;
-        if( b->empty() )
+        if (b->empty())
             doneItem(b);
         else
             buffer.push(b);
     }
 }
 
-IBucket *Pipeline::nextItem()
-{
-    while(1) {
+IBucket *Pipeline::nextItem() {
+    while (1) {
         if (buffer.empty()) {
 #ifdef DEBUG
             // It should not be possible to propagate more buckets
@@ -167,7 +153,7 @@ IBucket *Pipeline::nextItem()
             return 0;
         }
 
-        if( ((buffer.top())->getClock() + PipeLength) > globalClock )
+        if (((buffer.top())->getClock() + PipeLength) > globalClock)
             return 0;
 
         IBucket *b = buffer.top();
@@ -185,7 +171,7 @@ IBucket *Pipeline::nextItem()
 
                     b->top()->killSilently();
                     b->pop();
-                } while(!b->empty());
+                } while (!b->empty());
                 I(b->empty());
 
                 bucketPool.push_back(b);
@@ -208,30 +194,24 @@ IBucket *Pipeline::nextItem()
 }
 
 PipeQueue::PipeQueue(CPU_t i)
-    :pipeLine(
-        SescConf->getInt("cpucore", "decodeDelay",i)
-        +SescConf->getInt("cpucore", "renameDelay",i)
-        ,SescConf->getInt("cpucore", "fetchWidth",i)
-        ,SescConf->getInt("cpucore", "maxIRequests",i))
-    ,instQueue(SescConf->getInt("cpucore", "instQueueSize",i))
-{
+        : pipeLine(
+        SescConf->getInt("cpucore", "decodeDelay", i)
+        + SescConf->getInt("cpucore", "renameDelay", i), SescConf->getInt("cpucore", "fetchWidth", i),
+        SescConf->getInt("cpucore", "maxIRequests", i)), instQueue(SescConf->getInt("cpucore", "instQueueSize", i)) {
     SescConf->isInt("cpucore", "decodeDelay", i);
-    SescConf->isBetween("cpucore", "decodeDelay", 1, 64,i);
+    SescConf->isBetween("cpucore", "decodeDelay", 1, 64, i);
 
     SescConf->isInt("cpucore", "renameDelay", i);
     SescConf->isBetween("cpucore", "renameDelay", 1, 64, i);
 
-    SescConf->isInt("cpucore", "maxIRequests",i);
-    SescConf->isBetween("cpucore", "maxIRequests", 0, 32000,i);
+    SescConf->isInt("cpucore", "maxIRequests", i);
+    SescConf->isBetween("cpucore", "maxIRequests", 0, 32000, i);
 
-    SescConf->isInt("cpucore", "instQueueSize",i);
-    SescConf->isBetween("cpucore", "instQueueSize"
-                        ,SescConf->getInt("cpucore","fetchWidth",i)
-                        ,32768,i);
+    SescConf->isInt("cpucore", "instQueueSize", i);
+    SescConf->isBetween("cpucore", "instQueueSize", SescConf->getInt("cpucore", "fetchWidth", i), 32768, i);
 
 }
 
-PipeQueue::~PipeQueue()
-{
+PipeQueue::~PipeQueue() {
     // do nothing
 }

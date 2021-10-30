@@ -30,7 +30,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "Pipeline.h"
 #include "FetchEngine.h"
 
-class Processor:public GProcessor {
+class Processor : public GProcessor {
 private:
     FetchEngine IFID;
     PipeQueue pipeQ;
@@ -46,19 +46,23 @@ protected:
 
     // BEGIN VIRTUAL FUNCTIONS of GProcessor
     DInst **getRAT(const int32_t contextId);
+
     FetchEngine *currentFlow();
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 
     size_t availableFlows() const;
 
     long long getAndClearnGradInsts(Pid_t pid);
+
     long long getAndClearnWPathInsts(Pid_t pid);
 
     void goRabbitMode(long long n2Skip);
 
     Pid_t findVictimPid() const;
+
     bool hasWork() const;
 
     void advanceClock();

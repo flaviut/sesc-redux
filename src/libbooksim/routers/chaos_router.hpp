@@ -41,16 +41,14 @@
 #include "pipefifo.hpp"
 #include "vc.hpp"
 
-class ChaosRouter : public Router
-{
+class ChaosRouter : public Router {
 
-    tRoutingFunction   _rf;
+    tRoutingFunction _rf;
 
-    vector<OutputSet*> _input_route;
-    vector<OutputSet*> _mq_route;
+    vector<OutputSet *> _input_route;
+    vector<OutputSet *> _mq_route;
 
-    enum eQState
-    {
+    enum eQState {
         empty,         //            input avail
         filling,       //    >**H    ready to send
         full,          //  T****H    ready to send
@@ -59,7 +57,7 @@ class ChaosRouter : public Router
         shared         // >**HT**>
     };
 
-    PipelineFIFO<Flit>   *_crossbar_pipe;
+    PipelineFIFO<Flit> *_crossbar_pipe;
 
     int _multi_queue_size;
     int _buffer_size;
@@ -87,41 +85,50 @@ class ChaosRouter : public Router
     int _cur_channel;
     int _read_stall;
 
-    bool _IsInjectionChan( int chan ) const;
-    bool _IsEjectionChan( int chan ) const;
+    bool _IsInjectionChan(int chan) const;
 
-    bool _InputReady( int input ) const;
-    bool _OutputFull( int out ) const;
-    bool _OutputAvail( int out ) const;
-    bool _MultiQueueFull( int mq ) const;
+    bool _IsEjectionChan(int chan) const;
 
-    int  _InputForOutput( int output ) const;
-    int  _MultiQueueForOutput( int output ) const;
-    int  _FindAvailMultiQueue( ) const;
+    bool _InputReady(int input) const;
 
-    void _NextInterestingChannel( );
-    void _OutputAdvance( );
-    void _SendFlits( );
-    void _SendCredits( );
+    bool _OutputFull(int out) const;
 
-    virtual void _InternalStep( );
+    bool _OutputAvail(int out) const;
+
+    bool _MultiQueueFull(int mq) const;
+
+    int _InputForOutput(int output) const;
+
+    int _MultiQueueForOutput(int output) const;
+
+    int _FindAvailMultiQueue() const;
+
+    void _NextInterestingChannel();
+
+    void _OutputAdvance();
+
+    void _SendFlits();
+
+    void _SendCredits();
+
+    virtual void _InternalStep();
 
 public:
-    ChaosRouter( const Configuration& config,
-                 Module *parent, const string & name, int id,
-                 int inputs, int outputs );
+    ChaosRouter(const Configuration &config,
+                Module *parent, const string &name, int id,
+                int inputs, int outputs);
 
-    virtual ~ChaosRouter( );
+    virtual ~ChaosRouter();
 
-    virtual void ReadInputs( );
-    virtual void WriteOutputs( );
+    virtual void ReadInputs();
 
-    virtual int GetUsedCredit(int out) const
-    {
+    virtual void WriteOutputs();
+
+    virtual int GetUsedCredit(int out) const {
         return 0;
     }
-    virtual int GetBufferOccupancy(int i) const
-    {
+
+    virtual int GetBufferOccupancy(int i) const {
         return 0;
     }
 
@@ -136,20 +143,19 @@ public:
     }
 #endif
 
-    virtual vector<int> UsedCredits() const
-    {
-        return vector<int>();
-    }
-    virtual vector<int> FreeCredits() const
-    {
-        return vector<int>();
-    }
-    virtual vector<int> MaxCredits() const
-    {
+    virtual vector<int> UsedCredits() const {
         return vector<int>();
     }
 
-    void Display( ostream & os = cout ) const;
+    virtual vector<int> FreeCredits() const {
+        return vector<int>();
+    }
+
+    virtual vector<int> MaxCredits() const {
+        return vector<int>();
+    }
+
+    void Display(ostream &os = cout) const;
 };
 
 #endif

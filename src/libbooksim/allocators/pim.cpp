@@ -33,46 +33,39 @@
 
 //#define DEBUG_PIM
 
-PIM::PIM( Module *parent, const string& name,
-          int inputs, int outputs, int iters ) :
-    DenseAllocator( parent, name, inputs, outputs ),
-    _PIM_iter(iters)
-{
+PIM::PIM(Module *parent, const string &name,
+         int inputs, int outputs, int iters) :
+        DenseAllocator(parent, name, inputs, outputs),
+        _PIM_iter(iters) {
 }
 
-PIM::~PIM( )
-{
+PIM::~PIM() {
 }
 
-void PIM::Allocate( )
-{
+void PIM::Allocate() {
     int input;
     int output;
 
     int input_offset;
     int output_offset;
 
-    for ( int iter = 0; iter < _PIM_iter; ++iter )
-    {
+    for (int iter = 0; iter < _PIM_iter; ++iter) {
         // Grant phase --- outputs randomly choose
         // between one of their requests
 
         vector<int> grants(_outputs, -1);
 
-        for ( output = 0; output < _outputs; ++output )
-        {
+        for (output = 0; output < _outputs; ++output) {
 
             // A random arbiter between input requests
-            input_offset  = RandomInt( _inputs - 1 );
+            input_offset = RandomInt(_inputs - 1);
 
-            for ( int i = 0; i < _inputs; ++i )
-            {
-                input = ( i + input_offset ) % _inputs;
+            for (int i = 0; i < _inputs; ++i) {
+                input = (i + input_offset) % _inputs;
 
-                if ( ( _request[input][output].label != -1 ) &&
-                        ( _inmatch[input] == -1 ) &&
-                        ( _outmatch[output] == -1 ) )
-                {
+                if ((_request[input][output].label != -1) &&
+                    (_inmatch[input] == -1) &&
+                    (_outmatch[output] == -1)) {
 
                     // Grant
                     grants[output] = input;
@@ -84,21 +77,18 @@ void PIM::Allocate( )
         // Accept phase -- inputs randomly choose
         // between input_speedup of their grants
 
-        for ( input = 0; input < _inputs; ++input )
-        {
+        for (input = 0; input < _inputs; ++input) {
 
             // A random arbiter between output grants
-            output_offset  = RandomInt( _outputs - 1 );
+            output_offset = RandomInt(_outputs - 1);
 
-            for ( int o = 0; o < _outputs; ++o )
-            {
-                output = ( o + output_offset ) % _outputs;
+            for (int o = 0; o < _outputs; ++o) {
+                output = (o + output_offset) % _outputs;
 
-                if ( grants[output] == input )
-                {
+                if (grants[output] == input) {
 
                     // Accept
-                    _inmatch[input]   = output;
+                    _inmatch[input] = output;
                     _outmatch[output] = input;
 
                     break;

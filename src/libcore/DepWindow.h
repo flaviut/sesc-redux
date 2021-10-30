@@ -31,6 +31,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "SCTable.h"
 
 class DInst;
+
 class GProcessor;
 
 class DepWindow {
@@ -64,6 +65,7 @@ protected:
 
 public:
     ~DepWindow();
+
     DepWindow(GProcessor *gp, const char *clusterName);
 
     void wakeUpDeps(DInst *dinst);
@@ -71,7 +73,9 @@ public:
     void select(DInst *dinst);
 
     StallCause canIssue(DInst *dinst) const;
+
     void addInst(DInst *dinst);
+
     void executed(DInst *dinst);
 
 

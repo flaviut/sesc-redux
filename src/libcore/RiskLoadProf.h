@@ -34,9 +34,11 @@ private:
 
 public:
     RiskLoadProf();
+
     ~RiskLoadProf() {}
 
     void insert(uint32_t ldInst);
+
     void finalize();
 };
 

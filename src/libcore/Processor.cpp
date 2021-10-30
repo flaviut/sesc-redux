@@ -38,81 +38,67 @@ extern unsigned long long lastFin;
 #endif
 
 Processor::Processor(GMemorySystem *gm, CPU_t i)
-    :GProcessor(gm, i, 1)
-    ,IFID(i, i, gm, this)
-    ,pipeQ(i)
-{
+        : GProcessor(gm, i, 1), IFID(i, i, gm, this), pipeQ(i) {
     spaceInInstQueue = InstQueueSize;
 
-    bzero(RAT,sizeof(DInst*)*NumArchRegs);
+    bzero(RAT, sizeof(DInst *) * NumArchRegs);
 
     l1Cache = gm->getDataSource();
 
 }
 
-Processor::~Processor()
-{
+Processor::~Processor() {
     // Nothing to do
 }
 
-DInst **Processor::getRAT(const int32_t contextId)
-{
+DInst **Processor::getRAT(const int32_t contextId) {
     I(contextId == Id);
     return RAT;
 }
 
-FetchEngine *Processor::currentFlow()
-{
+FetchEngine *Processor::currentFlow() {
     return &IFID;
 }
 
-void Processor::switchIn(Pid_t pid)
-{
+void Processor::switchIn(Pid_t pid) {
     IFID.switchIn(pid);
 }
 
-void Processor::switchOut(Pid_t pid)
-{
+void Processor::switchOut(Pid_t pid) {
     IFID.switchOut(pid);
 }
 
-size_t Processor::availableFlows() const
-{
+size_t Processor::availableFlows() const {
     return IFID.getPid() < 0 ? 1 : 0;
 }
 
-long long Processor::getAndClearnGradInsts(Pid_t pid)
-{
+long long Processor::getAndClearnGradInsts(Pid_t pid) {
     I(IFID.getPid() == pid);
 
     return IFID.getAndClearnGradInsts();
 }
 
-long long Processor::getAndClearnWPathInsts(Pid_t pid)
-{
+long long Processor::getAndClearnWPathInsts(Pid_t pid) {
     I(IFID.getPid() == pid);
 
     return IFID.getAndClearnWPathInsts();
 }
 
-Pid_t Processor::findVictimPid() const
-{
+Pid_t Processor::findVictimPid() const {
     return IFID.getPid();
 }
 
-void Processor::goRabbitMode(long long n2Skip)
-{
+void Processor::goRabbitMode(long long n2Skip) {
     IFID.goRabbitMode(n2Skip);
 }
 
-void Processor::advanceClock()
-{
+void Processor::advanceClock() {
 #if (defined CHECK_STALL)
-    if((globalClock-lastFin)>100000000 && !ThreadContext::ff) {
+    if ((globalClock - lastFin) > 100000000 && !ThreadContext::ff) {
         printf("Cache access stalled at %lld (last %lld)\n", globalClock, lastFin);
         fflush(stdout);
         lastFin = globalClock;
-    }   
+    }
 #endif
 
     clockTicks++;
@@ -121,9 +107,9 @@ void Processor::advanceClock()
     //       ,unresolvedLoad, unresolvedStore, unresolvedBranch);
 
     // Fetch Stage
-    if (IFID.hasWork() ) {
+    if (IFID.hasWork()) {
         IBucket *bucket = pipeQ.pipeLine.newItem();
-        if( bucket ) {
+        if (bucket) {
             IFID.fetch(bucket);
         }
     }
@@ -131,7 +117,7 @@ void Processor::advanceClock()
     // ID Stage (insert to instQueue)
     if (spaceInInstQueue >= FetchWidth) {
         IBucket *bucket = pipeQ.pipeLine.nextItem();
-        if( bucket ) {
+        if (bucket) {
             I(!bucket->empty());
             //      I(bucket->top()->getInst()->getAddr());
 
@@ -145,7 +131,7 @@ void Processor::advanceClock()
     }
 
     // RENAME Stage
-    if ( !pipeQ.instQueue.empty() ) {
+    if (!pipeQ.instQueue.empty()) {
         spaceInInstQueue += issue(pipeQ);
         //    spaceInInstQueue += issue(pipeQ);
     }
@@ -154,14 +140,13 @@ void Processor::advanceClock()
 }
 
 
-StallCause Processor::addInst(DInst *dinst)
-{
+StallCause Processor::addInst(DInst *dinst) {
     const Instruction *inst = dinst->getInst();
 
     if (InOrderCore) {
-        if(RAT[inst->getSrc1()] != 0 || RAT[inst->getSrc2()] != 0
-                || RAT[inst->getDest()] != 0
-          ) {
+        if (RAT[inst->getSrc1()] != 0 || RAT[inst->getSrc2()] != 0
+            || RAT[inst->getDest()] != 0
+                ) {
             return SmallWinStall;
         }
     }
@@ -173,16 +158,16 @@ StallCause Processor::addInst(DInst *dinst)
 
     I(dinst->getResource() != 0); // Resource::schedule must set the resource field
 
-    if(!dinst->isSrc2Ready()) {
+    if (!dinst->isSrc2Ready()) {
         // It already has a src2 dep. It means that it is solved at
         // retirement (Memory consistency. coherence issues)
-        if( RAT[inst->getSrc1()] )
+        if (RAT[inst->getSrc1()])
             RAT[inst->getSrc1()]->addSrc1(dinst);
     } else {
-        if( RAT[inst->getSrc1()] )
+        if (RAT[inst->getSrc1()])
             RAT[inst->getSrc1()]->addSrc1(dinst);
 
-        if( RAT[inst->getSrc2()] )
+        if (RAT[inst->getSrc2()])
             RAT[inst->getSrc2()]->addSrc2(dinst);
     }
 
@@ -195,8 +180,7 @@ StallCause Processor::addInst(DInst *dinst)
     return NoStall;
 }
 
-bool Processor::hasWork() const
-{
+bool Processor::hasWork() const {
     if (IFID.hasWork())
         return true;
 

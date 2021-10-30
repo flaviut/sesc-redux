@@ -35,25 +35,24 @@
 #include "booksim.hpp"
 #include "booksim_config.hpp"
 
-BookSimConfig::BookSimConfig( )
-{
+BookSimConfig::BookSimConfig() {
     //========================================================
     // Network options
     //========================================================
 
     // Channel length listing file
-    AddStrField( "channel_file", "" ) ;
+    AddStrField("channel_file", "");
 
     // Physical sub-networks
     _int_map["subnets"] = 1;
 
     //==== Topology options =======================
     //important
-    AddStrField( "topology", "torus" );
+    AddStrField("topology", "torus");
     _int_map["k"] = 8; //network radix
     _int_map["n"] = 2; //network dimension
     _int_map["c"] = 1; //concentration
-    AddStrField( "routing_function", "none" );
+    AddStrField("routing_function", "none");
     _int_map["use_noc_latency"] = 1;
 
     //not critical
@@ -64,11 +63,11 @@ BookSimConfig::BookSimConfig( )
 
 
     _int_map["link_failures"] = 0; //legacy
-    _int_map["fail_seed"]     = 0; //legacy
+    _int_map["fail_seed"] = 0; //legacy
 
     //==== Single-node options ===============================
 
-    _int_map["in_ports"]  = 5;
+    _int_map["in_ports"] = 5;
     _int_map["out_ports"] = 5;
 
     //========================================================
@@ -77,7 +76,7 @@ BookSimConfig::BookSimConfig( )
 
     //==== General options ===================================
 
-    AddStrField( "router", "iq" );
+    AddStrField("router", "iq");
 
     _int_map["output_delay"] = 0;
     _int_map["credit_delay"] = 0;
@@ -93,15 +92,15 @@ BookSimConfig::BookSimConfig( )
     //==== Input-queued ======================================
 
     // Control of virtual channel speculation
-    _int_map["speculative"] = 0 ;
-    _int_map["spec_check_elig"] = 1 ;
-    _int_map["spec_check_cred"] = 1 ;
-    _int_map["spec_mask_by_reqs"] = 0 ;
+    _int_map["speculative"] = 0;
+    _int_map["spec_check_elig"] = 1;
+    _int_map["spec_check_cred"] = 1;
+    _int_map["spec_mask_by_reqs"] = 0;
     AddStrField("spec_sw_allocator", "prio");
 
-    _int_map["num_vcs"]         = 16;
-    _int_map["vc_buf_size"]     = 8;
-    _int_map["buf_size"]        = -1;
+    _int_map["num_vcs"] = 16;
+    _int_map["vc_buf_size"] = 8;
+    _int_map["buf_size"] = -1;
     AddStrField("buffer_policy", "private");
 
     _int_map["private_bufs"] = -1;
@@ -121,18 +120,18 @@ BookSimConfig::BookSimConfig( )
     _int_map["vc_busy_when_full"] = 0; // mark VCs as in use when they have no credit available
     _int_map["vc_prioritize_empty"] = 0; // prioritize empty VCs over non-empty ones in VC allocation
     _int_map["vc_priority_donation"] = 0; // allow high-priority flits to donate their priority to low-priority that they are queued up behind
-	_int_map["vc_shuffle_requests"] = 0; // rearrange VC allocator requests to avoid unfairness
+    _int_map["vc_shuffle_requests"] = 0; // rearrange VC allocator requests to avoid unfairness
 
     _int_map["hold_switch_for_packet"] = 0; // hold a switch config for the entire packet
 
-    _int_map["input_speedup"]     = 1;  // expansion of input ports into crossbar
-    _int_map["output_speedup"]    = 1;  // expansion of output ports into crossbar
+    _int_map["input_speedup"] = 1;  // expansion of input ports into crossbar
+    _int_map["output_speedup"] = 1;  // expansion of output ports into crossbar
 
-    _int_map["routing_delay"]    = 1;
-    _int_map["vc_alloc_delay"]   = 1;
-    _int_map["sw_alloc_delay"]   = 1;
+    _int_map["routing_delay"] = 1;
+    _int_map["vc_alloc_delay"] = 1;
+    _int_map["sw_alloc_delay"] = 1;
     _int_map["st_prepare_delay"] = 0;
-    _int_map["st_final_delay"]   = 1;
+    _int_map["st_final_delay"] = 1;
 
     //==== Event-driven =====================================
 
@@ -140,10 +139,10 @@ BookSimConfig::BookSimConfig( )
 
     //==== Allocators ========================================
 
-    AddStrField( "vc_allocator", "islip" );
-    AddStrField( "sw_allocator", "islip" );
+    AddStrField("vc_allocator", "islip");
+    AddStrField("sw_allocator", "islip");
 
-    AddStrField( "arb_type", "round_robin" );
+    AddStrField("arb_type", "round_robin");
 
     _int_map["alloc_iters"] = 1;
 
@@ -151,14 +150,14 @@ BookSimConfig::BookSimConfig( )
 
     _int_map["classes"] = 1;
 
-    AddStrField( "traffic", "uniform" );
+    AddStrField("traffic", "uniform");
 
     _int_map["class_priority"] = 0;
     AddStrField("class_priority", ""); // workaraound to allow for vector specification
 
     _int_map["perm_seed"] = 0;         // seed value for random permuation trafficpattern generator
 
-    _float_map["injection_rate"]       = 0.1;
+    _float_map["injection_rate"] = 0.1;
     AddStrField("injection_rate", ""); // workaraound to allow for vector specification
 
     _int_map["injection_rate_uses_flits"] = 0;
@@ -171,13 +170,13 @@ BookSimConfig::BookSimConfig( )
     _int_map["packet_size_rate"] = 1;
     AddStrField("packet_size_rate", ""); // workaraound to allow for vector specification
 
-    AddStrField( "injection_process", "bernoulli" );
+    AddStrField("injection_process", "bernoulli");
 
     _float_map["burst_alpha"] = 0.5; // burst interval
-    _float_map["burst_beta"]  = 0.5; // burst length
+    _float_map["burst_beta"] = 0.5; // burst length
     _float_map["burst_r1"] = -1.0; // burst rate
 
-    AddStrField( "priority", "none" );  // message priorities
+    AddStrField("priority", "none");  // message priorities
 
     _int_map["batch_size"] = 1000;
     _int_map["batch_count"] = 1;
@@ -206,13 +205,13 @@ BookSimConfig::BookSimConfig( )
     _int_map["write_reply_subnet"] = 0;
 
     // Set packet length in flits
-    _int_map["read_request_size"]  = 1;
+    _int_map["read_request_size"] = 1;
     AddStrField("read_request_size", ""); // workaraound to allow for vector specification
     _int_map["write_request_size"] = 1;
     AddStrField("write_request_size", ""); // workaraound to allow for vector specification
-    _int_map["read_reply_size"]    = 1;
+    _int_map["read_reply_size"] = 1;
     AddStrField("read_reply_size", ""); // workaraound to allow for vector specification
-    _int_map["write_reply_size"]   = 1;
+    _int_map["write_reply_size"] = 1;
     AddStrField("write_reply_size", ""); // workaraound to allow for vector specification
 
     //==== Simulation parameters ==========================
@@ -221,19 +220,19 @@ BookSimConfig::BookSimConfig( )
     //   latency    - average + latency distribution for a particular injection rate
     //   throughput - sustained throughput for a particular injection rate
 
-    AddStrField( "sim_type", "latency" );
+    AddStrField("sim_type", "latency");
 
     _int_map["warmup_periods"] = 0; // number of samples periods to "warm-up" the simulation
 
     _int_map["sample_period"] = 1000; // how long between measurements
-    _int_map["max_samples"]   = 10;   // maximum number of sample periods in a simulation
+    _int_map["max_samples"] = 10;   // maximum number of sample periods in a simulation
 
     // whether or not to measure statistics for a given traffic class
     _int_map["measure_stats"] = 1;
     AddStrField("measure_stats", ""); // workaround to allow for vector specification
 
-	//whether to enable per pair statistics, caution N^2 memory usage
-	_int_map["pair_stats"] = 0;
+    //whether to enable per pair statistics, caution N^2 memory usage
+    _int_map["pair_stats"] = 0;
 
     // if avg. latency exceeds the threshold, assume unstable
     _float_map["latency_thres"] = 1000.0;
@@ -251,17 +250,17 @@ BookSimConfig::BookSimConfig( )
     _float_map["acc_stopping_thres"] = 0.05;
     AddStrField("acc_stopping_thres", ""); // workaround to allow for vector specification
 
-    _int_map["sim_count"]     = 1;   // number of simulations to perform
+    _int_map["sim_count"] = 1;   // number of simulations to perform
 
 
-    _int_map["include_queuing"] =1; // non-zero includes source queuing latency
+    _int_map["include_queuing"] = 1; // non-zero includes source queuing latency
 
     //  _int_map["reorder"]         = 0;  // know what you're doing
 
     //_int_map["flit_timing"]     = 0;  // know what you're doing
     //_int_map["split_packets"]   = 0;  // know what you're doing
 
-    _int_map["seed"]            = 0; //random seed for simulation, e.g. traffic
+    _int_map["seed"] = 0; //random seed for simulation, e.g. traffic
 
     _int_map["print_activity"] = 0;
 
@@ -302,18 +301,17 @@ BookSimConfig::BookSimConfig( )
 
     //==================Power model params=====================
     _int_map["sim_power"] = 0;
-    AddStrField("power_output_file","pwr_tmp");
+    AddStrField("power_output_file", "pwr_tmp");
     AddStrField("tech_file", "");
     _int_map["channel_width"] = 128;
     _int_map["channel_sweep"] = 0;
 
     //==================Network file===========================
-    AddStrField("network_file","");
+    AddStrField("network_file", "");
 }
 
 
-PowerConfig::PowerConfig( )
-{
+PowerConfig::PowerConfig() {
 
     _int_map["H_INVD2"] = 0;
     _int_map["W_INVD2"] = 0;

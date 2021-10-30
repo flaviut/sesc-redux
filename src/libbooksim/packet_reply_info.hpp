@@ -33,8 +33,7 @@
 #include "flit.hpp"
 
 //register the requests to a node
-class PacketReplyInfo
-{
+class PacketReplyInfo {
 
 public:
     int source;
@@ -42,16 +41,19 @@ public:
     bool record;
     Flit::FlitType type;
 
-    static PacketReplyInfo* New();
+    static PacketReplyInfo *New();
+
     void Free();
+
     static void FreeAll();
 
 private:
 
-    static stack<PacketReplyInfo*> _all;
-    static stack<PacketReplyInfo*> _free;
+    static stack<PacketReplyInfo *> _all;
+    static stack<PacketReplyInfo *> _free;
 
     PacketReplyInfo() {}
+
     ~PacketReplyInfo() {}
 };
 

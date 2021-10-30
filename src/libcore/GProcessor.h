@@ -44,7 +44,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "LDSTQ.h"
 
 class FetchEngine;
+
 class GMemorySystem;
+
 class BPredictor;
 
 
@@ -68,7 +70,6 @@ protected:
 
     FastQueue<DInst *> replayQ;
     LDSTQ lsq;
-
 
 
     ClusterManager clusterManager;
@@ -102,27 +103,33 @@ protected:
 #endif
 
     // "Lack of Retirement" Stats
-    GStatsCntr  noFetch;
-    GStatsCntr  noFetch2;
+    GStatsCntr noFetch;
+    GStatsCntr noFetch2;
 
-    GStatsAvg   retired;
-    GStatsCntr  notRetiredOtherCause;
+    GStatsAvg retired;
+    GStatsCntr notRetiredOtherCause;
     GStatsCntr *notRetired[MaxNoRetResp][MaxInstType][MaxRetOutcome];
 
     // Construction
     void buildInstStats(GStatsCntr *nInstFake[MaxInstType], const char *txt);
 
-    void buildUnit(const char *clusterName, GMemorySystem *ms, Cluster *cluster, InstType type
-                   ,GStatsEnergyCGBase *ecg);
-    void buildCluster(const char *clusterName, GMemorySystem * ms);
+    void
+    buildUnit(const char *clusterName, GMemorySystem *ms, Cluster *cluster, InstType type, GStatsEnergyCGBase *ecg);
+
+    void buildCluster(const char *clusterName, GMemorySystem *ms);
+
     void buildClusters(GMemorySystem *ms);
 
     GProcessor(GMemorySystem *gm, CPU_t i, size_t numFlows);
 
     virtual StallCause addInst(DInst *dinst) = 0;
+
     StallCause sharedAddInst(DInst *dinst);
+
     int32_t issue(PipeQueue &pipeQ);
+
     int32_t issueFromReplayQ();
+
     void retire();
 
     virtual DInst **getRAT(const int32_t contextId) = 0;
@@ -148,6 +155,7 @@ public:
     GStatsCntr nLockContCycles;
 
     virtual ~GProcessor();
+
     CPU_t getId() const {
         return Id;
     }
@@ -160,6 +168,7 @@ public:
     GMemorySystem *getMemorySystem() const {
         return memorySystem;
     }
+
     LDSTQ *getLSQ() {
         return &lsq;
     }
@@ -185,7 +194,8 @@ public:
 
     // Extracts the pid. Precondition: the pid should be running in the processor
     virtual void switchOut(Pid_t pid) = 0;
-    virtual long long getAndClearnGradInsts(Pid_t pid)  = 0; // Must be called only by RunningProcs
+
+    virtual long long getAndClearnGradInsts(Pid_t pid) = 0; // Must be called only by RunningProcs
     virtual long long getAndClearnWPathInsts(Pid_t pid) = 0; // Must be called only by RunningProcs
 
     // Returns the number of extra threads (switchIn) that processor may accept
@@ -200,7 +210,7 @@ public:
     // Processor.
     virtual void advanceClock() = 0;
 
-    virtual bool hasWork() const=0;
+    virtual bool hasWork() const = 0;
 
 
 #ifdef SESC_MISPATH

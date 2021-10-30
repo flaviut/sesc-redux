@@ -29,19 +29,19 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "libll/Instruction.h"
 
 class Resource;
+
 class GMemorySystem;
+
 class GStatsEnergyCGBase;
+
 class GProcessor;
 
 // #define WINDOW_USE_HIST 1
 
 class Cluster {
 private:
-    void buildUnit(const char *clusterName
-                   ,GMemorySystem *ms
-                   ,Cluster *cluster
-                   ,InstType type
-                   ,GStatsEnergyCGBase *ecgbase);
+    void
+    buildUnit(const char *clusterName, GMemorySystem *ms, Cluster *cluster, InstType type, GStatsEnergyCGBase *ecgbase);
 
 protected:
     DepWindow window;
@@ -57,24 +57,26 @@ protected:
 
     GStatsAvg winNotUsed;
 
-    Resource   *res[MaxInstType];
+    Resource *res[MaxInstType];
 
 protected:
     void delEntry() {
         windowSize++;
-        I(windowSize<=MaxWinSize);
+        I(windowSize <= MaxWinSize);
     }
 
     virtual ~Cluster();
+
     Cluster(const char *clusterName, GProcessor *gp);
 
 public:
     void newEntry() {
         windowSize--;
-        I(windowSize>=0);
+        I(windowSize >= 0);
     }
+
     StallCause canIssue(DInst *dinst) const {
-        if (windowSize>0)
+        if (windowSize > 0)
             return window.canIssue(dinst);
         return SmallWinStall;
     }
@@ -88,6 +90,7 @@ public:
     }
 
     virtual void executed(DInst *dinst) = 0;
+
     virtual void retire(DInst *dinst) = 0;
 
     static Cluster *create(const char *clusterName, GMemorySystem *ms, GProcessor *gproc);
@@ -112,9 +115,10 @@ public:
     }
 
     ExecutedCluster(const char *clusterName, GProcessor *gp)
-        : Cluster(clusterName, gp) { }
+            : Cluster(clusterName, gp) {}
 
     void executed(DInst *dinst);
+
     void retire(DInst *dinst);
 };
 
@@ -122,17 +126,19 @@ class RetiredCluster : public Cluster {
 public:
     virtual ~RetiredCluster() {
     }
+
     RetiredCluster(const char *clusterName, GProcessor *gp)
-        : Cluster(clusterName, gp) { }
+            : Cluster(clusterName, gp) {}
 
     void executed(DInst *dinst);
+
     void retire(DInst *dinst);
 };
 
 
 class ClusterManager {
 private:
-    Resource   *res[MaxInstType];
+    Resource *res[MaxInstType];
 protected:
 public:
     ClusterManager(GMemorySystem *ms, GProcessor *gproc);

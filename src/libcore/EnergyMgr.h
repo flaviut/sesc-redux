@@ -26,6 +26,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "nanassert.h"
 
 #include "GEnergy.h"
+
 #ifdef SESC_ENERGY
 
 class EnergyMgr {
@@ -55,9 +56,11 @@ private:
     EnergyMgr() {
         I(0); // No instance allowed
     }
+
 public:
     static void init() {
     }
+
     static double etop(double energy) {
         I(0);
         return 0;
@@ -68,13 +71,15 @@ public:
         return 0;
     }
 
-    static double get(const char *block, const char *name, int32_t procId=0) {
+    static double get(const char *block, const char *name, int32_t procId = 0) {
         return -1.0;
     }
-    static double get(const char* name, int32_t procId=0) {
+
+    static double get(const char *name, int32_t procId = 0) {
         return -1.0;
     }
 };
+
 #endif // !SESC_ENERGY
 
 #endif // !GENERGYMGR_H

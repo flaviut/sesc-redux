@@ -30,33 +30,37 @@
 
 #include "network.hpp"
 
-class KNCube : public Network
-{
+class KNCube : public Network {
 
     bool _mesh;
 
     int _k;
     int _n;
 
-    void _ComputeSize( const Configuration &config );
-    void _BuildNet( const Configuration &config );
+    void _ComputeSize(const Configuration &config);
 
-    int _LeftChannel( int node, int dim );
-    int _RightChannel( int node, int dim );
+    void _BuildNet(const Configuration &config);
 
-    int _LeftNode( int node, int dim );
-    int _RightNode( int node, int dim );
+    int _LeftChannel(int node, int dim);
+
+    int _RightChannel(int node, int dim);
+
+    int _LeftNode(int node, int dim);
+
+    int _RightNode(int node, int dim);
 
 public:
-    KNCube( const Configuration &config, const string & name, bool mesh );
+    KNCube(const Configuration &config, const string &name, bool mesh);
+
     static void RegisterRoutingFunctions();
 
-    int GetN( ) const;
-    int GetK( ) const;
+    int GetN() const;
 
-    double Capacity( ) const;
+    int GetK() const;
 
-    void InsertRandomFaults( const Configuration &config );
+    double Capacity() const;
+
+    void InsertRandomFaults(const Configuration &config);
 
 };
 

@@ -45,8 +45,7 @@
 typedef Channel<Credit> CreditChannel;
 
 
-class Network : public TimedModule
-{
+class Network : public TimedModule {
 protected:
 
     int _size;
@@ -67,95 +66,102 @@ protected:
 
     deque<TimedModule *> _timed_modules;
 
-    virtual void _ComputeSize( const Configuration &config ) = 0;
-    virtual void _BuildNet( const Configuration &config ) = 0;
+    virtual void _ComputeSize(const Configuration &config) = 0;
 
-    void _Alloc( );
+    virtual void _BuildNet(const Configuration &config) = 0;
+
+    void _Alloc();
 
 public:
-    Network( const Configuration &config, const string & name );
-    virtual ~Network( );
+    Network(const Configuration &config, const string &name);
 
-    static Network *New( const Configuration &config, const string & name );
+    virtual ~Network();
 
-    virtual void WriteFlit( Flit *f, int source );
-    virtual Flit *ReadFlit( int dest );
+    static Network *New(const Configuration &config, const string &name);
 
-    virtual void    WriteCredit( Credit *c, int dest );
-    virtual Credit *ReadCredit( int source );
+    virtual void WriteFlit(Flit *f, int source);
 
-    inline int NumNodes( ) const
-    {
+    virtual Flit *ReadFlit(int dest);
+
+    virtual void WriteCredit(Credit *c, int dest);
+
+    virtual Credit *ReadCredit(int source);
+
+    inline int NumNodes() const {
         return _nodes;
     }
 
-    virtual void InsertRandomFaults( const Configuration &config );
-    void OutChannelFault( int r, int c, bool fault = true );
+    virtual void InsertRandomFaults(const Configuration &config);
 
-    virtual double Capacity( ) const;
+    void OutChannelFault(int r, int c, bool fault = true);
 
-    virtual void ReadInputs( );
-    virtual void Evaluate( );
-    virtual void WriteOutputs( );
+    virtual double Capacity() const;
 
-    void Display( ostream & os = cout ) const;
-    void DumpChannelMap( ostream & os = cout, string const & prefix = "" ) const;
-    void DumpNodeMap( ostream & os = cout, string const & prefix = "" ) const;
+    virtual void ReadInputs();
 
-    int NumChannels() const
-    {
+    virtual void Evaluate();
+
+    virtual void WriteOutputs();
+
+    void Display(ostream &os = cout) const;
+
+    void DumpChannelMap(ostream &os = cout, string const &prefix = "") const;
+
+    void DumpNodeMap(ostream &os = cout, string const &prefix = "") const;
+
+    int NumChannels() const {
         return _channels;
     }
-    const vector<FlitChannel *> & GetInject()
-    {
+
+    const vector<FlitChannel *> &GetInject() {
         return _inject;
     }
-    FlitChannel * GetInject(int index)
-    {
+
+    FlitChannel *GetInject(int index) {
         return _inject[index];
     }
-    const vector<CreditChannel *> & GetInjectCred()
-    {
+
+    const vector<CreditChannel *> &GetInjectCred() {
         return _inject_cred;
     }
-    CreditChannel * GetInjectCred(int index)
-    {
+
+    CreditChannel *GetInjectCred(int index) {
         return _inject_cred[index];
     }
-    const vector<FlitChannel *> & GetEject()
-    {
+
+    const vector<FlitChannel *> &GetEject() {
         return _eject;
     }
-    FlitChannel * GetEject(int index)
-    {
+
+    FlitChannel *GetEject(int index) {
         return _eject[index];
     }
-    const vector<CreditChannel *> & GetEjectCred()
-    {
+
+    const vector<CreditChannel *> &GetEjectCred() {
         return _eject_cred;
     }
-    CreditChannel * GetEjectCred(int index)
-    {
+
+    CreditChannel *GetEjectCred(int index) {
         return _eject_cred[index];
     }
-    const vector<FlitChannel *> & GetChannels()
-    {
+
+    const vector<FlitChannel *> &GetChannels() {
         return _chan;
     }
-    const vector<CreditChannel *> & GetChannelsCred()
-    {
+
+    const vector<CreditChannel *> &GetChannelsCred() {
         return _chan_cred;
     }
-    const vector<Router *> & GetRouters()
-    {
+
+    const vector<Router *> &GetRouters() {
         return _routers;
     }
-    Router * GetRouter(int index)
-    {
+
+    Router *GetRouter(int index) {
         return _routers[index];
     }
-    int NumRouters() const
-    {
+
+    int NumRouters() const {
         return _size;
     }
 };

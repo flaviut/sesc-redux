@@ -36,7 +36,7 @@ class HVersion;
 //content is to be compared
 class MemObjCaseeqstr {
 public:
-    inline bool operator()(const char* s1, const char* s2) const {
+    inline bool operator()(const char *s1, const char *s2) const {
         return strcasecmp(s1, s2) == 0;
     }
 };
@@ -50,6 +50,7 @@ public:
     void addMemoryObj(const char *device_name, MemObj *obj);
 
     MemObj *searchMemoryObj(const char *section, const char *name) const;
+
     MemObj *searchMemoryObj(const char *name) const;
 
     void clear();
@@ -90,48 +91,59 @@ protected:
     static char *privatizeDeviceName(char *given_name, int32_t num);
 
     virtual GMemoryOS *buildMemoryOS(const char *section);
+
     virtual MemObj *buildMemoryObj(const char *type, const char *section, const char *name);
 
 public:
     GMemorySystem(int32_t processorId);
+
     virtual ~GMemorySystem();
 
     // The code can not be located in constructor because it is nor possible to
     // operate with virtual functions at construction time
     virtual void buildMemorySystem();
 
-    static int32_t  getPageSize()  {
-        return 1<<Log2PageSize;
+    static int32_t getPageSize() {
+        return 1 << Log2PageSize;
     }
-    static int32_t  calcPage(PAddr paddr)  {
+
+    static int32_t calcPage(PAddr paddr) {
         return paddr >> Log2PageSize;
     }
+
     static PAddr calcPAddr4Page(int32_t p) {
         return p << Log2PageSize;
     }
-    static int32_t  calcFullPage(int32_t p) {
+
+    static int32_t calcFullPage(int32_t p) {
         return p << Log2PageSize;
     }
-    static int32_t  calcPageMask(int32_t p) {
+
+    static int32_t calcPageMask(int32_t p) {
         return p & PageMask;
     }
-    static int32_t  calcPageAddr(VAddr va) {
+
+    static int32_t calcPageAddr(VAddr va) {
         return va & ~PageMask;
     }
+
     static PAddr calcPAddr(int32_t p, VAddr a) {
         I((p & PageMask) == 0);
         return p | (a & PageMask);
     }
 
     MemObj *searchMemoryObj(bool shared, const char *section, const char *name) const;
+
     MemObj *searchMemoryObj(bool shared, const char *name) const;
 
     MemObj *declareMemoryObj(const char *block, const char *field);
 
     int32_t getId() const;
 
-    MemObj *getDataSource()  const;
+    MemObj *getDataSource() const;
+
     MemObj *getInstrSource() const;
+
     GMemoryOS *getMemoryOS() const;
 
 };
@@ -141,6 +153,7 @@ private:
 protected:
 public:
     DummyMemorySystem(int32_t id);
+
     ~DummyMemorySystem();
 
 };

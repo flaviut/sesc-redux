@@ -34,18 +34,18 @@
 #include "booksim.hpp"
 #include "outputset.hpp"
 
-class Flit
-{
+class Flit {
 
 public:
 
     const static int NUM_FLIT_TYPES = 5;
-    enum FlitType { READ_REQUEST  = 0,
-                    READ_REPLY    = 1,
-                    WRITE_REQUEST = 2,
-                    WRITE_REPLY   = 3,
-                    ANY_TYPE      = 4
-                  };
+    enum FlitType {
+        READ_REQUEST = 0,
+        READ_REPLY = 1,
+        WRITE_REQUEST = 2,
+        WRITE_REPLY = 3,
+        ANY_TYPE = 4
+    };
     FlitType type;
 
     int vc;
@@ -55,27 +55,27 @@ public:
     bool head;
     bool tail;
 
-    BTime_t  ctime;
-    BTime_t  itime;
-    BTime_t  atime;
+    BTime_t ctime;
+    BTime_t itime;
+    BTime_t atime;
 
-    BId_t  id;
-	BId_t  pid;
+    BId_t id;
+    BId_t pid;
 
     bool record;
 
-    int  src;
-    int  dest;
+    int src;
+    int dest;
 
-    BPri_t  pri;
+    BPri_t pri;
     //int  pri;
 
-    int  hops;
+    int hops;
     bool watch;
-    int  subnetwork;
+    int subnetwork;
 
-	// JJ
-	void *SESCPkt;
+    // JJ
+    void *SESCPkt;
 
     // intermediate destination (if any)
     mutable int intm;
@@ -84,20 +84,23 @@ public:
     mutable int ph;
 
     // Fields for arbitrary data
-    void* data ;
+    void *data;
 
     // Lookahead route info
     OutputSet la_route_set;
 
     void Reset();
 
-    static Flit * New();
+    static Flit *New();
+
     void Free();
+
     static void FreeAll();
 
 private:
 
     Flit();
+
     ~Flit() {}
 
     static stack<Flit *> _all;
@@ -105,6 +108,6 @@ private:
 
 };
 
-ostream& operator<<( ostream& os, const Flit& f );
+ostream &operator<<(ostream &os, const Flit &f);
 
 #endif

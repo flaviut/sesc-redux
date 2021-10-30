@@ -27,6 +27,7 @@
 
 #ifndef _GLOBALS_HPP_
 #define _GLOBALS_HPP_
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -36,7 +37,8 @@
 long long GetSimTime();
 
 class Stats;
-Stats * GetStats(const std::string & name);
+
+Stats *GetStats(const std::string &name);
 
 extern bool gPrintActivity;
 
@@ -48,6 +50,6 @@ extern int gNodes;
 
 extern bool gTrace;
 
-extern std::ostream * gWatchOut;
+extern std::ostream *gWatchOut;
 
 #endif

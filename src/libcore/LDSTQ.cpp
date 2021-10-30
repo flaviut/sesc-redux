@@ -23,25 +23,19 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "GProcessor.h"
 
 LDSTQ::LDSTQ(GProcessor *gp, const int32_t id)
-    :ldldViolations("LDSTQ(%d)_ldldViolations", id)
-    ,stldViolations("LDSTQ(%d)_stldViolations", id)
-    ,ststViolations("LDSTQ(%d)_ststViolations", id)
-    ,stldForwarding("LDSTQ(%d)_stldForwarding", id)
-    ,gproc(gp)
-{
+        : ldldViolations("LDSTQ(%d)_ldldViolations", id), stldViolations("LDSTQ(%d)_stldViolations", id),
+          ststViolations("LDSTQ(%d)_ststViolations", id), stldForwarding("LDSTQ(%d)_stldForwarding", id), gproc(gp) {
 }
 
-void LDSTQ::insert(DInst *dinst)
-{
+void LDSTQ::insert(DInst *dinst) {
     I(inflightInsts.find(dinst) == inflightInsts.end());
     instMap[calcWord(dinst)].push_back(dinst);
 
     inflightInsts.insert(dinst);
 }
 
-bool LDSTQ::executed(DInst *dinst)
-{
-    if(dinst->isDeadInst())
+bool LDSTQ::executed(DInst *dinst) {
+    if (dinst->isDeadInst())
         return false;
 
     bool doReplay = false;
@@ -58,32 +52,32 @@ bool LDSTQ::executed(DInst *dinst)
 
     DInstQueue::iterator instIt = addrIt->second.end();
     instIt--;
-    while(instIt != addrIt->second.begin()) {
+    while (instIt != addrIt->second.begin()) {
         DInst *qdinst = *instIt;
-        if(qdinst == dinst)
+        if (qdinst == dinst)
             beforeInst = false;
 
         const Instruction *qinst = qdinst->getInst();
 
-        if(beforeInst && qdinst->isResolved()) {
-            if(inst->isLoad() && qinst->isLoad()) {
+        if (beforeInst && qdinst->isResolved()) {
+            if (inst->isLoad() && qinst->isLoad()) {
                 ldldViolations.inc();
                 doReplay = true;
-                if(!dinst->isDeadInst())
+                if (!dinst->isDeadInst())
                     gproc->replay(qdinst);
-            } else if(inst->isStore() && qinst->isStore()) {
+            } else if (inst->isStore() && qinst->isStore()) {
                 ststViolations.inc();
-            } else if(inst->isStore() && qinst->isLoad()) {
+            } else if (inst->isStore() && qinst->isLoad()) {
                 stldViolations.inc();
                 doReplay = true;
-                if(!dinst->isDeadInst())
+                if (!dinst->isDeadInst())
                     gproc->replay(qdinst);
             }
         }
 
 
-        if(!beforeInst && inst->isLoad()
-                && qinst->isStore() && qdinst->isResolved()) {
+        if (!beforeInst && inst->isLoad()
+            && qinst->isStore() && qdinst->isResolved()) {
 #ifdef LDSTQ_FWD
             dinst->setLoadForwarded();
 #endif
@@ -97,16 +91,15 @@ bool LDSTQ::executed(DInst *dinst)
     return doReplay;
 }
 
-void LDSTQ::remove(DInst *dinst)
-{
+void LDSTQ::remove(DInst *dinst) {
     I(inflightInsts.find(dinst) != inflightInsts.end());
     AddrDInstQMap::iterator addrIt = instMap.find(calcWord(dinst));
 
     I(addrIt != instMap.end());
 
     DInstQueue::iterator instIt = addrIt->second.begin();
-    while(instIt != addrIt->second.end()) {
-        if(*instIt == dinst)
+    while (instIt != addrIt->second.end()) {
+        if (*instIt == dinst)
             break;
         instIt++;
     }
@@ -114,7 +107,7 @@ void LDSTQ::remove(DInst *dinst)
     I(instIt != addrIt->second.end());
     addrIt->second.erase(instIt);
 
-    if(addrIt->second.size() == 0)
+    if (addrIt->second.size() == 0)
         instMap.erase(addrIt);
 
     inflightInsts.erase(dinst);

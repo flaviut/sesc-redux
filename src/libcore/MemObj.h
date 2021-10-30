@@ -47,7 +47,7 @@ class MemRequest;      // Memory Request (from processor to cache)
 
 class MemObj {
 public:
-    typedef std::vector<MemObj*> LevelType;
+    typedef std::vector<MemObj *> LevelType;
 private:
     bool highest;
 
@@ -70,17 +70,19 @@ protected:
     bool dataCache;
 
     void addSideLowerLevel(MemObj *obj) {
-        I( obj );
+        I(obj);
         sideLowerLevel = obj;
         obj->addSideUpperLevel(this);
     }
+
     void addSideUpperLevel(MemObj *obj) {
         sideUpperLevel = obj;
-	}
+    }
+
 #endif
 
     void addLowerLevel(MemObj *obj) {
-        I( obj );
+        I(obj);
         lowerLevel.push_back(obj);
         obj->addUpperLevel(this);
     }
@@ -93,18 +95,21 @@ protected:
 
         I(oc);
 
-        for(uint32_t i=0; i<upperLevel.size(); i++)
+        for (uint32_t i = 0; i < upperLevel.size(); i++)
             upperLevel[i]->invalidate(addr, size, oc);
     }
 
 public:
     MemObj(const char *section, const char *sName);
+
     MemObj();
+
     virtual ~MemObj();
 
     bool isHighestLevel() const {
         return highest;
     }
+
     void setHighestLevel() {
         I(!highest);
         highest = true;
@@ -113,20 +118,24 @@ public:
     const char *getDescrSection() const {
         return descrSection;
     }
+
     const char *getSymbolicName() const {
         return symbolicName;
     }
 
 #if (defined SESC_CMP)
+
     // JJO
     virtual int32_t getNodeID() {
         IJ(0);
         return 0;
     }
+
     virtual int32_t getMaxNodeID() {
         IJ(0);
         return 0;
     }
+
     virtual void goToMem(MemRequest *mreq) {
         IJ(0);
     }
@@ -136,6 +145,7 @@ public:
     const LevelType *getLowerLevel() const {
         return &lowerLevel;
     }
+
     const LevelType *getUpperLevel() const {
         return &upperLevel;
     }
@@ -162,9 +172,11 @@ public:
     virtual Time_t getNextFreeCycle() const = 0;
 
     virtual void access(MemRequest *mreq) = 0;
+
     virtual void returnAccess(MemRequest *mreq) = 0;
 
     virtual void invalidate(PAddr addr, ushort size, MemObj *oc) = 0;
+
     virtual void doInvalidate(PAddr addr, ushort size) {
         I(0);
     }
@@ -174,30 +186,37 @@ public:
 
     // When the buffers in the cache are full and it does not accept more requests
     virtual bool canAcceptStore(PAddr addr) = 0;
+
     virtual bool canAcceptLoad(PAddr addr) {
         return true;
     }
 
     // Print stats
     virtual void dump() const;
+
 #if (defined SESC_CMP)
+
     // JJO
     virtual uint32_t getPendingReqs() {
         IJ(0);
         return 0;
     }
+
     virtual uint32_t getPendingReqsProc(int32_t pID) {
         IJ(0);
         return 0;
     }
+
     virtual Time_t getPendingCycles() {
         IJ(0);
         return 0;
     }
+
     virtual int getOcc() {
         IJ(0);
         return 0;
     }
+
 #endif
 
 };
@@ -206,13 +225,20 @@ class DummyMemObj : public MemObj {
 private:
 protected:
     Time_t getNextFreeCycle() const;
+
     void access(MemRequest *req);
+
     bool canAcceptStore(PAddr addr);
+
     void invalidate(PAddr addr, ushort size, MemObj *oc);
+
     void doInvalidate(PAddr addr, ushort size);
+
     void returnAccess(MemRequest *req);
+
 public:
     DummyMemObj();
+
     DummyMemObj(const char *section, const char *sName);
 };
 

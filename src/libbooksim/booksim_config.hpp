@@ -30,12 +30,11 @@
 
 #include "config_utils.hpp"
 
-class BookSimConfig : public Configuration
-{
+class BookSimConfig : public Configuration {
 protected:
 
 public:
-    BookSimConfig( );
+    BookSimConfig();
 
 };
 
@@ -46,10 +45,9 @@ public:
 
 #include "config_utils.hpp"
 
-class PowerConfig : public Configuration
-{
+class PowerConfig : public Configuration {
 public:
-    PowerConfig( );
+    PowerConfig();
 
 };
 

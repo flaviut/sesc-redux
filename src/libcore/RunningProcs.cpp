@@ -27,55 +27,51 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "ReportTherm.h"
 #endif
 
-RunningProcs::RunningProcs()
-{
-    stayInLoop=true;
+RunningProcs::RunningProcs() {
+    stayInLoop = true;
 }
 
-void RunningProcs::finishWorkNow()
-{
-    stayInLoop=false;
+void RunningProcs::finishWorkNow() {
+    stayInLoop = false;
 #ifdef SESC_THERM
     ReportTherm::stopCB();
 #endif
     workingList.clear();
-    startProc =0;
+    startProc = 0;
 }
 
-void RunningProcs::workingListRemove(GProcessor *core)
-{
-    ProcessorMultiSet::iterator availIt=availableProcessors.find(core);
-    if (availIt==availableProcessors.end())
+void RunningProcs::workingListRemove(GProcessor *core) {
+    ProcessorMultiSet::iterator availIt = availableProcessors.find(core);
+    if (availIt == availableProcessors.end())
         availableProcessors.insert(core);
 
     if (core->hasWork())
         return;
 
-    bool found=false;
-    for(size_t i=0; i<workingList.size(); i++) {
+    bool found = false;
+    for (size_t i = 0; i < workingList.size(); i++) {
         if (workingList[i] == core) {
             found = true;
             continue;
         } else if (found) {
-            I(i>0);
-            workingList[i-1] = workingList[i];
+            I(i > 0);
+            workingList[i - 1] = workingList[i];
         }
     }
 
     workingList.pop_back();
-    startProc =0;
-    stayInLoop=!workingList.empty();
+    startProc = 0;
+    stayInLoop = !workingList.empty();
 }
 
-void RunningProcs::workingListAdd(GProcessor *core)
-{
-    ProcessorMultiSet::iterator availIt=availableProcessors.find(core);
-    if (availIt!=availableProcessors.end())
+void RunningProcs::workingListAdd(GProcessor *core) {
+    ProcessorMultiSet::iterator availIt = availableProcessors.find(core);
+    if (availIt != availableProcessors.end())
         availableProcessors.erase(availIt);
 
 // TODO: Ein?  I(core->hasWork());
 
-    for(size_t i=0; i<workingList.size(); i++) {
+    for (size_t i = 0; i < workingList.size(); i++) {
         if (workingList[i] == core)
             return;
     }
@@ -83,19 +79,18 @@ void RunningProcs::workingListAdd(GProcessor *core)
     workingList.push_back(core);
 }
 
-void RunningProcs::run()
-{
-    I(cpuVector.size() > 0 );
+void RunningProcs::run() {
+    I(cpuVector.size() > 0);
 
     IS(currentCPU = 0);
 
     do {
-        if ( workingList.empty() ) {
+        if (workingList.empty()) {
             EventScheduler::advanceClock();
         }
 
         while (hasWork()) {
-            stayInLoop=true;
+            stayInLoop = true;
 
             startProc = 0;
 
@@ -103,7 +98,7 @@ void RunningProcs::run()
                 // Loop duplicated so round-robin fetch starts on different
                 // processor each cycle <><>
 
-                for(size_t i=startProc ; i < workingList.size() ; i++) {
+                for (size_t i = startProc; i < workingList.size(); i++) {
                     if (workingList[i]->hasWork()) {
                         currentCPU = workingList[i];
                         currentCPU->advanceClock();
@@ -111,7 +106,7 @@ void RunningProcs::run()
                         workingListRemove(workingList[i]);
                     }
                 }
-                for(size_t i=0 ; i < startProc ; i++) {
+                for (size_t i = 0; i < startProc; i++) {
                     if (workingList[i]->hasWork()) {
                         currentCPU = workingList[i];
                         currentCPU->advanceClock();
@@ -126,58 +121,57 @@ void RunningProcs::run()
 
                 IS(currentCPU = 0);
                 EventScheduler::advanceClock();
-            } while(stayInLoop);
+            } while (stayInLoop);
 #ifdef SESC_THERM
             ReportTherm::stopCB();
 #endif
         }
-    } while(!EventScheduler::empty());
+    } while (!EventScheduler::empty());
 
-	if(ThreadContext::simDone) {
-		MSG("End skipping: skipped %lld\n",(long long int)ThreadContext::finalSkip);
-		fflush(stdout);
-	}
+    if (ThreadContext::simDone) {
+        MSG("End skipping: skipped %lld\n", (long long int) ThreadContext::finalSkip);
+        fflush(stdout);
+    }
 
 }
 
-void RunningProcs::makeRunnable(ProcessId *proc)
-{
+void RunningProcs::makeRunnable(ProcessId *proc) {
     // The process must be in the InvalidState
-    I(proc->getState()==InvalidState);
+    I(proc->getState() == InvalidState);
     // Now the process is runnable (but still not running)
-    ProcessId *victimProc=proc->becomeReady();
+    ProcessId *victimProc = proc->becomeReady();
     // Get the CPU where the process would like to run
-    CPU_t cpu=proc->getCPU();
+    CPU_t cpu = proc->getCPU();
     // If there is a preferred CPU, try to schedule there
-    if(cpu>=0) {
+    if (cpu >= 0) {
         // Get the GProcessor of the CPU
-        GProcessor *core=getProcessor(cpu);
+        GProcessor *core = getProcessor(cpu);
         // Are there available flows on this CPU
-        if(core->availableFlows()) {
+        if (core->availableFlows()) {
             // There is an available flow, grab it
-            switchIn(cpu,proc);
+            switchIn(cpu, proc);
             return;
         }
     }
     // Could not run the process on the cpu it wanted
     // If the process is not pinned to that processor, try to find another cpu
-    if(!proc->isPinned()) {
+    if (!proc->isPinned()) {
         // Find an available processor
-        GProcessor *core=getAvailableProcessor();
+        GProcessor *core = getAvailableProcessor();
         // If available processor found, run there
-        if(core) {
-            switchIn(core->getId(),proc);
+        if (core) {
+            switchIn(core->getId(), proc);
             return;
         }
     }
     // Could not run on an available processor
     // If there is a process to evict, switch it out and switch the new one in its place
-    if(victimProc) {
-        I(victimProc->getState()==RunningState);
+    if (victimProc) {
+        I(victimProc->getState() == RunningState);
         // get the processor where victim process is running
-        cpu=victimProc->getCPU();
+        cpu = victimProc->getCPU();
         switchOut(cpu, victimProc);
-        switchIn(cpu,proc);
+        switchIn(cpu, proc);
         victimProc->becomeNonReady();
         makeRunnable(victimProc);
     }
@@ -185,23 +179,22 @@ void RunningProcs::makeRunnable(ProcessId *proc)
     // The new process has to wait its turn
 }
 
-void RunningProcs::makeNonRunnable(ProcessId *proc)
-{
+void RunningProcs::makeNonRunnable(ProcessId *proc) {
     // It should still be running or ready
-    I((proc->getState()==RunningState)||(proc->getState()==ReadyState));
+    I((proc->getState() == RunningState) || (proc->getState() == ReadyState));
     // If it is still running, remove it from the processor
-    if(proc->getState()==RunningState) {
+    if (proc->getState() == RunningState) {
         // Find the CPU where it is running
-        CPU_t cpu=proc->getCPU();
+        CPU_t cpu = proc->getCPU();
         // Remove it from there
         switchOut(cpu, proc);
         // Set the state to InvalidState to make the process non-runnable
         proc->becomeNonReady();
         // Find another process to run on this cpu
-        ProcessId *newProc=ProcessId::queueGet(cpu);
+        ProcessId *newProc = ProcessId::queueGet(cpu);
         // If a process has been found, switch it in
-        if(newProc) {
-            switchIn(cpu,newProc);
+        if (newProc) {
+            switchIn(cpu, newProc);
         }
     } else {
         // Just set the state to InvalidState to make it non-runnable
@@ -209,36 +202,34 @@ void RunningProcs::makeNonRunnable(ProcessId *proc)
     }
 }
 
-void RunningProcs::setProcessor(CPU_t cpu, GProcessor *newCore)
-{
-    if(cpu >= (CPU_t)size())
-        cpuVector.resize(cpu+1);
+void RunningProcs::setProcessor(CPU_t cpu, GProcessor *newCore) {
+    if (cpu >= (CPU_t) size())
+        cpuVector.resize(cpu + 1);
 
-    GProcessor *oldCore=cpuVector[cpu];
-    cpuVector[cpu]=newCore;
+    GProcessor *oldCore = cpuVector[cpu];
+    cpuVector[cpu] = newCore;
 
     // Is there was an old core in this slot
-    if(oldCore) {
+    if (oldCore) {
         // Erase all instances of the old core from the available multiset
-        size_t erased=availableProcessors.erase(oldCore);
+        size_t erased = availableProcessors.erase(oldCore);
         // Check whether we erased the right number of entries
-        I(oldCore->getMaxFlows()==erased);
+        I(oldCore->getMaxFlows() == erased);
     }
 
     // If there is a new core in this slot
-    if(newCore) {
+    if (newCore) {
         // Insert the new core into the available mulstiset
         // once for each of its available flows
-        for(size_t i=0; i<newCore->getMaxFlows(); i++)
+        for (size_t i = 0; i < newCore->getMaxFlows(); i++)
             availableProcessors.insert(newCore);
     }
 
 }
 
 
-void RunningProcs::switchIn(CPU_t id, ProcessId *proc)
-{
-    GProcessor *core=getProcessor(id);
+void RunningProcs::switchIn(CPU_t id, ProcessId *proc) {
+    GProcessor *core = getProcessor(id);
 
     workingListAdd(core);
 
@@ -246,9 +237,8 @@ void RunningProcs::switchIn(CPU_t id, ProcessId *proc)
     core->switchIn(proc->getPid()); // Must be the last thing because it can generate a switch
 }
 
-void RunningProcs::switchOut(CPU_t id, ProcessId *proc)
-{
-    GProcessor *core=getProcessor(id);
+void RunningProcs::switchOut(CPU_t id, ProcessId *proc) {
+    GProcessor *core = getProcessor(id);
     Pid_t pid = proc->getPid();
 
     proc->switchOut(core->getAndClearnGradInsts(pid),
@@ -259,15 +249,14 @@ void RunningProcs::switchOut(CPU_t id, ProcessId *proc)
     workingListRemove(core);
 }
 
-GProcessor *RunningProcs::getAvailableProcessor(void)
-{
+GProcessor *RunningProcs::getAvailableProcessor(void) {
     // Get the first processor in the avaialable multiset
-    ProcessorMultiSet::iterator availIt=availableProcessors.begin();
+    ProcessorMultiSet::iterator availIt = availableProcessors.begin();
 
-    if(availIt==availableProcessors.end()) {
+    if (availIt == availableProcessors.end()) {
         //UGLY UGLY fix for the bug, i'll fix it soon. --luis
-        for(unsigned cpuId = 0; cpuId < size(); cpuId++) {
-            if(getProcessor(cpuId)->availableFlows() > 0)
+        for (unsigned cpuId = 0; cpuId < size(); cpuId++) {
+            if (getProcessor(cpuId)->availableFlows() > 0)
                 return getProcessor(cpuId);
         }
         return 0;

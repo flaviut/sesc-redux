@@ -41,8 +41,8 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 class LDSTBuffer {
 private:
 
-    typedef HASH_MAP<VAddr,DInst *,VAddr_hash> EntryType;
-    typedef HASH_MAP<int32_t, DInst*>   FenceEntryType;
+    typedef HASH_MAP<VAddr, DInst *, VAddr_hash> EntryType;
+    typedef HASH_MAP<int32_t, DInst *> FenceEntryType;
     static EntryType stores;
     static FenceEntryType fences;
 
@@ -54,6 +54,7 @@ private:
         // Just remove the two lower bits
         return (dinst->getVaddr()) >> 2;
     }
+
 public:
 
     /** Get an entry from the LDSTQueue
@@ -66,6 +67,7 @@ public:
      * Release
      */
     static void getFenceEntry(DInst *dinst);
+
     static void fenceLocallyPerformed(DInst *dinst);
 
     /** Store gets an entry in the LDSTBuffer

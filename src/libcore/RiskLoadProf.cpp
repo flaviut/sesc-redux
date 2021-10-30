@@ -22,8 +22,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "OSSim.h"
 #include "RiskLoadProf.h"
 
-RiskLoadProf::RiskLoadProf()
-{
+RiskLoadProf::RiskLoadProf() {
     char fname[1024];
 
     sprintf(fname, "%s.riskloads", osSim->getBenchName());
@@ -31,20 +30,18 @@ RiskLoadProf::RiskLoadProf()
     I(fout);
 }
 
-void RiskLoadProf::insert(uint32_t ldInst)
-{
+void RiskLoadProf::insert(uint32_t ldInst) {
     HashType::iterator it = riskLoads.find(ldInst);
-    if(it != riskLoads.end())
+    if (it != riskLoads.end())
         (*it).second++;
     else
         riskLoads[ldInst] = 1;
 }
 
-void RiskLoadProf::finalize()
-{
+void RiskLoadProf::finalize() {
     // print out the risk load list
     for (HashType::const_iterator it = riskLoads.begin();
-            it != riskLoads.end(); it++ )
+         it != riskLoads.end(); it++)
         fprintf(fout, "0x%08lx %d\n", (*it).first, (*it).second);
 
     fclose(fout);

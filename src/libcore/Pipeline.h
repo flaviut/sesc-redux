@@ -53,6 +53,7 @@ protected:
     Time_t clock;
 
     friend class Pipeline;
+
     friend class PipeIBucketLess;
 
     Pipeline *const pipeLine;
@@ -61,8 +62,9 @@ protected:
     Time_t getPipelineId() const {
         return pipeId;
     }
+
     void setPipelineId(Time_t i) {
-        pipeId=i;
+        pipeId = i;
     }
 
     void markFetched();
@@ -70,13 +72,15 @@ protected:
     Time_t getClock() const {
         return clock;
     }
+
     void setClock() {
         clock = globalClock;
     }
 
 public:
-    IBucket(size_t size, Pipeline *p, bool clean=false);
-    virtual ~IBucket() { }
+    IBucket(size_t size, Pipeline *p, bool clean = false);
+
+    virtual ~IBucket() {}
 
     StaticCallbackMember0<IBucket, &IBucket::markFetched> markFetchedCB;
 };
@@ -98,7 +102,7 @@ private:
     IBucketCont bucketPool;
     IBucketCont cleanBucketPool;
 
-    std::priority_queue<IBucket *, std::vector<IBucket*>, PipeIBucketLess> received;
+    std::priority_queue<IBucket *, std::vector<IBucket *>, PipeIBucketLess> received;
 
     Time_t maxItemCntr;
     Time_t minItemCntr;
@@ -107,14 +111,16 @@ private:
 
 protected:
     void clearItems();
+
 public:
     Pipeline(size_t s, size_t fetch, int32_t maxReqs);
+
     virtual ~Pipeline();
 
     void cleanMark();
 
     IBucket *newItem() {
-        if(nIRequests == 0 || bucketPool.empty())
+        if (nIRequests == 0 || bucketPool.empty())
             return 0;
 
         nIRequests--;
@@ -135,19 +141,23 @@ public:
         // bucketPool.size() has lineal time O(n)
         return !buffer.empty() || !received.empty() || nIRequests < MaxIRequests;
     }
+
     void readyItem(IBucket *b);
+
     void doneItem(IBucket *b) {
         I(b->getPipelineId() < minItemCntr);
         I(b->empty());
 
         bucketPool.push_back(b);
     }
+
     IBucket *nextItem();
 };
 
 class PipeQueue {
 public:
     PipeQueue(CPU_t i);
+
     ~PipeQueue();
 
     Pipeline pipeLine;

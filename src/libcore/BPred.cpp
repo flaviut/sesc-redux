@@ -36,10 +36,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 BPred::BPred(int32_t i, int32_t fetchWidth, const char *sec, const char *name)
-    :id(i)
-    ,nHit("BPred(%d)_%s:nHit",i,name)
-    ,nMiss("BPred(%d)_%s:nMiss",i,name)
-{
+        : id(i), nHit("BPred(%d)_%s:nHit", i, name), nMiss("BPred(%d)_%s:nMiss", i, name) {
     // bpred4CycleAddrShift
     if (SescConf->checkInt(sec, "bpred4Cycle")) {
         SescConf->isPower2(sec, "bpred4Cycle");
@@ -48,26 +45,25 @@ BPred::BPred(int32_t i, int32_t fetchWidth, const char *sec, const char *name)
     } else {
         bpred4Cycle = fetchWidth;
     }
-    bpred4CycleAddrShift = log2i(fetchWidth/bpred4Cycle);
-    I(bpred4CycleAddrShift>=0 &&
-      (unsigned)bpred4CycleAddrShift<=roundUpPower2((unsigned)fetchWidth));
+    bpred4CycleAddrShift = log2i(fetchWidth / bpred4Cycle);
+    I(bpred4CycleAddrShift >= 0 &&
+      (unsigned) bpred4CycleAddrShift <= roundUpPower2((unsigned) fetchWidth));
 
     // Energy counters
-    if (strstr(name,"RAS")==0 && strstr(name,"BTB")==0) {
+    if (strstr(name, "RAS") == 0 && strstr(name, "BTB") == 0) {
         // RAS and BTB have their own energy counters (do not replicate counters)
 
         char cadena[100];
 
-        sprintf(cadena, "BPred(%d)_%s",i,name);
-        bpredEnergy = new GStatsEnergy("bpredEnergy", cadena, i, FetchPower, EnergyMgr::get("bpredEnergy",i));
+        sprintf(cadena, "BPred(%d)_%s", i, name);
+        bpredEnergy = new GStatsEnergy("bpredEnergy", cadena, i, FetchPower, EnergyMgr::get("bpredEnergy", i));
     } else {
         bpredEnergy = 0;
     }
 }
 
-BPred::~BPred()
-{
-    if(bpredEnergy)
+BPred::~BPred() {
+    if (bpredEnergy)
         delete bpredEnergy;
 }
 
@@ -75,19 +71,17 @@ BPred::~BPred()
  * RAS
  */
 BPRas::BPRas(int32_t i, int32_t fetchWidth, const char *section)
-    :BPred(i, fetchWidth, section,"RAS")
-    ,RasSize(SescConf->getInt(section,"rasSize"))
-{
+        : BPred(i, fetchWidth, section, "RAS"), RasSize(SescConf->getInt(section, "rasSize")) {
     char cadena[100];
 
     sprintf(cadena, "BPred(%d)_RAS", i);
-    rasEnergy = new GStatsEnergy("rasEnergy", cadena, i, FetchPower , EnergyMgr::get("rasEnergy",i));
+    rasEnergy = new GStatsEnergy("rasEnergy", cadena, i, FetchPower, EnergyMgr::get("rasEnergy", i));
 
     // Constraints
     SescConf->isInt(section, "rasSize");
     SescConf->isBetween(section, "rasSize", 0, 128);    // More than 128???
 
-    if(RasSize == 0) {
+    if (RasSize == 0) {
         stack = 0;
         return;
     }
@@ -98,43 +92,41 @@ BPRas::BPRas(int32_t i, int32_t fetchWidth, const char *section)
     index = 0;
 }
 
-BPRas::~BPRas()
-{
+BPRas::~BPRas() {
     delete rasEnergy;
-    delete [] stack;
+    delete[] stack;
 }
 
-PredType BPRas::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
-{
+PredType BPRas::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     // RAS is a little bit different than other predictors because it can update
     // the state without knowing the oracleID. All the other predictors update the
     // statistics when the branch is resolved. RAS automatically updates the
     // tables when predict is called. The update only actualizes the statistics.
 
-    if(inst->isFuncRet()) {
+    if (inst->isFuncRet()) {
         rasEnergy->inc();
-        if(stack == 0)
+        if (stack == 0)
             return CorrectPrediction;
 
         //    I(oracleID);
         if (doUpdate) {
             index--;
-            if( index < 0 )
-                index = RasSize-1;
+            if (index < 0)
+                index = RasSize - 1;
         }
 
-        if( stack[index] == oracleID )
+        if (stack[index] == oracleID)
             return CorrectPrediction;
 
         return MissPrediction;
-    } else if(inst->isFuncCall() && stack) {
+    } else if (inst->isFuncCall() && stack) {
         rasEnergy->inc();
 
         if (doUpdate) {
             stack[index] = inst->calcNextInstID();
             index++;
 
-            if( index >= RasSize )
+            if (index >= RasSize)
                 index = 0;
         }
     }
@@ -142,65 +134,59 @@ PredType BPRas::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
     return NoPrediction;
 }
 
-void BPRas::switchIn(Pid_t pid)
-{
+void BPRas::switchIn(Pid_t pid) {
     // TODO: a task spawn passes the RAS. Copy it the first time (keep
     // it as processor migrates?)
 }
 
-void BPRas::switchOut(Pid_t pid)
-{
+void BPRas::switchOut(Pid_t pid) {
     // read BPRas::switchIn
 }
 
 /*****************************************
  * BTB
  */
-BPBTB::BPBTB(int32_t i, int32_t fetchWidth,const char *section, const char *name)
-    :BPred(i, fetchWidth, section, name ? name : "BTB")
-{
+BPBTB::BPBTB(int32_t i, int32_t fetchWidth, const char *section, const char *name)
+        : BPred(i, fetchWidth, section, name ? name : "BTB") {
     char cadena[100];
 
-    sprintf(cadena, "BPred(%d)_%s",i, name ? name : "BTB");
-    btbEnergy = new GStatsEnergy("btbEnergy", cadena, i, FetchPower, EnergyMgr::get("btbEnergy",i));
+    sprintf(cadena, "BPred(%d)_%s", i, name ? name : "BTB");
+    btbEnergy = new GStatsEnergy("btbEnergy", cadena, i, FetchPower, EnergyMgr::get("btbEnergy", i));
 
-    if( SescConf->getInt(section,"btbSize") == 0 ) {
+    if (SescConf->getInt(section, "btbSize") == 0) {
         // Oracle
         data = 0;
         return;
     }
 
-    data = BTBCache::create(section,"btb","BPred_BTB(%d):",i);
+    data = BTBCache::create(section, "btb", "BPred_BTB(%d):", i);
     I(data);
 }
 
-BPBTB::~BPBTB()
-{
+BPBTB::~BPBTB() {
     delete btbEnergy;
-    if( data )
+    if (data)
         data->destroy();
 }
 
-void BPBTB::updateOnly(const Instruction *inst, InstID oracleID)
-{
-    if( data == 0 )
+void BPBTB::updateOnly(const Instruction *inst, InstID oracleID) {
+    if (data == 0)
         return;
 
     bool ntaken = inst->calcNextInstID() == oracleID;
-    uint32_t key   = calcInstID(inst);
+    uint32_t key = calcInstID(inst);
 
     // Update only in taken branches
-    if( ntaken )
+    if (ntaken)
         return;
 
     BTBCache::CacheLine *cl = data->fillLine(key);
-    I( cl );
+    I(cl);
 
     cl->inst = oracleID;
 }
 
-PredType BPBTB::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BPBTB::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bool ntaken = inst->calcNextInstID() == oracleID;
 
     btbEnergy->inc();
@@ -220,16 +206,16 @@ PredType BPBTB::predict(const Instruction * inst, InstID oracleID, bool doUpdate
 
     uint32_t key = calcInstID(inst);
 
-    if ( ntaken || !doUpdate ) {
+    if (ntaken || !doUpdate) {
         // The branch is not taken. Do not update the cache
         BTBCache::CacheLine *cl = data->readLine(key);
 
-        if( cl == 0 ) {
+        if (cl == 0) {
             nMiss.cinc(doUpdate);
             return NoBTBPrediction; // NoBTBPrediction because BTAC would hide the prediction
         }
 
-        if( cl->inst == oracleID ) {
+        if (cl->inst == oracleID) {
             nHit.cinc(doUpdate);
             return CorrectPrediction;
         }
@@ -243,12 +229,12 @@ PredType BPBTB::predict(const Instruction * inst, InstID oracleID, bool doUpdate
     // The branch is taken. Update the cache
 
     BTBCache::CacheLine *cl = data->fillLine(key);
-    I( cl );
+    I(cl);
 
     InstID predictID = cl->inst;
     cl->inst = oracleID;
 
-    if( predictID == oracleID ) {
+    if (predictID == oracleID) {
         nHit.inc();
         return CorrectPrediction;
     }
@@ -258,94 +244,82 @@ PredType BPBTB::predict(const Instruction * inst, InstID oracleID, bool doUpdate
 }
 
 
-void BPBTB::switchIn(Pid_t pid)
-{
+void BPBTB::switchIn(Pid_t pid) {
     // Nothing to back (history does not work after all)
 }
 
-void BPBTB::switchOut(Pid_t pid)
-{
+void BPBTB::switchOut(Pid_t pid) {
 }
 
 /*****************************************
  * BPOracle
  */
 
-PredType BPOracle::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BPOracle::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->calcNextInstID() == oracleID )
+    if (inst->calcNextInstID() == oracleID)
         return CorrectPrediction; //NT
 
     return btb.predict(inst, oracleID, doUpdate);
 }
 
-void BPOracle::switchIn(Pid_t pid)
-{
+void BPOracle::switchIn(Pid_t pid) {
     // Oracle, do nothing
 }
 
-void BPOracle::switchOut(Pid_t pid)
-{
+void BPOracle::switchOut(Pid_t pid) {
 }
 
 /*****************************************
  * BPTaken
  */
 
-PredType BPTaken::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BPTaken::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->calcNextInstID() == oracleID )
+    if (inst->calcNextInstID() == oracleID)
         return MissPrediction;
 
     return btb.predict(inst, oracleID, doUpdate);
 }
 
-void BPTaken::switchIn(Pid_t pid)
-{
+void BPTaken::switchIn(Pid_t pid) {
     // Static prediction. Do nothing
 }
 
-void BPTaken::switchOut(Pid_t pid)
-{
+void BPTaken::switchOut(Pid_t pid) {
 }
 
 /*****************************************
  * BPNotTaken
  */
 
-PredType  BPNotTaken::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BPNotTaken::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
     return inst->calcNextInstID() == oracleID ? CorrectPrediction : MissPrediction;
 }
 
-void BPNotTaken::switchIn(Pid_t pid)
-{
+void BPNotTaken::switchIn(Pid_t pid) {
     // Static prediction. Do nothing
 }
 
-void BPNotTaken::switchOut(Pid_t pid)
-{
+void BPNotTaken::switchOut(Pid_t pid) {
 }
 
 /*****************************************
  * BPStatic
  */
 
-PredType BPStatic::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BPStatic::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
     bool ptaken = inst->guessAsTaken();
 
     bool taken = inst->calcNextInstID() != oracleID;
 
-    if( taken != ptaken) {
+    if (taken != ptaken) {
         if (doUpdate)
             btb.updateOnly(inst, oracleID);
         return MissPrediction;
@@ -354,13 +328,11 @@ PredType BPStatic::predict(const Instruction * inst, InstID oracleID, bool doUpd
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-void BPStatic::switchIn(Pid_t pid)
-{
+void BPStatic::switchIn(Pid_t pid) {
     // Static prediction. Do nothing
 }
 
-void BPStatic::switchOut(Pid_t pid)
-{
+void BPStatic::switchOut(Pid_t pid) {
 }
 
 /*****************************************
@@ -368,12 +340,8 @@ void BPStatic::switchOut(Pid_t pid)
  */
 
 BP2bit::BP2bit(int32_t i, int32_t fetchWidth, const char *section)
-    :BPred(i, fetchWidth, section, "2bit")
-    ,btb(  i, fetchWidth, section)
-    ,table(i,section
-           ,SescConf->getInt(section,"size")
-           ,SescConf->getInt(section,"bits"))
-{
+        : BPred(i, fetchWidth, section, "2bit"), btb(i, fetchWidth, section),
+          table(i, section, SescConf->getInt(section, "size"), SescConf->getInt(section, "bits")) {
     // Constraints
     SescConf->isInt(section, "size");
     SescConf->isPower2(section, "size");
@@ -384,11 +352,10 @@ BP2bit::BP2bit(int32_t i, int32_t fetchWidth, const char *section)
     // Done
 }
 
-PredType BP2bit::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
-{
+PredType BP2bit::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->isBranchTaken() )
+    if (inst->isBranchTaken())
         return btb.predict(inst, oracleID, doUpdate);
 
     bool taken = (inst->calcNextInstID() != oracleID);
@@ -399,22 +366,20 @@ PredType BP2bit::predict(const Instruction *inst, InstID oracleID, bool doUpdate
     else
         ptaken = table.predict(calcInstID(inst));
 
-    if( taken != ptaken ) {
+    if (taken != ptaken) {
         if (doUpdate)
-            btb.updateOnly(inst,oracleID);
+            btb.updateOnly(inst, oracleID);
         return MissPrediction;
     }
 
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-void BP2bit::switchIn(Pid_t pid)
-{
+void BP2bit::switchIn(Pid_t pid) {
     // No history to backup (local predictor use no history)
 }
 
-void BP2bit::switchOut(Pid_t pid)
-{
+void BP2bit::switchOut(Pid_t pid) {
 }
 
 
@@ -423,16 +388,10 @@ void BP2bit::switchOut(Pid_t pid)
  */
 
 BP2level::BP2level(int32_t i, int32_t fetchWidth, const char *section)
-    :BPred(i, fetchWidth, section,"2level")
-    ,btb( i, fetchWidth, section)
-    ,l1Size(SescConf->getInt(section,"l1Size"))
-    ,l1SizeMask(l1Size - 1)
-    ,historySize(SescConf->getInt(section,"historySize"))
-    ,historyMask((1 << historySize) - 1)
-    ,globalTable(i,section
-                 ,SescConf->getInt(section,"l2Size")
-                 ,SescConf->getInt(section,"l2Bits"))
-{
+        : BPred(i, fetchWidth, section, "2level"), btb(i, fetchWidth, section),
+          l1Size(SescConf->getInt(section, "l1Size")), l1SizeMask(l1Size - 1),
+          historySize(SescConf->getInt(section, "historySize")), historyMask((1 << historySize) - 1),
+          globalTable(i, section, SescConf->getInt(section, "l2Size"), SescConf->getInt(section, "l2Bits")) {
     // Constraints
     SescConf->isInt(section, "l1Size");
     SescConf->isPower2(section, "l1Size");
@@ -451,29 +410,27 @@ BP2level::BP2level(int32_t i, int32_t fetchWidth, const char *section)
     I(historyTable);
 }
 
-BP2level::~BP2level()
-{
+BP2level::~BP2level() {
     delete historyTable;
 }
 
-PredType BP2level::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BP2level::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->isBranchTaken() )
+    if (inst->isBranchTaken())
         return btb.predict(inst, oracleID, doUpdate);
 
     bool taken = (inst->calcNextInstID() != oracleID);
-    HistoryType iID     = calcInstID(inst);
-    ushort      l1Index = iID & l1SizeMask;
+    HistoryType iID = calcInstID(inst);
+    ushort l1Index = iID & l1SizeMask;
     HistoryType l2Index = historyTable[l1Index];
 
     // update historyTable statistics
     if (doUpdate)
-        historyTable[l1Index] = ((l2Index << 1) | ((iID>>2 & 1)^(taken?1:0))) & historyMask;
+        historyTable[l1Index] = ((l2Index << 1) | ((iID >> 2 & 1) ^ (taken ? 1 : 0))) & historyMask;
 
     // calculate Table possition
-    l2Index = ((l2Index ^ iID) & historyMask ) | (iID<<historySize);
+    l2Index = ((l2Index ^ iID) & historyMask) | (iID << historySize);
 
     bool ptaken;
     if (doUpdate)
@@ -481,21 +438,19 @@ PredType BP2level::predict(const Instruction * inst, InstID oracleID, bool doUpd
     else
         ptaken = globalTable.predict(l2Index);
 
-    if( taken != ptaken) {
+    if (taken != ptaken) {
         if (doUpdate)
-            btb.updateOnly(inst,oracleID);
+            btb.updateOnly(inst, oracleID);
         return MissPrediction;
     }
 
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-void BP2level::switchIn(Pid_t pid)
-{
+void BP2level::switchIn(Pid_t pid) {
 }
 
-void BP2level::switchOut(Pid_t pid)
-{
+void BP2level::switchOut(Pid_t pid) {
 }
 
 /*****************************************
@@ -503,79 +458,66 @@ void BP2level::switchOut(Pid_t pid)
  */
 
 BPHybrid::BPHybrid(int32_t i, int32_t fetchWidth, const char *section)
-    :BPred(i, fetchWidth, section,"Hybrid")
-    ,btb(  i, fetchWidth, section)
-    ,historySize(SescConf->getInt(section,"historySize"))
-    ,historyMask((1 << historySize) - 1)
-    ,globalTable(i,section
-                 ,SescConf->getInt(section,"l2Size")
-                 ,SescConf->getInt(section,"l2Bits"))
-    ,ghr(0)
-    ,localTable(i,section
-                ,SescConf->getInt(section,"localSize")
-                ,SescConf->getInt(section,"localBits"))
-    ,metaTable(i,section
-               ,SescConf->getInt(section,"MetaSize")
-               ,SescConf->getInt(section,"MetaBits"))
-
-{
+        : BPred(i, fetchWidth, section, "Hybrid"), btb(i, fetchWidth, section),
+          historySize(SescConf->getInt(section, "historySize")), historyMask((1 << historySize) - 1),
+          globalTable(i, section, SescConf->getInt(section, "l2Size"), SescConf->getInt(section, "l2Bits")), ghr(0),
+          localTable(i, section, SescConf->getInt(section, "localSize"), SescConf->getInt(section, "localBits")),
+          metaTable(i, section, SescConf->getInt(section, "MetaSize"), SescConf->getInt(section, "MetaBits")) {
     // Constraints
-    SescConf->isInt(section,    "localSize");
-    SescConf->isPower2(section,  "localSize");
+    SescConf->isInt(section, "localSize");
+    SescConf->isPower2(section, "localSize");
     SescConf->isBetween(section, "localBits", 1, 7);
 
-    SescConf->isInt(section    , "MetaSize");
-    SescConf->isPower2(section  , "MetaSize");
-    SescConf->isBetween(section , "MetaBits", 1, 7);
+    SescConf->isInt(section, "MetaSize");
+    SescConf->isPower2(section, "MetaSize");
+    SescConf->isBetween(section, "MetaBits", 1, 7);
 
-    SescConf->isInt(section,    "historySize");
+    SescConf->isInt(section, "historySize");
     SescConf->isBetween(section, "historySize", 1, 63);
 
-    SescConf->isInt(section,   "l2Size");
+    SescConf->isInt(section, "l2Size");
     SescConf->isPower2(section, "l2Size");
-    SescConf->isBetween(section,"l2Bits", 1, 7);
+    SescConf->isBetween(section, "l2Bits", 1, 7);
 }
 
-BPHybrid::~BPHybrid()
-{
+BPHybrid::~BPHybrid() {
 }
 
-PredType BPHybrid::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
-{
+PredType BPHybrid::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->isBranchTaken() )
+    if (inst->isBranchTaken())
         return btb.predict(inst, oracleID, doUpdate);
 
     bool taken = (inst->calcNextInstID() != oracleID);
-    HistoryType iID     = calcInstID(inst);
+    HistoryType iID = calcInstID(inst);
     HistoryType l2Index = ghr;
 
     // update historyTable statistics
     if (doUpdate) {
-        ghr = ((ghr << 1) | ((iID>>2 & 1)^(taken?1:0))) & historyMask;
+        ghr = ((ghr << 1) | ((iID >> 2 & 1) ^ (taken ? 1 : 0))) & historyMask;
     }
 
     // calculate Table possition
-    l2Index = ((l2Index ^ iID) & historyMask ) | (iID<<historySize);
+    l2Index = ((l2Index ^ iID) & historyMask) | (iID << historySize);
 
     bool globalTaken;
     bool localTaken;
     if (doUpdate) {
         globalTaken = globalTable.predict(l2Index, taken);
-        localTaken  = localTable.predict(iID, taken);
+        localTaken = localTable.predict(iID, taken);
     } else {
         globalTaken = globalTable.predict(l2Index);
-        localTaken  = localTable.predict(iID);
+        localTaken = localTable.predict(iID);
     }
 
     bool metaOut;
     if (!doUpdate) {
         metaOut = metaTable.predict(l2Index); // do not update meta
-    } else if( globalTaken == taken && localTaken != taken) {
+    } else if (globalTaken == taken && localTaken != taken) {
         // global is correct, local incorrect
         metaOut = metaTable.predict(l2Index, false);
-    } else if( globalTaken != taken && localTaken == taken) {
+    } else if (globalTaken != taken && localTaken == taken) {
         // global is incorrect, local correct
         metaOut = metaTable.predict(l2Index, true);
     } else {
@@ -586,19 +528,17 @@ PredType BPHybrid::predict(const Instruction *inst, InstID oracleID, bool doUpda
 
     if (taken != ptaken) {
         if (doUpdate)
-            btb.updateOnly(inst,oracleID);
+            btb.updateOnly(inst, oracleID);
         return MissPrediction;
     }
 
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-void BPHybrid::switchIn(Pid_t pid)
-{
+void BPHybrid::switchIn(Pid_t pid) {
 }
 
-void BPHybrid::switchOut(Pid_t pid)
-{
+void BPHybrid::switchOut(Pid_t pid) {
 }
 
 /*****************************************
@@ -613,56 +553,48 @@ void BPHybrid::switchOut(Pid_t pid)
  */
 
 BP2BcgSkew::BP2BcgSkew(int32_t i, int32_t fetchWidth, const char *section)
-    : BPred(i, fetchWidth, section,"2BcgSkew")
-    ,btb(   i, fetchWidth, section)
-    ,BIM(i,section,SescConf->getInt(section,"BIMSize"))
-    ,G0(i,section,SescConf->getInt(section,"G0Size"))
-    ,G0HistorySize(SescConf->getInt(section,"G0HistorySize"))
-    ,G0HistoryMask((1 << G0HistorySize) - 1)
-    ,G1(i,section,SescConf->getInt(section,"G1Size"))
-    ,G1HistorySize(SescConf->getInt(section,"G1HistorySize"))
-    ,G1HistoryMask((1 << G1HistorySize) - 1)
-    ,metaTable(i,section,SescConf->getInt(section,"MetaSize"))
-    ,MetaHistorySize(SescConf->getInt(section,"MetaHistorySize"))
-    ,MetaHistoryMask((1 << MetaHistorySize) - 1)
-{
+        : BPred(i, fetchWidth, section, "2BcgSkew"), btb(i, fetchWidth, section),
+          BIM(i, section, SescConf->getInt(section, "BIMSize")), G0(i, section, SescConf->getInt(section, "G0Size")),
+          G0HistorySize(SescConf->getInt(section, "G0HistorySize")), G0HistoryMask((1 << G0HistorySize) - 1),
+          G1(i, section, SescConf->getInt(section, "G1Size")),
+          G1HistorySize(SescConf->getInt(section, "G1HistorySize")), G1HistoryMask((1 << G1HistorySize) - 1),
+          metaTable(i, section, SescConf->getInt(section, "MetaSize")),
+          MetaHistorySize(SescConf->getInt(section, "MetaHistorySize")), MetaHistoryMask((1 << MetaHistorySize) - 1) {
     // Constraints
-    SescConf->isInt(section    , "BIMSize");
-    SescConf->isPower2(section  , "BIMSize");
-    SescConf->isGT(section      , "BIMSize", 1);
+    SescConf->isInt(section, "BIMSize");
+    SescConf->isPower2(section, "BIMSize");
+    SescConf->isGT(section, "BIMSize", 1);
 
-    SescConf->isInt(section    , "G0Size");
-    SescConf->isPower2(section  , "G0Size");
-    SescConf->isGT(section      , "G0Size", 1);
+    SescConf->isInt(section, "G0Size");
+    SescConf->isPower2(section, "G0Size");
+    SescConf->isGT(section, "G0Size", 1);
 
-    SescConf->isInt(section    , "G0HistorySize");
-    SescConf->isBetween(section , "G0HistorySize", 1, 63);
+    SescConf->isInt(section, "G0HistorySize");
+    SescConf->isBetween(section, "G0HistorySize", 1, 63);
 
-    SescConf->isInt(section    , "G1Size");
-    SescConf->isPower2(section  , "G1Size");
-    SescConf->isGT(section      , "G1Size", 1);
+    SescConf->isInt(section, "G1Size");
+    SescConf->isPower2(section, "G1Size");
+    SescConf->isGT(section, "G1Size", 1);
 
-    SescConf->isInt(section    , "G1HistorySize");
-    SescConf->isBetween(section , "G1HistorySize", 1, 63);
+    SescConf->isInt(section, "G1HistorySize");
+    SescConf->isBetween(section, "G1HistorySize", 1, 63);
 
-    SescConf->isInt(section    , "MetaSize");
-    SescConf->isPower2(section  , "MetaSize");
-    SescConf->isGT(section      , "MetaSize", 1);
+    SescConf->isInt(section, "MetaSize");
+    SescConf->isPower2(section, "MetaSize");
+    SescConf->isGT(section, "MetaSize", 1);
 
-    SescConf->isInt(section    , "MetaHistorySize");
-    SescConf->isBetween(section , "MetaHistorySize", 1, 63);
+    SescConf->isInt(section, "MetaHistorySize");
+    SescConf->isBetween(section, "MetaHistorySize", 1, 63);
 
     history = 0x55555555;
 }
 
-BP2BcgSkew::~BP2BcgSkew()
-{
+BP2BcgSkew::~BP2BcgSkew() {
     // Nothing?
 }
 
 
-PredType BP2BcgSkew::predict(const Instruction * inst, InstID oracleID, bool doUpdate)
-{
+PredType BP2BcgSkew::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
     if (inst->isBranchTaken())
@@ -672,21 +604,21 @@ PredType BP2BcgSkew::predict(const Instruction * inst, InstID oracleID, bool doU
 
     bool taken = (inst->calcNextInstID() != oracleID);
 
-    HistoryType xorKey1    = history^iID;
-    HistoryType xorKey2    = history^(iID>>2);
-    HistoryType xorKey3    = history^(iID>>4);
+    HistoryType xorKey1 = history ^ iID;
+    HistoryType xorKey2 = history ^ (iID >> 2);
+    HistoryType xorKey3 = history ^ (iID >> 4);
 
-    HistoryType metaIndex = (xorKey1 & MetaHistoryMask) | iID<<MetaHistorySize;
-    HistoryType G0Index   = (xorKey2 & G0HistoryMask)   | iID<<G0HistorySize;
-    HistoryType G1Index   = (xorKey3 & G1HistoryMask)   | iID<<G1HistorySize;
+    HistoryType metaIndex = (xorKey1 & MetaHistoryMask) | iID << MetaHistorySize;
+    HistoryType G0Index = (xorKey2 & G0HistoryMask) | iID << G0HistorySize;
+    HistoryType G1Index = (xorKey3 & G1HistoryMask) | iID << G1HistorySize;
 
     bool metaOut = metaTable.predict(metaIndex);
 
-    bool BIMOut   = BIM.predict(iID);
-    bool G0Out    = G0.predict(G0Index);
-    bool G1Out    = G1.predict(G1Index);
+    bool BIMOut = BIM.predict(iID);
+    bool G0Out = G0.predict(G0Index);
+    bool G1Out = G1.predict(G1Index);
 
-    bool gskewOut = (G0Out?1:0) + (G1Out?1:0) + (BIMOut?1:0) >= 2;
+    bool gskewOut = (G0Out ? 1 : 0) + (G1Out ? 1 : 0) + (BIMOut ? 1 : 0) >= 2;
 
     bool ptaken = metaOut ? BIMOut : gskewOut;
 
@@ -694,19 +626,19 @@ PredType BP2BcgSkew::predict(const Instruction * inst, InstID oracleID, bool doU
         if (!doUpdate)
             return MissPrediction;
 
-        BIM.predict(iID,taken);
-        G0.predict(G0Index,taken);
-        G1.predict(G1Index,taken);
+        BIM.predict(iID, taken);
+        G0.predict(G0Index, taken);
+        G1.predict(G1Index, taken);
 
-        BIMOut   = BIM.predict(iID);
-        G0Out    = G0.predict(G0Index);
-        G1Out    = G1.predict(G1Index);
+        BIMOut = BIM.predict(iID);
+        G0Out = G0.predict(G0Index);
+        G1Out = G1.predict(G1Index);
 
-        gskewOut = (G0Out?1:0) + (G1Out?1:0) + (BIMOut?1:0) >= 2;
+        gskewOut = (G0Out ? 1 : 0) + (G1Out ? 1 : 0) + (BIMOut ? 1 : 0) >= 2;
         if (BIMOut != gskewOut)
-            metaTable.predict(metaIndex,(BIMOut == taken));
+            metaTable.predict(metaIndex, (BIMOut == taken));
         else
-            metaTable.reset(metaIndex,(BIMOut == taken));
+            metaTable.reset(metaIndex, (BIMOut == taken));
 
         I(doUpdate);
         btb.updateOnly(inst, oracleID);
@@ -715,31 +647,29 @@ PredType BP2BcgSkew::predict(const Instruction * inst, InstID oracleID, bool doU
 
     if (doUpdate) {
         if (metaOut) {
-            BIM.predict(iID,taken);
+            BIM.predict(iID, taken);
         } else {
             if (BIMOut == taken)
-                BIM.predict(iID,taken);
+                BIM.predict(iID, taken);
             if (G0Out == taken)
-                G0.predict(G0Index,taken);
+                G0.predict(G0Index, taken);
             if (G1Out == taken)
-                G1.predict(G1Index,taken);
+                G1.predict(G1Index, taken);
         }
 
         if (BIMOut != gskewOut)
-            metaTable.predict(metaIndex,(BIMOut == taken));
+            metaTable.predict(metaIndex, (BIMOut == taken));
 
-        history = history<<1 | ((iID>>2 & 1)^(taken?1:0));
+        history = history << 1 | ((iID >> 2 & 1) ^ (taken ? 1 : 0));
     }
 
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-void BP2BcgSkew::switchIn(Pid_t pid)
-{
+void BP2BcgSkew::switchIn(Pid_t pid) {
 }
 
-void BP2BcgSkew::switchOut(Pid_t pid)
-{
+void BP2BcgSkew::switchOut(Pid_t pid) {
 }
 
 /*****************************************
@@ -772,20 +702,11 @@ void BP2BcgSkew::switchOut(Pid_t pid)
  */
 
 BPyags::BPyags(int32_t i, int32_t fetchWidth, const char *section)
-    :BPred(i, fetchWidth, section, "yags")
-    ,btb(  i, fetchWidth, section)
-    ,historySize(24)
-    ,historyMask((1 << 24) - 1)
-    ,table(i,section
-           ,SescConf->getInt(section,"size")
-           ,SescConf->getInt(section,"bits"))
-    ,ctableTaken(i,section
-                 ,SescConf->getInt(section,"l1size")
-                 ,SescConf->getInt(section,"l1bits"))
-    ,ctableNotTaken(i,section
-                    ,SescConf->getInt(section,"l2size")
-                    ,SescConf->getInt(section,"l2bits"))
-{
+        : BPred(i, fetchWidth, section, "yags"), btb(i, fetchWidth, section), historySize(24),
+          historyMask((1 << 24) - 1),
+          table(i, section, SescConf->getInt(section, "size"), SescConf->getInt(section, "bits")),
+          ctableTaken(i, section, SescConf->getInt(section, "l1size"), SescConf->getInt(section, "l1bits")),
+          ctableNotTaken(i, section, SescConf->getInt(section, "l2size"), SescConf->getInt(section, "l2bits")) {
     // Constraints
     SescConf->isInt(section, "size");
     SescConf->isPower2(section, "size");
@@ -807,42 +728,40 @@ BPyags::BPyags(int32_t i, int32_t fetchWidth, const char *section)
 
     SescConf->isBetween(section, "tagbits", 1, 7);
 
-    CacheTaken = new uchar[SescConf->getInt(section,"l1size")];
-    CacheTakenMask = SescConf->getInt(section,"l1size") - 1;
-    CacheTakenTagMask = (1 << SescConf->getInt(section,"tagbits")) - 1;
+    CacheTaken = new uchar[SescConf->getInt(section, "l1size")];
+    CacheTakenMask = SescConf->getInt(section, "l1size") - 1;
+    CacheTakenTagMask = (1 << SescConf->getInt(section, "tagbits")) - 1;
 
-    CacheNotTaken = new uchar[SescConf->getInt(section,"l2size")];
-    CacheNotTakenMask = SescConf->getInt(section,"l2size") - 1;
-    CacheNotTakenTagMask = (1 << SescConf->getInt(section,"tagbits")) - 1;
+    CacheNotTaken = new uchar[SescConf->getInt(section, "l2size")];
+    CacheNotTakenMask = SescConf->getInt(section, "l2size") - 1;
+    CacheNotTakenTagMask = (1 << SescConf->getInt(section, "tagbits")) - 1;
 
     // Done
 }
 
-BPyags::~BPyags()
-{
+BPyags::~BPyags() {
 
 }
 
-PredType BPyags::predict(const Instruction *inst, InstID oracleID,bool doUpdate)
-{
+PredType BPyags::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->isBranchTaken() )
+    if (inst->isBranchTaken())
         return btb.predict(inst, oracleID, doUpdate);
 
     bool taken = (inst->calcNextInstID() != oracleID);
-    HistoryType iID      = calcInstID(inst);
-    HistoryType iIDHist  = ghr;
+    HistoryType iID = calcInstID(inst);
+    HistoryType iIDHist = ghr;
 
 
     bool choice;
     if (doUpdate) {
-        ghr = ((ghr << 1) | ((iID>>2 & 1)^(taken?1:0))) & historyMask;
+        ghr = ((ghr << 1) | ((iID >> 2 & 1) ^ (taken ? 1 : 0))) & historyMask;
         choice = table.predict(iID, taken);
     } else
         choice = table.predict(iID);
 
-    iIDHist = ((iIDHist ^ iID) & historyMask ) | (iID<<historySize);
+    iIDHist = ((iIDHist ^ iID) & historyMask) | (iID << historySize);
 
     bool ptaken;
     if (choice) {
@@ -852,8 +771,8 @@ PredType BPyags::predict(const Instruction *inst, InstID oracleID,bool doUpdate)
         // prediction from the cache table will override the choice table.
 
         HistoryType cacheIndex = iIDHist & CacheNotTakenMask;
-        HistoryType tag        = iID & CacheNotTakenTagMask;
-        bool cacheHit          = (CacheNotTaken[cacheIndex] == tag);
+        HistoryType tag = iID & CacheNotTakenTagMask;
+        bool cacheHit = (CacheNotTaken[cacheIndex] == tag);
 
         if (cacheHit) {
             if (doUpdate) {
@@ -864,7 +783,7 @@ PredType BPyags::predict(const Instruction *inst, InstID oracleID,bool doUpdate)
             }
         } else if ((doUpdate) && (taken == false)) {
             CacheNotTaken[cacheIndex] = tag;
-            (void)ctableNotTaken.predict(iID, taken);
+            (void) ctableNotTaken.predict(iID, taken);
         }
     } else {
         ptaken = false;
@@ -872,8 +791,8 @@ PredType BPyags::predict(const Instruction *inst, InstID oracleID,bool doUpdate)
         // from the cache table will override the choice table.
 
         HistoryType cacheIndex = iIDHist & CacheTakenMask;
-        HistoryType tag        = iID & CacheTakenTagMask;
-        bool cacheHit          = (CacheTaken[cacheIndex] == tag);
+        HistoryType tag = iID & CacheTakenTagMask;
+        bool cacheHit = (CacheTaken[cacheIndex] == tag);
 
         if (cacheHit) {
             if (doUpdate) {
@@ -884,27 +803,25 @@ PredType BPyags::predict(const Instruction *inst, InstID oracleID,bool doUpdate)
             }
         } else if ((doUpdate) && (taken == true)) {
             CacheTaken[cacheIndex] = tag;
-            (void)ctableTaken.predict(iIDHist, taken);
+            (void) ctableTaken.predict(iIDHist, taken);
             ptaken = false;
         }
     }
 
-    if( taken != ptaken ) {
+    if (taken != ptaken) {
         if (doUpdate)
-            btb.updateOnly(inst,oracleID);
+            btb.updateOnly(inst, oracleID);
         return MissPrediction;
     }
 
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-void BPyags::switchIn(Pid_t pid)
-{
+void BPyags::switchIn(Pid_t pid) {
 
 }
 
-void BPyags::switchOut(Pid_t pid)
-{
+void BPyags::switchOut(Pid_t pid) {
 
 }
 
@@ -916,20 +833,12 @@ void BPyags::switchOut(Pid_t pid)
  *
  */
 
-BPOgehl::BPOgehl(int32_t i, int32_t fetchWidth,const char *section)
-    :BPred(i, fetchWidth, section, "ogehl")
-    ,btb(  i, fetchWidth, section)
-    ,M_SIZ(SescConf->getInt(section,"mtables"))
-    ,glength(200)
-    ,nentry(3)
-    ,addwidth(8)
-    ,logpred(log2i(SescConf->getInt(section,"tsize")))
-    ,THETA(SescConf->getInt(section,"mtables"))
-    ,MAXTHETA(31)
-    ,THETAUP(1 << (SescConf->getInt(section,"tcbits") - 1))
-    ,PREDUP(1 << (SescConf->getInt(section,"tbits") - 1))
-    ,TC(0)
-{
+BPOgehl::BPOgehl(int32_t i, int32_t fetchWidth, const char *section)
+        : BPred(i, fetchWidth, section, "ogehl"), btb(i, fetchWidth, section),
+          M_SIZ(SescConf->getInt(section, "mtables")), glength(200), nentry(3), addwidth(8),
+          logpred(log2i(SescConf->getInt(section, "tsize"))), THETA(SescConf->getInt(section, "mtables")), MAXTHETA(31),
+          THETAUP(1 << (SescConf->getInt(section, "tcbits") - 1)),
+          PREDUP(1 << (SescConf->getInt(section, "tbits") - 1)), TC(0) {
     SescConf->isInt(section, "tsize");
     SescConf->isPower2(section, "tsize");
     SescConf->isGT(section, "tsize", 1);
@@ -937,7 +846,7 @@ BPOgehl::BPOgehl(int32_t i, int32_t fetchWidth,const char *section)
     SescConf->isBetween(section, "tcbits", 1, 15);
     SescConf->isBetween(section, "mtables", 6, 32);
 
-    pred = new char*[M_SIZ];
+    pred = new char *[M_SIZ];
     for (int32_t i = 0; i < M_SIZ; i++) {
         pred[i] = new char[1 << logpred];
         for (int32_t j = 0; j < (1 << logpred); j++)
@@ -954,39 +863,37 @@ BPOgehl::BPOgehl(int32_t i, int32_t fetchWidth,const char *section)
 
     for (int32_t j = 0; j < (1 << (logpred - 1)); j++)
         MINITAG[j] = 0;
-    AC=0;
+    AC = 0;
 
     double initset = 3;
-    double tt = ((double)glength) / initset;
-    double Pow = pow(tt, 1.0/(M_SIZ + 1));
+    double tt = ((double) glength) / initset;
+    double Pow = pow(tt, 1.0 / (M_SIZ + 1));
 
     histLength = new int[M_SIZ + 3];
     usedHistLength = new int[M_SIZ];
     histLength[0] = 0;
     histLength[1] = 3;
     for (int32_t i = 2; i < M_SIZ + 3; i++)
-        histLength[i] = (int) ((initset * pow (Pow, (double) (i - 1))) + 0.5);
+        histLength[i] = (int) ((initset * pow(Pow, (double) (i - 1))) + 0.5);
     for (int32_t i = 0; i < M_SIZ; i++) {
         usedHistLength[i] = histLength[i];
     }
 }
 
-BPOgehl::~BPOgehl()
-{
+BPOgehl::~BPOgehl() {
 }
 
-PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
-{
+PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdate) {
     bpredEnergy->inc();
 
-    if( inst->isBranchTaken() )
+    if (inst->isBranchTaken())
         return btb.predict(inst, oracleID, doUpdate);
 
     bool taken = (inst->calcNextInstID() != oracleID);
     bool ptaken = false;
 
-    int32_t S = (M_SIZ/2);
-    HistoryType *iID = (HistoryType *)alloca(M_SIZ*sizeof(HistoryType));
+    int32_t S = (M_SIZ / 2);
+    HistoryType *iID = (HistoryType *) alloca(M_SIZ * sizeof(HistoryType));
 
     // Prediction is sum of entries in M tables (table 1 is half-size to fit in 64k)
     for (int32_t i = 0; i < M_SIZ; i++) {
@@ -999,7 +906,7 @@ PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdat
     }
     ptaken = (S >= 0);
 
-    if( doUpdate ) {
+    if (doUpdate) {
 
         // Update theta (threshold)
         if (taken != ptaken) {
@@ -1022,7 +929,7 @@ PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdat
             }
         }
 
-        if( taken != ptaken || (S < THETA && S >= -THETA)) {
+        if (taken != ptaken || (S < THETA && S >= -THETA)) {
 
             // Update M tables
             for (int32_t i = 0; i < M_SIZ; i++) {
@@ -1034,13 +941,13 @@ PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdat
                         pred[i][iID[i]]--;
                 }
             }
-            btb.updateOnly(inst,oracleID);
+            btb.updateOnly(inst, oracleID);
 
             // Update history lengths
             if ((iID[M_SIZ - 1] & 1) == 0) {
                 if (taken != ptaken) {
                     miniTag = MINITAG[iID[M_SIZ - 1] >> 1];
-                    if (miniTag != ((int)(inst->currentID() & 1))) {
+                    if (miniTag != ((int) (inst->currentID() & 1))) {
                         AC -= 4;
                         if (AC < -256) {
                             AC = -256;
@@ -1077,8 +984,7 @@ PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdat
     return ptaken ? btb.predict(inst, oracleID, doUpdate) : CorrectPrediction;
 }
 
-int32_t BPOgehl::geoidx(long long Add, long long *histo, long long phisto, int32_t m, int32_t funct)
-{
+int32_t BPOgehl::geoidx(long long Add, long long *histo, long long phisto, int32_t m, int32_t funct) {
     long long inter, Hh, Res;
     int32_t x, i, shift;
     int32_t PT;
@@ -1096,9 +1002,9 @@ int32_t BPOgehl::geoidx(long long Add, long long *histo, long long phisto, int32
 
     if (MinAdd >= 8) {
         inter =
-            ((histo[0] & ((1 << m) - 1)) << (MinAdd + plength)) +
-            ((Add & ((1 << MinAdd) - 1)) << plength) +
-            ((phisto & ((1 << plength) - 1)));
+                ((histo[0] & ((1 << m) - 1)) << (MinAdd + plength)) +
+                ((Add & ((1 << MinAdd) - 1)) << plength) +
+                ((phisto & ((1 << plength) - 1)));
     } else {
         for (x = 0; x < nentry * logpred; x++) {
             T[x] = ((x * (addwidth + m + plength - 1)) / (nentry * logpred - 1));
@@ -1146,20 +1052,18 @@ int32_t BPOgehl::geoidx(long long Add, long long *histo, long long phisto, int32
     for (i = 1; i < nentry; i++) {
         inter = inter >> logpred;
         Res ^=
-            ((inter & ((1 << logpred) - 1)) >> FUNCT) ^
-            ((inter & ((1 << FUNCT) - 1)) << ((logpred - FUNCT)));
+                ((inter & ((1 << logpred) - 1)) >> FUNCT) ^
+                ((inter & ((1 << FUNCT) - 1)) << ((logpred - FUNCT)));
         FUNCT = (FUNCT + 1) % logpred;
     }
 
     return ((int) Res);
 }
 
-void BPOgehl::switchIn(Pid_t pid)
-{
+void BPOgehl::switchIn(Pid_t pid) {
 }
 
-void BPOgehl::switchOut(Pid_t pid)
-{
+void BPOgehl::switchOut(Pid_t pid) {
 }
 
 /*****************************************
@@ -1167,9 +1071,8 @@ void BPOgehl::switchOut(Pid_t pid)
  */
 
 
-BPred *BPredictor::getBPred(int32_t id, int32_t fetchWidth, const char *sec)
-{
-    BPred *pred=0;
+BPred *BPredictor::getBPred(int32_t id, int32_t fetchWidth, const char *sec) {
+    BPred *pred = 0;
 
     const char *type = SescConf->getCharPtr(sec, "type");
 
@@ -1195,7 +1098,7 @@ BPred *BPredictor::getBPred(int32_t id, int32_t fetchWidth, const char *sec)
     } else if (strcasecmp(type, "ogehl") == 0) {
         pred = new BPOgehl(id, fetchWidth, sec);
     } else {
-        MSG("BPredictor::BPredictor Invalid branch predictor type [%s] in section [%s]", type,sec);
+        MSG("BPredictor::BPredictor Invalid branch predictor type [%s] in section [%s]", type, sec);
         exit(0);
     }
     I(pred);
@@ -1204,14 +1107,8 @@ BPred *BPredictor::getBPred(int32_t id, int32_t fetchWidth, const char *sec)
 }
 
 BPredictor::BPredictor(int32_t i, int32_t fetchWidth, const char *sec, BPredictor *bpred)
-    :id(i)
-    ,SMTcopy(bpred != 0)
-    ,ras(i, fetchWidth, sec)
-    ,nBranches("BPred(%d):nBranches", i)
-    ,nTaken("BPred(%d):nTaken", i)
-    ,nMiss("BPred(%d):nMiss", i)
-    ,section(strdup(sec ? sec : "null" ))
-{
+        : id(i), SMTcopy(bpred != 0), ras(i, fetchWidth, sec), nBranches("BPred(%d):nBranches", i),
+          nTaken("BPred(%d):nTaken", i), nMiss("BPred(%d):nMiss", i), section(strdup(sec ? sec : "null")) {
 
     // Threads in SMT system share the predictor. Only the Ras is duplicated
     if (bpred)
@@ -1220,8 +1117,7 @@ BPredictor::BPredictor(int32_t i, int32_t fetchWidth, const char *sec, BPredicto
         pred = getBPred(id, fetchWidth, section);
 }
 
-BPredictor::~BPredictor()
-{
+BPredictor::~BPredictor() {
     dump(section);
 
     if (!SMTcopy)
@@ -1230,7 +1126,6 @@ BPredictor::~BPredictor()
     free(section);
 }
 
-void BPredictor::dump(const char *str) const
-{
+void BPredictor::dump(const char *str) const {
     // nothing?
 }

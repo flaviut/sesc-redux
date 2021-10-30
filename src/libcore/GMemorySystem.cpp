@@ -25,7 +25,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <math.h>
 #include "GMemorySystem.h"
 
-ushort GMemorySystem::Log2PageSize=0;
+ushort GMemorySystem::Log2PageSize = 0;
 uint32_t GMemorySystem::PageMask;
 
 MemoryObjContainer GMemorySystem::sharedMemoryObjContainer;
@@ -35,14 +35,12 @@ GMemorySystem::StrCounterType  GMemorySystem::usedNames;
 //////////////////////////////////////////////
 // MemoryObjContainer
 
-void MemoryObjContainer::addMemoryObj(const char *device_name, MemObj *obj)
-{
+void MemoryObjContainer::addMemoryObj(const char *device_name, MemObj *obj) {
     intlMemoryObjContainer[device_name] = obj;
 }
 
 MemObj *MemoryObjContainer::searchMemoryObj(const char *descr_section,
-        const char *device_name) const
-{
+                                            const char *device_name) const {
     I(descr_section);
     I(device_name);
 
@@ -50,7 +48,7 @@ MemObj *MemoryObjContainer::searchMemoryObj(const char *descr_section,
 
     if (it != intlMemoryObjContainer.end()) {
 
-        const char *descrSection=(*it).second->getDescrSection();
+        const char *descrSection = (*it).second->getDescrSection();
 
         if (strcasecmp(descrSection, descr_section)) {
 
@@ -67,18 +65,16 @@ MemObj *MemoryObjContainer::searchMemoryObj(const char *descr_section,
 }
 
 /* Only returns a pointer if there is only one with that name */
-MemObj *MemoryObjContainer::searchMemoryObj(const char *device_name) const
-{
+MemObj *MemoryObjContainer::searchMemoryObj(const char *device_name) const {
     I(device_name);
 
-    if(intlMemoryObjContainer.count(device_name) != 1)
+    if (intlMemoryObjContainer.count(device_name) != 1)
         return NULL;
 
     return (*(intlMemoryObjContainer.find(device_name))).second;
 }
 
-void MemoryObjContainer::clear()
-{
+void MemoryObjContainer::clear() {
     intlMemoryObjContainer.clear();
 }
 
@@ -86,8 +82,7 @@ void MemoryObjContainer::clear()
 // GMemorySystem
 
 GMemorySystem::GMemorySystem(int32_t processorId)
-    :Id(processorId)
-{
+        : Id(processorId) {
     localMemoryObjContainer = new MemoryObjContainer();
 
     if (!Log2PageSize) {
@@ -100,11 +95,10 @@ GMemorySystem::GMemorySystem(int32_t processorId)
     }
 
     dataSource = 0;
-    instrSource= 0;
+    instrSource = 0;
 }
 
-GMemorySystem::~GMemorySystem()
-{
+GMemorySystem::~GMemorySystem() {
     if (dataSource)
         delete dataSource;
     if (instrSource && dataSource != instrSource)
@@ -112,13 +106,12 @@ GMemorySystem::~GMemorySystem()
     delete localMemoryObjContainer;
 }
 
-GMemoryOS *GMemorySystem::buildMemoryOS(const char *section)
-{
+GMemoryOS *GMemorySystem::buildMemoryOS(const char *section) {
     const char *osType = SescConf->getCharPtr(section, "OSType");
 
     if (!(strcasecmp(osType, "dummy") == 0
-            || strcasecmp(osType, "std") == 0
-         )) {
+          || strcasecmp(osType, "std") == 0
+    )) {
         MSG("Invalid OStype [%s]", osType);
     }
 
@@ -126,21 +119,19 @@ GMemoryOS *GMemorySystem::buildMemoryOS(const char *section)
     return new DummyMemoryOS(Id);
 }
 
-MemObj *GMemorySystem::buildMemoryObj(const char *type, const char *section, const char *name)
-{
+MemObj *GMemorySystem::buildMemoryObj(const char *type, const char *section, const char *name) {
     if (!(strcasecmp(type, "dummy") == 0
-            || strcasecmp(type, "cache") == 0
-            || strcasecmp(type, "icache") == 0
-            || strcasecmp(type, "smpcache") == 0
-         )) {
+          || strcasecmp(type, "cache") == 0
+          || strcasecmp(type, "icache") == 0
+          || strcasecmp(type, "smpcache") == 0
+    )) {
         MSG("Invalid memory type [%s]", type);
     }
 
     return new DummyMemObj(section, name);
 }
 
-void GMemorySystem::buildMemorySystem()
-{
+void GMemorySystem::buildMemorySystem() {
     SescConf->isCharPtr("", "cpucore", Id);
 
     const char *def_block = SescConf->getCharPtr("", "cpucore", Id);
@@ -160,8 +151,7 @@ void GMemorySystem::buildMemorySystem()
     memoryOS = buildMemoryOS(def_block);
 }
 
-char *GMemorySystem::buildUniqueName(const char *device_type)
-{
+char *GMemorySystem::buildUniqueName(const char *device_type) {
     int32_t num;
 
     StrCounterType::iterator it = usedNames.find(device_type);
@@ -174,35 +164,31 @@ char *GMemorySystem::buildUniqueName(const char *device_type)
         num = ++(*it).second;
 
     size_t size = strlen(device_type);
-    char *ret = (char*)malloc(size + 6 + (int)log10((float)num+10));
-    sprintf(ret,"%s(%d)", device_type, num);
+    char *ret = (char *) malloc(size + 6 + (int) log10((float) num + 10));
+    sprintf(ret, "%s(%d)", device_type, num);
 
     return ret;
 }
 
-char *GMemorySystem::privatizeDeviceName(char *given_name, int32_t num)
-{
-    char *ret=new char[strlen(given_name) + 8 + (int)log10((float)num+10)];
+char *GMemorySystem::privatizeDeviceName(char *given_name, int32_t num) {
+    char *ret = new char[strlen(given_name) + 8 + (int) log10((float) num + 10)];
 
-    sprintf(ret,"P(%i)_%s", num, given_name);
+    sprintf(ret, "P(%i)_%s", num, given_name);
 
     delete[] given_name;
 
     return ret;
 }
 
-MemObj *GMemorySystem::searchMemoryObj(bool shared, const char *section, const char *name) const
-{
+MemObj *GMemorySystem::searchMemoryObj(bool shared, const char *section, const char *name) const {
     return getMemoryObjContainer(shared)->searchMemoryObj(section, name);
 }
 
-MemObj *GMemorySystem::searchMemoryObj(bool shared, const char *name) const
-{
+MemObj *GMemorySystem::searchMemoryObj(bool shared, const char *name) const {
     return getMemoryObjContainer(shared)->searchMemoryObj(name);
 }
 
-MemObj *GMemorySystem::declareMemoryObj(const char *block, const char *field)
-{
+MemObj *GMemorySystem::declareMemoryObj(const char *block, const char *field) {
     bool shared = false; // Private by default
     SescConf->isCharPtr(block, field);
 
@@ -255,7 +241,7 @@ MemObj *GMemorySystem::declareMemoryObj(const char *block, const char *field)
 
     SescConf->isCharPtr(device_descr_section, "deviceType");
     const char *device_type = SescConf->getCharPtr(device_descr_section,
-                              "deviceType");
+                                                   "deviceType");
 
     /* If the device has been given a name, we may be refering to an
      * already existing device in the system, so let's search
@@ -289,34 +275,28 @@ MemObj *GMemorySystem::declareMemoryObj(const char *block, const char *field)
     return newMem;
 }
 
-int32_t GMemorySystem::getId() const
-{
+int32_t GMemorySystem::getId() const {
     return Id;
 }
 
-MemObj *GMemorySystem::getDataSource()  const
-{
+MemObj *GMemorySystem::getDataSource() const {
     return dataSource;
 }
 
-MemObj *GMemorySystem::getInstrSource() const
-{
+MemObj *GMemorySystem::getInstrSource() const {
     return instrSource;
 }
 
-GMemoryOS *GMemorySystem::getMemoryOS() const
-{
+GMemoryOS *GMemorySystem::getMemoryOS() const {
     return memoryOS;
 }
 
 DummyMemorySystem::DummyMemorySystem(int32_t id)
-    : GMemorySystem(id)
-{
+        : GMemorySystem(id) {
     // Do nothing
 }
 
-DummyMemorySystem::~DummyMemorySystem()
-{
+DummyMemorySystem::~DummyMemorySystem() {
     // Do nothing
 }
 

@@ -37,7 +37,7 @@ private:
     size_t startProc;
 
     typedef std::vector<GProcessor *> GProcCont;
-    GProcCont  workingList;
+    GProcCont workingList;
 
     GProcessor *currentCPU;
 
@@ -49,17 +49,22 @@ private:
     ProcessorMultiSet availableProcessors;
 
     void workingListRemove(GProcessor *core);
+
     void workingListAdd(GProcessor *core);
+
 public:
     void makeRunnable(ProcessId *proc);
+
     void makeNonRunnable(ProcessId *proc);
+
     void setProcessor(CPU_t cpu, GProcessor *newCore);
 
     void switchIn(CPU_t id, ProcessId *proc);
+
     void switchOut(CPU_t id, ProcessId *proc);
 
     GProcessor *getProcessor(CPU_t cpu) const {
-        I((CPU_t)cpuVector.size() > cpu);
+        I((CPU_t) cpuVector.size() > cpu);
         return cpuVector[cpu];
     }
 
@@ -71,7 +76,9 @@ public:
     }
 
     RunningProcs();
+
     void run();
+
     void finishWorkNow();
 
     GProcessor *getCurrentCPU() const {

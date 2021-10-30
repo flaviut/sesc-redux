@@ -30,15 +30,17 @@
 
 #include "module.hpp"
 
-class TimedModule : public Module
-{
+class TimedModule : public Module {
 
 public:
-    TimedModule(Module * parent, string const & name) : Module(parent, name) {}
+    TimedModule(Module *parent, string const &name) : Module(parent, name) {}
+
     virtual ~TimedModule() {}
 
     virtual void ReadInputs() = 0;
+
     virtual void Evaluate() = 0;
+
     virtual void WriteOutputs() = 0;
 };
 

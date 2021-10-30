@@ -68,36 +68,32 @@
 //#define DEBUG_MAXSIZE
 //#define PRINT_MATCHING
 
-MaxSizeMatch::MaxSizeMatch( Module *parent, const string& name,
-                            int inputs, int outputs ) :
-    DenseAllocator( parent, name, inputs, outputs )
-{
+MaxSizeMatch::MaxSizeMatch(Module *parent, const string &name,
+                           int inputs, int outputs) :
+        DenseAllocator(parent, name, inputs, outputs) {
     _from.resize(outputs);
-    _s    = new int [inputs];
-    _ns   = new int [inputs];
+    _s = new int[inputs];
+    _ns = new int[inputs];
     _prio = 0;
 }
 
-MaxSizeMatch::~MaxSizeMatch( )
-{
-    delete [] _s;
-    delete [] _ns;
+MaxSizeMatch::~MaxSizeMatch() {
+    delete[] _s;
+    delete[] _ns;
 }
 
-void MaxSizeMatch::Allocate( )
-{
+void MaxSizeMatch::Allocate() {
 
     // augment as many times as possible
     // (this is an O(N^3) maximum-size matching algorithm)
-    while( _ShortestAugmenting( ) );
+    while (_ShortestAugmenting());
 
     // next time, start at next input to ensure fairness
     _prio = (_prio + 1) % _inputs;
 }
 
 
-bool MaxSizeMatch::_ShortestAugmenting( )
-{
+bool MaxSizeMatch::_ShortestAugmenting() {
     int i, j, jn;
     int slen, nslen;
 
@@ -105,10 +101,9 @@ bool MaxSizeMatch::_ShortestAugmenting( )
     slen = 0;
 
     // push all unassigned inputs to the stack
-    for ( i = 0; i < _inputs; ++i )
-    {
+    for (i = 0; i < _inputs; ++i) {
         j = (i + _prio) % _inputs;
-        if ( _inmatch[j] == -1 )   // start with unmatched left nodes
+        if (_inmatch[j] == -1)   // start with unmatched left nodes
         {
             _s[slen++] = j;
         }
@@ -116,19 +111,16 @@ bool MaxSizeMatch::_ShortestAugmenting( )
 
     _from.assign(_inputs, -1);
 
-    for ( int iter = 0; iter < _inputs; iter++ )
-    {
+    for (int iter = 0; iter < _inputs; iter++) {
         nslen = 0;
 
-        for ( int e = 0; e < slen; ++e )
-        {
+        for (int e = 0; e < slen; ++e) {
             i = _s[e];
 
-            for ( j = 0; j < _outputs; ++j )
-            {
-                if ( ( _request[i][j].label != -1 ) && // edge (i,j) exists
-                        ( _inmatch[i] != j ) &&     // (i,j) is not contained in the current matching
-                        ( _from[j] == -1 ) )        // no shorter path to j exists
+            for (j = 0; j < _outputs; ++j) {
+                if ((_request[i][j].label != -1) && // edge (i,j) exists
+                    (_inmatch[i] != j) &&     // (i,j) is not contained in the current matching
+                    (_from[j] == -1))        // no shorter path to j exists
                 {
 
                     _from[j] = i;                  // how did we get to j?
@@ -136,11 +128,10 @@ bool MaxSizeMatch::_ShortestAugmenting( )
 #ifdef DEBUG_MAXSIZE
                     cout << "  got to " << j << " from " << i << endl;
 #endif
-                    if ( _outmatch[j] == -1 )     // j is unmatched -- augmenting path found
+                    if (_outmatch[j] == -1)     // j is unmatched -- augmenting path found
                     {
                         goto found_augmenting;
-                    }
-                    else                          // j is matched
+                    } else                          // j is matched
                     {
                         _ns[nslen] = _outmatch[j];  // add the destination of this edge to the leaf nodes
                         nslen++;
@@ -154,7 +145,7 @@ bool MaxSizeMatch::_ShortestAugmenting( )
         }
 
         // no augmenting path found yet, swap stacks
-        int * t = _s;
+        int *t = _s;
         _s = _ns;
         _ns = t;
         slen = nslen;
@@ -162,7 +153,7 @@ bool MaxSizeMatch::_ShortestAugmenting( )
 
     return false; // no augmenting paths
 
-found_augmenting:
+    found_augmenting:
 
     // the augmenting path ends at node j on the right
 
@@ -177,7 +168,7 @@ found_augmenting:
     cout << i;
 #endif
 
-    while ( _inmatch[i] != -1 )    // loop until the end of the path
+    while (_inmatch[i] != -1)    // loop until the end of the path
     {
         jn = _inmatch[i];            // remove previous edge (i,jn) and add (i,j)
         _inmatch[i] = j;

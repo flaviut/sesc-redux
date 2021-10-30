@@ -13,29 +13,32 @@ typedef uintptr_t RAddr;
 typedef uint32_t PAddr;
 // Type for Virtual addresses (in simulated application)
 typedef uint64_t VAddr;
+
 struct VAddr_hash {
     size_t operator()(VAddr __x) const {
-        return ((__x>>8)^__x);
+        return ((__x >> 8) ^ __x);
     }
 };
 
 // These are the native types for the target (simulated) machine
 typedef uint16_t targUShort;
-typedef int16_t  targShort;
+typedef int16_t targShort;
 typedef uint32_t targUInt;
-typedef int32_t  targInt;
+typedef int32_t targInt;
 typedef uint32_t targULong;
-typedef int32_t  targLong;
+typedef int32_t targLong;
 typedef uint64_t targULongLong;
-typedef int64_t  targLongLong;
+typedef int64_t targLongLong;
 
 // Return value v aligned (up or down) to a multiple of a
 template<class V, class A>
 inline V alignDown(V v, A a) {
-    return v-(v&(a-1));
+    return v - (v & (a - 1));
 }
+
 template<class V, class A>
 inline V alignUp(V v, A a) {
-    return alignDown(v+a-1,a);
+    return alignDown(v + a - 1, a);
 }
+
 #endif

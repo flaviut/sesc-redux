@@ -31,21 +31,18 @@
 #include "prio_arb.hpp"
 
 
-PriorityArbiter::PriorityArbiter( const Configuration &config,
-                                  Module *parent, const string& name,
-                                  int inputs )
-    : Module( parent, name ), _rr_ptr(0), _inputs( inputs )
-{
+PriorityArbiter::PriorityArbiter(const Configuration &config,
+                                 Module *parent, const string &name,
+                                 int inputs)
+        : Module(parent, name), _rr_ptr(0), _inputs(inputs) {
 
 }
 
-void PriorityArbiter::Clear( )
-{
-    _requests.clear( );
+void PriorityArbiter::Clear() {
+    _requests.clear();
 }
 
-void PriorityArbiter::AddRequest( int in, int label, BPri_t pri )
-{
+void PriorityArbiter::AddRequest(int in, int label, BPri_t pri) {
     sRequest r;
     list<sRequest>::iterator insert_point;
 
@@ -53,10 +50,9 @@ void PriorityArbiter::AddRequest( int in, int label, BPri_t pri )
     r.label = label;
     r.pri = pri;
 
-    insert_point = _requests.begin( );
-    while( ( insert_point != _requests.end( ) ) &&
-            ( insert_point->in < in ) )
-    {
+    insert_point = _requests.begin();
+    while ((insert_point != _requests.end()) &&
+           (insert_point->in < in)) {
         insert_point++;
     }
 
@@ -67,93 +63,77 @@ void PriorityArbiter::AddRequest( int in, int label, BPri_t pri )
     // if it is for the same input and has a higher
     // priority
 
-    if ( ( insert_point != _requests.end( ) ) &&
-            ( insert_point->in == in ) )
-    {
-        if ( insert_point->pri < pri )
-        {
+    if ((insert_point != _requests.end()) &&
+        (insert_point->in == in)) {
+        if (insert_point->pri < pri) {
             del = true;
-        }
-        else
-        {
+        } else {
             add = false;
         }
     }
 
-    if ( add )
-    {
-        _requests.insert( insert_point, r );
+    if (add) {
+        _requests.insert(insert_point, r);
     }
 
-    if ( del )
-    {
-        _requests.erase( insert_point );
+    if (del) {
+        _requests.erase(insert_point);
     }
 }
 
-void PriorityArbiter::RemoveRequest( int in, int label )
-{
+void PriorityArbiter::RemoveRequest(int in, int label) {
     list<sRequest>::iterator erase_point;
 
-    erase_point = _requests.begin( );
-    while( ( erase_point != _requests.end( ) ) &&
-            ( erase_point->in < in ) )
-    {
+    erase_point = _requests.begin();
+    while ((erase_point != _requests.end()) &&
+           (erase_point->in < in)) {
         erase_point++;
     }
 
-    assert( erase_point != _requests.end( ) );
-    _requests.erase( erase_point );
+    assert(erase_point != _requests.end());
+    _requests.erase(erase_point);
 }
 
-int PriorityArbiter::Match( ) const
-{
+int PriorityArbiter::Match() const {
     return _match;
 }
 
-void PriorityArbiter::Arbitrate( )
-{
+void PriorityArbiter::Arbitrate() {
     list<sRequest>::iterator p;
 
     int max_index;
-	BPri_t max_pri;
+    BPri_t max_pri;
     bool wrapped;
 
     //MERGENOTE
     //booksim does not have this if statement
     //as far as I can tell they are identical in function
-    if ( _requests.begin( ) != _requests.end( ) )
-    {
+    if (_requests.begin() != _requests.end()) {
         // A round-robin arbiter between input requests
-        p = _requests.begin( );
-        while( ( p != _requests.end( ) ) &&
-                ( p->in < _rr_ptr ) )
-        {
+        p = _requests.begin();
+        while ((p != _requests.end()) &&
+               (p->in < _rr_ptr)) {
             p++;
         }
 
         max_index = -1;
-        max_pri   = 0;
+        max_pri = 0;
 
         wrapped = false;
-        while( (!wrapped) || ( p->in < _rr_ptr ) )
-        {
-            if ( p == _requests.end( ) )
-            {
-                if ( wrapped )
-                {
+        while ((!wrapped) || (p->in < _rr_ptr)) {
+            if (p == _requests.end()) {
+                if (wrapped) {
                     break;
                 }
                 // p is valid here because empty lists
                 // are skipped (above)
-                p = _requests.begin( );
+                p = _requests.begin();
                 wrapped = true;
             }
 
             // check if request is the highest priority so far
-            if ( ( p->pri > max_pri ) || ( max_index == -1 ) )
-            {
-                max_pri   = p->pri;
+            if ((p->pri > max_pri) || (max_index == -1)) {
+                max_pri = p->pri;
                 max_index = p->in;
             }
 
@@ -161,14 +141,11 @@ void PriorityArbiter::Arbitrate( )
         }
 
         _match = max_index; // -1 for no match
-        if ( _match != -1 )
-        {
-            _rr_ptr = ( _match + 1 ) % _inputs;
+        if (_match != -1) {
+            _rr_ptr = (_match + 1) % _inputs;
         }
 
-    }
-    else
-    {
+    } else {
         _match = -1;
     }
 }
@@ -176,7 +153,6 @@ void PriorityArbiter::Arbitrate( )
 //MERGENOTE
 //added update function to priorityarbiter
 
-void PriorityArbiter::Update( )
-{
-    _rr_ptr = ( _rr_ptr + 1 ) % _inputs;
+void PriorityArbiter::Update() {
+    _rr_ptr = (_rr_ptr + 1) % _inputs;
 }

@@ -33,15 +33,13 @@
 #include "module.hpp"
 #include "config_utils.hpp"
 
-class PriorityArbiter : public Module
-{
+class PriorityArbiter : public Module {
     int _rr_ptr;
 
 protected:
     const int _inputs;
 
-    struct sRequest
-    {
+    struct sRequest {
         int in;
         int label;
         BPri_t pri;
@@ -52,19 +50,21 @@ protected:
     int _match;
 
 public:
-    PriorityArbiter( const Configuration &config,
-                     Module *parent, const string& name,
-                     int inputs );
+    PriorityArbiter(const Configuration &config,
+                    Module *parent, const string &name,
+                    int inputs);
 
-    void Clear( );
+    void Clear();
 
-    void AddRequest( int in, int label = 0, BPri_t pri = 0 );
-    void RemoveRequest( int in, int label = 0 );
+    void AddRequest(int in, int label = 0, BPri_t pri = 0);
 
-    int Match( ) const;
+    void RemoveRequest(int in, int label = 0);
 
-    void Arbitrate( );
-    void Update( );
+    int Match() const;
+
+    void Arbitrate();
+
+    void Update();
 };
 
 #endif

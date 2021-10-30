@@ -45,43 +45,34 @@
 //  $Date: 2007/06/27 23:10:17 $
 //  $Id: flitchannel.cpp 5188 2012-08-30 00:31:31Z dub $
 // ----------------------------------------------------------------------
-FlitChannel::FlitChannel(Module * parent, string const & name, int classes)
-    : Channel<Flit>(parent, name), _routerSource(NULL), _routerSourcePort(-1),
-      _routerSink(NULL), _routerSinkPort(-1), _idle(0), _classes(classes)
-{
+FlitChannel::FlitChannel(Module *parent, string const &name, int classes)
+        : Channel<Flit>(parent, name), _routerSource(NULL), _routerSourcePort(-1),
+          _routerSink(NULL), _routerSinkPort(-1), _idle(0), _classes(classes) {
     _active.resize(classes, 0);
 }
 
-void FlitChannel::SetSource(Router const * const router, int port)
-{
+void FlitChannel::SetSource(Router const *const router, int port) {
     _routerSource = router;
     _routerSourcePort = port;
 }
 
-void FlitChannel::SetSink(Router const * const router, int port)
-{
+void FlitChannel::SetSink(Router const *const router, int port) {
     _routerSink = router;
     _routerSinkPort = port;
 }
 
-void FlitChannel::Send(Flit * f)
-{
-    if(f)
-    {
+void FlitChannel::Send(Flit *f) {
+    if (f) {
         ++_active[f->cl];
-    }
-    else
-    {
+    } else {
         ++_idle;
     }
     Channel<Flit>::Send(f);
 }
 
-void FlitChannel::ReadInputs()
-{
-    Flit const * const & f = _input;
-    if(f && f->watch)
-    {
+void FlitChannel::ReadInputs() {
+    Flit const *const &f = _input;
+    if (f && f->watch) {
         *gWatchOut << GetSimTime() << " | " << FullName() << " | "
                    << "Beginning channel traversal for flit " << f->id
                    << " with delay " << _delay
@@ -90,11 +81,9 @@ void FlitChannel::ReadInputs()
     Channel<Flit>::ReadInputs();
 }
 
-void FlitChannel::WriteOutputs()
-{
+void FlitChannel::WriteOutputs() {
     Channel<Flit>::WriteOutputs();
-    if(_output && _output->watch)
-    {
+    if (_output && _output->watch) {
         *gWatchOut << GetSimTime() << " | " << FullName() << " | "
                    << "Completed channel traversal for flit " << _output->id
                    << "." << endl;

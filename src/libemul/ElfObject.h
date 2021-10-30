@@ -115,49 +115,55 @@ typedef struct
 class ThreadContext;
 
 namespace FileSys {
-class FileStatus;
-class SeekableDescription;
+    class FileStatus;
+
+    class SeekableDescription;
 }
 
 template<ExecMode mode>
-class ElfDefs : public ElfDefs<ExecMode(mode&ExecModeBitsMask)> {
+class ElfDefs : public ElfDefs<ExecMode(mode & ExecModeBitsMask)> {
 };
+
 template<>
 class ElfDefs<ExecModeBits32> {
 public:
     typedef Elf32_Ehdr Elf_Ehdr;
     typedef Elf32_Phdr Elf_Phdr;
     typedef Elf32_Shdr Elf_Shdr;
-    typedef Elf32_Sym  Elf_Sym;
+    typedef Elf32_Sym Elf_Sym;
+
     class Tauxv_t {
     public:
-        static const size_t Size_All=8;
+        static const size_t Size_All = 8;
         typedef uint32_t Type_a_type;
-        static const size_t Offs_a_type=0;
+        static const size_t Offs_a_type = 0;
         typedef uint32_t Type_a_val;
-        static const size_t Offs_a_val=4;
+        static const size_t Offs_a_val = 4;
     };
 };
+
 template<>
 class ElfDefs<ExecModeBits64> {
 public:
     typedef Elf64_Ehdr Elf_Ehdr;
     typedef Elf64_Phdr Elf_Phdr;
     typedef Elf64_Shdr Elf_Shdr;
-    typedef Elf64_Sym  Elf_Sym;
+    typedef Elf64_Sym Elf_Sym;
+
     class Tauxv_t {
     public:
-        static const size_t Size_All=16;
+        static const size_t Size_All = 16;
         typedef uint64_t Type_a_type;
-        static const size_t Offs_a_type=0;
+        static const size_t Offs_a_type = 0;
         typedef uint64_t Type_a_val;
-        static const size_t Offs_a_val=8;
+        static const size_t Offs_a_val = 8;
     };
 };
 
 ExecMode getExecMode(FileSys::SeekableDescription *fdesc);
 
-void mapFuncNames(ThreadContext *context, FileSys::SeekableDescription *fdesc, ExecMode mode, VAddr addr, size_t len, off_t off);
+void mapFuncNames(ThreadContext *context, FileSys::SeekableDescription *fdesc, ExecMode mode, VAddr addr, size_t len,
+                  off_t off);
 
 VAddr loadElfObject(ThreadContext *context, FileSys::SeekableDescription *fdesc, VAddr addr);
 

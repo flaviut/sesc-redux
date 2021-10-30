@@ -6,10 +6,14 @@ class ABIDefs {
 };
 
 #if (defined SUPPORT_MIPS32)
+
 #include "ABIDefsMips32.h"
+
 #endif
 #if (defined SUPPORT_MIPSEL32)
+
 #include "ABIDefsMipsel32.h"
+
 #endif
 #if (defined SUPPORT_MIPS64)
 #include "ABIDefsMips64.h"

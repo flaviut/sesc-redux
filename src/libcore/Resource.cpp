@@ -39,30 +39,24 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 Resource::Resource(Cluster *cls, PortGeneric *aGen)
-    : cluster(cls)
-    ,gen(aGen)
-{
+        : cluster(cls), gen(aGen) {
     I(cls);
-    if(gen)
+    if (gen)
         gen->subscribe();
 }
 
-Resource::~Resource()
-{
-    GMSG(!EventScheduler::empty(), "Resources destroyed with %Zu pending instructions"
-         ,EventScheduler::size());
+Resource::~Resource() {
+    GMSG(!EventScheduler::empty(), "Resources destroyed with %Zu pending instructions", EventScheduler::size());
 
-    if(gen)
+    if (gen)
         gen->unsubscribe();
 }
 
-void Resource::executed(DInst *dinst)
-{
+void Resource::executed(DInst *dinst) {
     cluster->executed(dinst);
 }
 
-RetOutcome Resource::retire(DInst *dinst)
-{
+RetOutcome Resource::retire(DInst *dinst) {
     cluster->retire(dinst);
     dinst->destroy();
     return Retired;
@@ -70,54 +64,40 @@ RetOutcome Resource::retire(DInst *dinst)
 
 /***********************************************/
 
-MemResource::MemResource(Cluster *cls
-                         ,PortGeneric *aGen
-                         ,GMemorySystem *ms
-                         ,int32_t id
-                         ,const char *cad)
-    : Resource(cls, aGen)
-    ,L1DCache(ms->getDataSource())
-    ,memorySystem(ms)
-{
+MemResource::MemResource(Cluster *cls, PortGeneric *aGen, GMemorySystem *ms, int32_t id, const char *cad)
+        : Resource(cls, aGen), L1DCache(ms->getDataSource()), memorySystem(ms) {
 
     char cadena[100];
-    sprintf(cadena,"%s(%d)", cad, id);
+    sprintf(cadena, "%s(%d)", cad, id);
 
 #ifdef SESC_NO_LDQ
     ldqCheckEnergy = new GStatsEnergyNull; // No stats
     ldqRdWrEnergy  = new GStatsEnergyNull; // No stats
 #endif
 
-    ldqCheckEnergy = new GStatsEnergy("ldqCheckEnergy",cadena,id, ExecPower
-                                      ,EnergyMgr::get("ldqCheckEnergy",id));
+    ldqCheckEnergy = new GStatsEnergy("ldqCheckEnergy", cadena, id, ExecPower, EnergyMgr::get("ldqCheckEnergy", id));
 
-    ldqRdWrEnergy  = new GStatsEnergy("ldqRdWrEnergy",cadena,id, ExecPower
-                                      ,EnergyMgr::get("ldqRdWrEnergy",id));
+    ldqRdWrEnergy = new GStatsEnergy("ldqRdWrEnergy", cadena, id, ExecPower, EnergyMgr::get("ldqRdWrEnergy", id));
 
 
-    stqCheckEnergy = new GStatsEnergy("stqCheckEnergy",cadena,id, ExecPower
-                                      ,EnergyMgr::get("stqCheckEnergy",id));
+    stqCheckEnergy = new GStatsEnergy("stqCheckEnergy", cadena, id, ExecPower, EnergyMgr::get("stqCheckEnergy", id));
 
 
-    stqRdWrEnergy  = new GStatsEnergy("stqRdWrEnergy",cadena,id, ExecPower
-                                      ,EnergyMgr::get("stqRdWrEnergy",id));
+    stqRdWrEnergy = new GStatsEnergy("stqRdWrEnergy", cadena, id, ExecPower, EnergyMgr::get("stqRdWrEnergy", id));
 
 
-    iAluEnergy = new GStatsEnergy("iAluEnergy", cadena , id, ExecPower
-                                  ,EnergyMgr::get("iALUEnergy",id));
+    iAluEnergy = new GStatsEnergy("iAluEnergy", cadena, id, ExecPower, EnergyMgr::get("iALUEnergy", id));
 }
 
 /***********************************************/
 
 FUMemory::FUMemory(Cluster *cls, GMemorySystem *ms, int32_t id)
-    : MemResource(cls, 0, ms, id, "FUMemory")
-{
+        : MemResource(cls, 0, ms, id, "FUMemory") {
     I(ms);
     I(L1DCache);
 }
 
-StallCause FUMemory::canIssue(DInst *dinst)
-{
+StallCause FUMemory::canIssue(DInst *dinst) {
     cluster->newEntry();
 
     // TODO: Someone implement a LDSTBuffer::fenceGetEntry(dinst);
@@ -129,12 +109,11 @@ StallCause FUMemory::canIssue(DInst *dinst)
     return NoStall;
 }
 
-void FUMemory::simTime(DInst *dinst)
-{
+void FUMemory::simTime(DInst *dinst) {
     const Instruction *inst = dinst->getInst();
     I(inst->isFence());
-    I(!inst->isLoad() );
-    I(!inst->isStore() );
+    I(!inst->isLoad());
+    I(!inst->isStore());
 
     // All structures accessed (very expensive)
     iAluEnergy->inc();
@@ -149,31 +128,30 @@ void FUMemory::simTime(DInst *dinst)
     dinst->doAtExecutedCB.schedule(1); // Next cycle
 }
 
-RetOutcome FUMemory::retire(DInst *dinst)
-{
+RetOutcome FUMemory::retire(DInst *dinst) {
     const Instruction *inst = dinst->getInst();
 
-    if( inst->getSubCode() == iFetchOp ) {
+    if (inst->getSubCode() == iFetchOp) {
         if (L1DCache->canAcceptStore(static_cast<PAddr>(dinst->getVaddr())) == false)
             return NoCacheSpace;
-        FUStore* r = (FUStore*) getCluster()->getResource(iStore);
+        FUStore *r = (FUStore *) getCluster()->getResource(iStore);
 #ifdef TS_CHERRY
         dinst->setCanBeRecycled();
         dinst->setMemoryIssued();
 #endif
-        if ( r->waitingOnFence() == true)
+        if (r->waitingOnFence() == true)
             return WaitForFence;
         else
             r->storeSent();
         DMemRequest::create(dinst, memorySystem, MemWrite);
-    } else if( inst->getSubCode() == iMemFence ) {
-        ((FUStore*)(getCluster()->getResource(iStore)))->doFence();
+    } else if (inst->getSubCode() == iMemFence) {
+        ((FUStore *) (getCluster()->getResource(iStore)))->doFence();
         dinst->destroy();
-    } else if( inst->getSubCode() == iAcquire ) {
+    } else if (inst->getSubCode() == iAcquire) {
         // TODO: Consistency in LDST
         dinst->destroy();
     } else {
-        I( inst->getSubCode() == iRelease );
+        I(inst->getSubCode() == iRelease);
         // TODO: Consistency in LDST
         dinst->destroy();
     }
@@ -184,34 +162,23 @@ RetOutcome FUMemory::retire(DInst *dinst)
 
 /***********************************************/
 
-FULoad::FULoad(Cluster *cls, PortGeneric *aGen
-               ,TimeDelta_t l
-               ,TimeDelta_t lsdelay
-               ,GMemorySystem *ms
-               ,size_t maxLoads
-               ,int32_t id)
-    : MemResource(cls, aGen, ms, id, "FULoad")
-    ,ldqNotUsed("FULoad(%d)_ldqNotUsed", id)
-    ,nForwarded("FULoad(%d):nForwarded", id)
-    ,lat(l)
-    ,LSDelay(lsdelay)
-    ,freeLoads(maxLoads)
-    ,misLoads(0)
-{
+FULoad::FULoad(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, TimeDelta_t lsdelay, GMemorySystem *ms, size_t maxLoads,
+               int32_t id)
+        : MemResource(cls, aGen, ms, id, "FULoad"), ldqNotUsed("FULoad(%d)_ldqNotUsed", id),
+          nForwarded("FULoad(%d):nForwarded", id), lat(l), LSDelay(lsdelay), freeLoads(maxLoads), misLoads(0) {
     char cadena[100];
-    sprintf(cadena,"FULoad(%d)", id);
+    sprintf(cadena, "FULoad(%d)", id);
 
     I(ms);
-    I(freeLoads>0);
+    I(freeLoads > 0);
 }
 
-StallCause FULoad::canIssue(DInst *dinst)
-{
+StallCause FULoad::canIssue(DInst *dinst) {
     int32_t freeEntries = freeLoads;
 #ifdef SESC_MISPATH
     freeEntries -= misLoads;
 #endif
-    if( freeEntries <= 0 ) {
+    if (freeEntries <= 0) {
         I(freeEntries == 0); // Can't be negative
         return OutsLoadsStall;
     }
@@ -231,9 +198,8 @@ StallCause FULoad::canIssue(DInst *dinst)
     return NoStall;
 }
 
-void FULoad::simTime(DInst *dinst)
-{
-    Time_t when = gen->nextSlot()+lat;
+void FULoad::simTime(DInst *dinst) {
+    Time_t when = gen->nextSlot() + lat;
 
     // The check in the LD Queue is performed always, for hit & miss
     iAluEnergy->inc();
@@ -246,11 +212,11 @@ void FULoad::simTime(DInst *dinst)
 
     if (dinst->isLoadForwarded()) {
 
-        dinst->doAtExecutedCB.scheduleAbs(when+LSDelay);
+        dinst->doAtExecutedCB.scheduleAbs(when + LSDelay);
         // forwardEnergy->inc(); // TODO: CACTI == a read in the STQ
         nForwarded.inc();
     } else {
-        if(dinst->isDeadInst()) {
+        if (dinst->isDeadInst()) {
             // dead inst, just make it fly through the pipeline
             dinst->doAtExecuted();
         } else {
@@ -259,36 +225,33 @@ void FULoad::simTime(DInst *dinst)
     }
 }
 
-void FULoad::executed(DInst* dinst)
-{
+void FULoad::executed(DInst *dinst) {
     Resource::executed(dinst);
 }
 
-void FULoad::cacheDispatched(DInst *dinst)
-{
-    I( !dinst->isLoadForwarded() );
+void FULoad::cacheDispatched(DInst *dinst) {
+    I(!dinst->isLoadForwarded());
 
-    if(!L1DCache->canAcceptLoad(static_cast<PAddr>(dinst->getVaddr()))) {
+    if (!L1DCache->canAcceptLoad(static_cast<PAddr>(dinst->getVaddr()))) {
         cacheDispatchedCB::schedule(7, this, dinst); //try again later
         return;
     }
 
-    I( !dinst->isLoadForwarded() );
+    I(!dinst->isLoadForwarded());
     // LOG("[0x%p] %lld 0x%lx read", dinst, globalClock, dinst->getVaddr());
-    if(!L1DCache->canAcceptLoad(static_cast<PAddr>(dinst->getVaddr()))) {
+    if (!L1DCache->canAcceptLoad(static_cast<PAddr>(dinst->getVaddr()))) {
         Time_t when = gen->nextSlot();
         //try again
         // +1 because when we have unilimited ports (or occ) 0, this will be an
         // infinite loop
-        cacheDispatchedCB::scheduleAbs(when+1, this, dinst);
+        cacheDispatchedCB::scheduleAbs(when + 1, this, dinst);
     } else {
 
         DMemRequest::create(dinst, memorySystem, MemRead);
     }
 }
 
-RetOutcome FULoad::retire(DInst *dinst)
-{
+RetOutcome FULoad::retire(DInst *dinst) {
     ldqNotUsed.sample(freeLoads);
 
     cluster->retire(dinst);
@@ -311,35 +274,23 @@ void FULoad::misBranchRestore()
     misLoads = 0;
 }
 #endif
+
 /***********************************************/
 
-FUStore::FUStore(Cluster *cls, PortGeneric *aGen
-                 ,TimeDelta_t l
-                 ,GMemorySystem *ms
-                 ,size_t maxStores
-                 ,int32_t id)
-    : MemResource(cls, aGen, ms, id, "FUStore")
-    ,stqNotUsed("FUStore(%d)_stqNotUsed", id)
-    ,nDeadStore("FUStore(%d):nDeadStore", id)
-    ,lat(l)
-    ,freeStores(maxStores)
-    ,misStores(0)
-    ,pendingFence(false)
-    ,nOutsStores(0)
-    ,nFences("FUStore(%d):nFences", id)
-    ,fenceStallCycles("FUStore(%d):fenceStallCycles", id)
-{
+FUStore::FUStore(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, GMemorySystem *ms, size_t maxStores, int32_t id)
+        : MemResource(cls, aGen, ms, id, "FUStore"), stqNotUsed("FUStore(%d)_stqNotUsed", id),
+          nDeadStore("FUStore(%d):nDeadStore", id), lat(l), freeStores(maxStores), misStores(0), pendingFence(false),
+          nOutsStores(0), nFences("FUStore(%d):nFences", id), fenceStallCycles("FUStore(%d):fenceStallCycles", id) {
 
-    I(freeStores>0);
+    I(freeStores > 0);
 }
 
-StallCause FUStore::canIssue(DInst *dinst)
-{
+StallCause FUStore::canIssue(DInst *dinst) {
     int32_t freeEntries = freeStores;
 #ifdef SESC_MISPATH
     freeEntries -= misStores;
 #endif
-    if( freeEntries <= 0 ) {
+    if (freeEntries <= 0) {
         I(freeEntries == 0); // Can't be negative
         return OutsStoresStall;
     }
@@ -360,13 +311,11 @@ StallCause FUStore::canIssue(DInst *dinst)
     return NoStall;
 }
 
-void FUStore::simTime(DInst *dinst)
-{
-    dinst->doAtExecutedCB.scheduleAbs(gen->nextSlot()+lat);
+void FUStore::simTime(DInst *dinst) {
+    dinst->doAtExecutedCB.scheduleAbs(gen->nextSlot() + lat);
 }
 
-void FUStore::executed(DInst *dinst)
-{
+void FUStore::executed(DInst *dinst) {
     stqRdWrEnergy->inc(); // Update fields
     ldqCheckEnergy->inc(); // Check st-ld replay traps
 
@@ -377,8 +326,7 @@ void FUStore::executed(DInst *dinst)
 
 }
 
-void FUStore::doRetire(DInst *dinst)
-{
+void FUStore::doRetire(DInst *dinst) {
     stqNotUsed.sample(freeStores);
 
     LDSTBuffer::storeLocallyPerformed(dinst);
@@ -393,10 +341,9 @@ void FUStore::doRetire(DInst *dinst)
 
 }
 
-RetOutcome FUStore::retire(DInst *dinst)
-{
+RetOutcome FUStore::retire(DInst *dinst) {
     if (dinst->isDeadInst() || dinst->isFake() || dinst->isEarlyRecycled()
-       ) {
+            ) {
         doRetire(dinst);
 
         if (dinst->isDeadStore())
@@ -406,10 +353,10 @@ RetOutcome FUStore::retire(DInst *dinst)
         return Retired;
     }
 
-    if(L1DCache->getNextFreeCycle() > globalClock)
+    if (L1DCache->getNextFreeCycle() > globalClock)
         return NoCachePorts;
 
-    if (!L1DCache->canAcceptStore(static_cast<PAddr>(dinst->getVaddr())) ) {
+    if (!L1DCache->canAcceptStore(static_cast<PAddr>(dinst->getVaddr()))) {
         return NoCacheSpace;
     }
 
@@ -436,8 +383,7 @@ RetOutcome FUStore::retire(DInst *dinst)
 }
 
 
-void FUStore::storeCompleted()
-{
+void FUStore::storeCompleted() {
     I(nOutsStores > 0);
     nOutsStores--;
     if (nOutsStores == 0)
@@ -458,31 +404,22 @@ void FUStore::misBranchRestore()
 
 
 /***********************************************/
-FUGeneric::FUGeneric(Cluster *cls
-                     ,PortGeneric *aGen
-                     ,TimeDelta_t l
-                     ,GStatsEnergyCG *eb
-                    )
-    :Resource(cls, aGen)
-    ,lat(l)
-    ,fuEnergy(eb)
-{
+FUGeneric::FUGeneric(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, GStatsEnergyCG *eb
+)
+        : Resource(cls, aGen), lat(l), fuEnergy(eb) {
 }
 
-StallCause FUGeneric::canIssue(DInst *dinst)
-{
+StallCause FUGeneric::canIssue(DInst *dinst) {
     cluster->newEntry();
 
     return NoStall;
 }
 
-void FUGeneric::simTime(DInst *dinst)
-{
-    dinst->doAtExecutedCB.scheduleAbs(gen->nextSlot()+lat);
+void FUGeneric::simTime(DInst *dinst) {
+    dinst->doAtExecutedCB.scheduleAbs(gen->nextSlot() + lat);
 }
 
-void FUGeneric::executed(DInst *dinst)
-{
+void FUGeneric::executed(DInst *dinst) {
     fuEnergy->inc();
     cluster->executed(dinst);
 }
@@ -491,15 +428,11 @@ void FUGeneric::executed(DInst *dinst)
 /***********************************************/
 
 FUBranch::FUBranch(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, int32_t mb)
-    :Resource(cls, aGen)
-    ,lat(l)
-    ,freeBranches(mb)
-{
-    I(freeBranches>0);
+        : Resource(cls, aGen), lat(l), freeBranches(mb) {
+    I(freeBranches > 0);
 }
 
-StallCause FUBranch::canIssue(DInst *dinst)
-{
+StallCause FUBranch::canIssue(DInst *dinst) {
     if (freeBranches == 0)
         return OutsBranchesStall;
 
@@ -510,13 +443,11 @@ StallCause FUBranch::canIssue(DInst *dinst)
     return NoStall;
 }
 
-void FUBranch::simTime(DInst *dinst)
-{
-    dinst->doAtExecutedCB.scheduleAbs(gen->nextSlot()+lat);
+void FUBranch::simTime(DInst *dinst) {
+    dinst->doAtExecutedCB.scheduleAbs(gen->nextSlot() + lat);
 }
 
-void FUBranch::executed(DInst *dinst)
-{
+void FUBranch::executed(DInst *dinst) {
 #ifndef SESC_BRANCH_AT_RETIRE
     // TODO: change it to remove getFetch only call missBranch when a
     // boolean is set? Backup done at fetch
@@ -559,17 +490,14 @@ RetOutcome FUBranch::retire(DInst *dinst)
 /***********************************************/
 
 FUEvent::FUEvent(Cluster *cls)
-    :Resource(cls, 0)
-{
+        : Resource(cls, 0) {
 }
 
-StallCause FUEvent::canIssue(DInst *dinst)
-{
+StallCause FUEvent::canIssue(DInst *dinst) {
     return NoStall;
 }
 
-void FUEvent::simTime(DInst *dinst)
-{
+void FUEvent::simTime(DInst *dinst) {
     I(dinst->getInst()->getEvent() == PostEvent);
     // memfence, Relase, and Acquire are passed to FUMemory
     //
@@ -580,7 +508,7 @@ void FUEvent::simTime(DInst *dinst)
 
     // If the preEvent is created with a vaddr the event handler is
     // responsible to canIssue the instruction execution.
-    I( dinst->getVaddr() == 0 );
+    I(dinst->getVaddr() == 0);
     cb->call();
 
     cluster->executed(dinst);

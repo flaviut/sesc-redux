@@ -39,14 +39,20 @@ private:
 protected:
 public:
     GMemoryOS(int32_t i)
-        : Id(i) {
+            : Id(i) {
     }
+
     virtual ~GMemoryOS() {
     }
+
     virtual int32_t TLBTranslate(VAddr vAddr) = 0;
-    virtual int32_t ITLBTranslate(VAddr iAddr) = 0 ;
+
+    virtual int32_t ITLBTranslate(VAddr iAddr) = 0;
+
     virtual void solveRequest(MemRequest *r) = 0;
+
     virtual void boot() = 0;
+
     virtual void report(const char *str) = 0;
 };
 
@@ -54,7 +60,7 @@ class DummyMemoryOS : public GMemoryOS {
 private:
     class DTLBState : public StateGeneric<> {
     public:
-        int32_t  physicalPage;
+        int32_t physicalPage;
 
         DTLBState(int32_t iphysicalPage = -1) {
             physicalPage = iphysicalPage;
@@ -71,14 +77,17 @@ private:
 public:
 
     DummyMemoryOS(int32_t i);
+
     virtual ~DummyMemoryOS();
 
     int32_t ITLBTranslate(VAddr iAddr);
+
     int32_t TLBTranslate(VAddr vAddr);
 
     void solveRequest(MemRequest *r);
 
     void boot();
+
     void report(const char *str);
 };
 

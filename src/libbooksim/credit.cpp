@@ -36,29 +36,23 @@
 stack<Credit *> Credit::_all;
 stack<Credit *> Credit::_free;
 
-Credit::Credit()
-{
+Credit::Credit() {
     Reset();
 }
 
-void Credit::Reset()
-{
+void Credit::Reset() {
     vc.clear();
     head = false;
     tail = false;
-    id   = -1;
+    id = -1;
 }
 
-Credit * Credit::New()
-{
-    Credit * c;
-    if(_free.empty())
-    {
+Credit *Credit::New() {
+    Credit *c;
+    if (_free.empty()) {
         c = new Credit();
         _all.push(c);
-    }
-    else
-    {
+    } else {
         c = _free.top();
         c->Reset();
         _free.pop();
@@ -66,22 +60,18 @@ Credit * Credit::New()
     return c;
 }
 
-void Credit::Free()
-{
+void Credit::Free() {
     _free.push(this);
 }
 
-void Credit::FreeAll()
-{
-    while(!_all.empty())
-    {
+void Credit::FreeAll() {
+    while (!_all.empty()) {
         delete _all.top();
         _all.pop();
     }
 }
 
 
-int Credit::OutStanding()
-{
-    return _all.size()-_free.size();
+int Credit::OutStanding() {
+    return _all.size() - _free.size();
 }

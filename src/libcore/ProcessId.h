@@ -73,19 +73,19 @@ public:
     class Stats {
     public:
         void reset() {
-            nSwitchs   = 0;
-            nSpawns    = 0;
-            totalTime  = 0;
-            waitTime   = 0;
+            nSwitchs = 0;
+            nSpawns = 0;
+            totalTime = 0;
+            waitTime = 0;
             nGradInsts = 0;
-            nWPathInsts= 0;
+            nWPathInsts = 0;
         }
 
         // Stats gathered for each thread
-        long long  nSwitchs ;
-        long long  nSpawns  ;
+        long long nSwitchs;
+        long long nSpawns;
         Time_t totalTime;
-        Time_t waitTime ;
+        Time_t waitTime;
         long long nGradInsts;       // Graduated instructions
         long long nWPathInsts;      // wrong path instructions
     };
@@ -96,7 +96,8 @@ private:
 
     static void printQueue(char *where);
 
-    static pool<ProcessId,true> pidPool;
+    static pool<ProcessId, true> pidPool;
+
     friend class pool<ProcessId, true>;
 
     static std::vector<ProcessId *> pidTable;
@@ -111,17 +112,17 @@ private:
 
     int32_t suspendedCounter;
 
-    CPU_t   cpu;
-    int32_t     myId;
-    int32_t     parentId;
-    Pid_t   ppid; // Parent pid
-    Pid_t   pid;
-    uint32_t   nChilds;
+    CPU_t cpu;
+    int32_t myId;
+    int32_t parentId;
+    Pid_t ppid; // Parent pid
+    Pid_t pid;
+    uint32_t nChilds;
 
-    Time_t  spawnTime;
-    Time_t  startTime;
+    Time_t spawnTime;
+    Time_t startTime;
 
-    Stats   stats;
+    Stats stats;
 
     // Set if process can move to another processor once it starts executing
     bool migrable;
@@ -131,9 +132,9 @@ private:
     // Inserts the process into the process queue and updates its position
     ProcessId *queueInsert(void) {
         // Should not already be in the queue
-        I(queuePosition==processQueue.end());
+        I(queuePosition == processQueue.end());
         // Insert at end of queue
-        queuePosition=processQueue.insert(processQueue.end(),this);
+        queuePosition = processQueue.insert(processQueue.end(), this);
         // Update the position to reflect priority
         return queuePromote();
     }
@@ -154,16 +155,17 @@ private:
     // Removes the process from the process queue
     void queueRemove(void) {
         // The process should still be in the queue
-        I(queuePosition!=processQueue.end());
+        I(queuePosition != processQueue.end());
         // Delete the process from the queue
         processQueue.erase(queuePosition);
         // Set current position in the queue to invalid
-        queuePosition=processQueue.end();
+        queuePosition = processQueue.end();
     }
 
 protected:
     ProcessId() {
     }
+
 public:
     static void boot();
 
@@ -171,35 +173,44 @@ public:
     static ProcessId *queueGet(const CPU_t cpu);
 
     bool sysconf(int32_t flags);
+
     int32_t getconf(void);
 
     static ProcessId *create(Pid_t ppid, Pid_t id, int32_t flags);
+
     void destroy();
+
     static void destroyAll();
 
     void incSuspendedCounter() {
         suspendedCounter++;
     }
+
     void decSuspendedCounter();
-    int32_t getSuspendedCounter() const  {
+
+    int32_t getSuspendedCounter() const {
         return suspendedCounter;
     }
 
-    static ProcessId *getProcessId(Pid_t pid) ;
+    static ProcessId *getProcessId(Pid_t pid);
+
     static bool isSafeId(Pid_t pid);
 
     static uint32_t getNumRunningThreads() {
         return processQueue.size();
     }
+
     static uint32_t getNumThreads();
 
     static void report(const char *str);
+
     void reportId();
 
-    bool isMigrable() const  {
+    bool isMigrable() const {
         return migrable;
     }
-    bool isPinned() const    {
+
+    bool isPinned() const {
         return pinned;
     }
 
@@ -209,10 +220,11 @@ public:
         cpu = p;
     }
 
-    CPU_t getCPU() const     {
+    CPU_t getCPU() const {
         return cpu;
     }
-    void setCPU(CPU_t nCPU)  {
+
+    void setCPU(CPU_t nCPU) {
         cpu = nCPU;
     }
 
@@ -220,32 +232,33 @@ public:
         return nChilds;
     }
 
-    Pid_t getPid()  const    {
+    Pid_t getPid() const {
         return pid;
     }
-    Pid_t getPPid() const    {
+
+    Pid_t getPPid() const {
         return ppid;
     }
 
     void setPPid(Pid_t newPPid) {
         // If new ppid the same as old one, do nothing
-        if(ppid==newPPid)
+        if (ppid == newPPid)
             return;
         // If there is an old ppid
-        if(ppid>=0) {
+        if (ppid >= 0) {
             // Reduce the number of children it has
-            ProcessId *oldParent=getProcessId(ppid);
-            if(oldParent) {
+            ProcessId *oldParent = getProcessId(ppid);
+            if (oldParent) {
                 oldParent->nChilds--;
             }
         }
         // Now the parent is newPPid
-        ppid=newPPid;
+        ppid = newPPid;
         // If there is such a process
-        if(ppid>=0) {
+        if (ppid >= 0) {
             // Increase the number of children it has
-            ProcessId *newParent=getProcessId(ppid);
-            if(newParent) {
+            ProcessId *newParent = getProcessId(ppid);
+            if (newParent) {
                 newParent->nChilds++;
             }
         }
@@ -254,18 +267,18 @@ public:
     // Makes the process ready to run
     ProcessId *becomeReady() {
         // The process should be in InvalidState
-        I(state==InvalidState);
+        I(state == InvalidState);
         // The new state of the process is ReadyState
-        state=ReadyState;
+        state = ReadyState;
         // Insert into the queue if not already in it
         return queueInsert();
     }
 
     void becomeNonReady() {
         // The process should be in ReadyState
-        I(state==ReadyState);
+        I(state == ReadyState);
         // The new state of the process is InvalidState
-        state=InvalidState;
+        state = InvalidState;
         // Remove from the process queue
         queueRemove();
     }
@@ -273,14 +286,15 @@ public:
     ProcessIdState getState() const {
         return state;
     }
+
     void setState(ProcessIdState nstate) {
         // Can onlychange from InvalidState to one of the non-runnable states, or
         // from one of the non-runnable states to the InvalidState
         // Note:
         //       To change between InvalidState and ReadyState, use becomeReady and becomeNonReady
         //       To change between ReadyState and RunningState, use switchIn and switchOut
-        I(((state==InvalidState)&&(nstate!=InvalidState)&&(nstate!=ReadyState)&&(nstate!=RunningState))||
-          ((nstate==InvalidState)&&(state!=InvalidState)&&(state!=ReadyState)&&(state!=RunningState)));
+        I(((state == InvalidState) && (nstate != InvalidState) && (nstate != ReadyState) && (nstate != RunningState)) ||
+          ((nstate == InvalidState) && (state != InvalidState) && (state != ReadyState) && (state != RunningState)));
         // Change to the new state
         state = nstate;
     }
@@ -288,51 +302,52 @@ public:
     // Called when this process starts running on a processor
     void switchIn(CPU_t nCPU) {
         // The process should be runnable but not running
-        I(state==ReadyState);
-        GI(!migrable&&pinned,cpu==nCPU);
+        I(state == ReadyState);
+        GI(!migrable && pinned, cpu == nCPU);
         cpu = nCPU;
         // If can not migrate, pin it to this processor
-        if(!migrable)
-            pinned=true;
+        if (!migrable)
+            pinned = true;
 
         // waittime includes the time between spawn and execution started
         stats.waitTime += globalClock - startTime;
         stats.nSwitchs++;
         startTime = globalClock;
         // The process is running now
-        state=RunningState;
+        state = RunningState;
     }
 
     // Called when this thread stops running on a processor
     void switchOut(long long nGradInsts_, long long nWPathInsts_) {
-        stats.totalTime  += globalClock - startTime;
+        stats.totalTime += globalClock - startTime;
         stats.nGradInsts += nGradInsts_;
-        stats.nWPathInsts+= nWPathInsts_;
+        stats.nWPathInsts += nWPathInsts_;
 
-        startTime  = globalClock;
+        startTime = globalClock;
 
-        I(getState()==RunningState);
+        I(getState() == RunningState);
 
-        state=ReadyState;
+        state = ReadyState;
     }
 
     int32_t getPriority(void) const {
         return priority;
     }
+
     ProcessId *setPriority(int32_t newPriority) {
         // By default, return nothing
-        ProcessId *retVal=0;
-        int32_t oldPriority=priority;
-        priority=newPriority;
+        ProcessId *retVal = 0;
+        int32_t oldPriority = priority;
+        priority = newPriority;
         // If in the process queue
-        if(queuePosition!=processQueue.end()) {
+        if (queuePosition != processQueue.end()) {
             // Update position in process queue
-            if(newPriority<oldPriority) {
+            if (newPriority < oldPriority) {
                 // New priority is better than the old one
-                retVal=queuePromote();
+                retVal = queuePromote();
             } else {
                 // New priority is worse than the old one
-                retVal=queueDemote();
+                retVal = queueDemote();
             }
         }
         return retVal;

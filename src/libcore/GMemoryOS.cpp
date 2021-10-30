@@ -23,41 +23,32 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 DummyMemoryOS::DummyMemoryOS(int32_t i)
-    : GMemoryOS(i)
-{
-    itlb = DTLBCache::create(SescConf->getCharPtr("cpucore","itlb",i)
-                             , "", "P(%d)_ITLB",i);
-    dtlb = DTLBCache::create(SescConf->getCharPtr("cpucore","dtlb",i)
-                             , "", "P(%d)_DTLB",i);
+        : GMemoryOS(i) {
+    itlb = DTLBCache::create(SescConf->getCharPtr("cpucore", "itlb", i), "", "P(%d)_ITLB", i);
+    dtlb = DTLBCache::create(SescConf->getCharPtr("cpucore", "dtlb", i), "", "P(%d)_DTLB", i);
 }
 
-DummyMemoryOS::~DummyMemoryOS()
-{
+DummyMemoryOS::~DummyMemoryOS() {
 }
 
-int32_t DummyMemoryOS::ITLBTranslate(VAddr iAddr)
-{
+int32_t DummyMemoryOS::ITLBTranslate(VAddr iAddr) {
     return iAddr;
 }
 
-int32_t DummyMemoryOS::TLBTranslate(VAddr vAddr)
-{
+int32_t DummyMemoryOS::TLBTranslate(VAddr vAddr) {
     return vAddr;
 }
 
-void DummyMemoryOS::solveRequest(MemRequest *r)
-{
+void DummyMemoryOS::solveRequest(MemRequest *r) {
     MSG("The DummyMemoryOS should not have failures in translation...");
     exit(-1);
 }
 
 
-void DummyMemoryOS::boot()
-{
+void DummyMemoryOS::boot() {
     // Nothing
 }
 
-void DummyMemoryOS::report(const char *str)
-{
+void DummyMemoryOS::report(const char *str) {
     // Nothing
 }

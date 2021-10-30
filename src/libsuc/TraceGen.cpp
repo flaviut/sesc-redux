@@ -14,8 +14,7 @@ bool TraceGen::tracing = true;
 
 // TOFIX: implement a fast/smarter memory allocation
 
-char *TraceGen::getText(const char *format, va_list ap)
-{
+char *TraceGen::getText(const char *format, va_list ap) {
     char strid[4096];
 
     vsprintf(strid, format, ap);
@@ -23,8 +22,7 @@ char *TraceGen::getText(const char *format, va_list ap)
     return strdup(strid);
 }
 
-void TraceGen::add(int32_t id, const char *format, ...)
-{
+void TraceGen::add(int32_t id, const char *format, ...) {
     if (!tracing)
         return;
 
@@ -39,22 +37,21 @@ void TraceGen::add(int32_t id, const char *format, ...)
     if (it == idMap.end()) {
         idMap[id] = str;
     } else {
-        char *join = (char *)malloc(strlen(str) + strlen(it->second)+5);
-        sprintf(join, "%s:%s",it->second, str);
+        char *join = (char *) malloc(strlen(str) + strlen(it->second) + 5);
+        sprintf(join, "%s:%s", it->second, str);
         free(str);
         free(it->second);
         it->second = join;
     }
 }
 
-void TraceGen::dump(int32_t id)
-{
+void TraceGen::dump(int32_t id) {
     IDMap::iterator it = idMap.find(id);
     if (it == idMap.end())
         return;
 
     if (tracing)
-        fprintf(stderr,"TraceGen:id=%d:%s\n", id, it->second);
+        fprintf(stderr, "TraceGen:id=%d:%s\n", id, it->second);
 
     free(it->second);
     idMap.erase(it);

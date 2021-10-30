@@ -33,7 +33,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "Pipeline.h"
 #include "FetchEngine.h"
 
-class SMTProcessor:public GProcessor {
+class SMTProcessor : public GProcessor {
 private:
     int32_t cFetchId;
     int32_t cDecodeId;
@@ -51,11 +51,12 @@ private:
 
     class Fetch {
     public:
-        Fetch(GMemorySystem *gm, CPU_t cpuID, int32_t cid, GProcessor *gproc, FetchEngine *fe=0);
+        Fetch(GMemorySystem *gm, CPU_t cpuID, int32_t cid, GProcessor *gproc, FetchEngine *fe = 0);
+
         ~Fetch();
 
         FetchEngine IFID;
-        PipeQueue   pipeQ;
+        PipeQueue pipeQ;
     };
 
     int32_t spaceInInstQueue;
@@ -66,30 +67,38 @@ private:
     Fetch *findFetch(Pid_t pid) const;
 
     void selectFetchFlow();
+
     void selectDecodeFlow();
+
     void selectIssueFlow();
 
 protected:
     // BEGIN VIRTUAL FUNCTIONS of GProcessor
     DInst **getRAT(const int32_t contextId);
+
     FetchEngine *currentFlow();
 
     void saveThreadContext(Pid_t pid);
+
     void loadThreadContext(Pid_t pid);
+
     ThreadContext *getThreadContext(Pid_t pid);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 
-    size_t  availableFlows() const;
+    size_t availableFlows() const;
 
     long long getAndClearnGradInsts(Pid_t pid);
+
     long long getAndClearnWPathInsts(Pid_t pid);
 
 
     void goRabbitMode(long long n2Skip);
 
     Pid_t findVictimPid() const;
+
     bool hasWork() const;
 
     void advanceClock();
@@ -100,6 +109,7 @@ protected:
 
 public:
     virtual ~SMTProcessor();
+
     SMTProcessor(GMemorySystem *gm, CPU_t i);
 
 #ifdef SESC_MISPATH

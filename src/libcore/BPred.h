@@ -56,10 +56,11 @@ enum PredType {
 class BPred {
 public:
     typedef unsigned long long HistoryType;
+
     class Hash4HistoryType {
     public:
         size_t operator()(const HistoryType &addr) const {
-            return ((addr) ^ (addr>>16));
+            return ((addr) ^ (addr >> 16));
         }
     };
 
@@ -77,15 +78,17 @@ protected:
         HistoryType cid = inst->currentID(); // psudo-PC works, no need addr (slower)
 
         // Remove used bits (restrict predictions per cycle)
-        cid = cid>>bpred4CycleAddrShift;
+        cid = cid >> bpred4CycleAddrShift;
         // randomize it
         cid = (cid >> 17) ^ (cid);
 
         return cid;
     }
+
 protected:
 public:
     BPred(int32_t i, int32_t fetchWidth, const char *section, const char *name);
+
     virtual ~BPred();
 
     // If oracleID is not passed, the predictor is not updaed
@@ -102,7 +105,8 @@ public:
         return pred;
     }
 
-    virtual void switchIn(Pid_t pid)  = 0;
+    virtual void switchIn(Pid_t pid) = 0;
+
     virtual void switchOut(Pid_t pid) = 0;
 };
 
@@ -117,10 +121,13 @@ private:
 protected:
 public:
     BPRas(int32_t i, int32_t fetchWidth, const char *section);
+
     ~BPRas();
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -147,13 +154,16 @@ private:
 
 protected:
 public:
-    BPBTB(int32_t i, int32_t fetchWidth, const char *section, const char *name=0);
+    BPBTB(int32_t i, int32_t fetchWidth, const char *section, const char *name = 0);
+
     ~BPBTB();
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
-    void updateOnly(const Instruction * inst, InstID oracleID);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+
+    void updateOnly(const Instruction *inst, InstID oracleID);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -164,13 +174,13 @@ private:
 protected:
 public:
     BPOracle(int32_t i, int32_t fetchWidth, const char *section)
-        :BPred(i, fetchWidth, section, "Oracle")
-        ,btb(i, fetchWidth, section) {
+            : BPred(i, fetchWidth, section, "Oracle"), btb(i, fetchWidth, section) {
     }
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -179,13 +189,14 @@ private:
 protected:
 public:
     BPNotTaken(int32_t i, int32_t fetchWidth, const char *section)
-        :BPred(i, fetchWidth, section, "NotTaken") {
+            : BPred(i, fetchWidth, section, "NotTaken") {
         // Done
     }
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -196,36 +207,36 @@ private:
 protected:
 public:
     BPTaken(int32_t i, int32_t fetchWidth, const char *section)
-        :BPred(i, fetchWidth, section, "Taken")
-        ,btb(  i, fetchWidth, section) {
+            : BPred(i, fetchWidth, section, "Taken"), btb(i, fetchWidth, section) {
         // Done
     }
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
-class BPStatic:public BPred {
+class BPStatic : public BPred {
 private:
     BPBTB btb;
 
 protected:
 public:
     BPStatic(int32_t i, int32_t fetchWidth, const char *section)
-        :BPred(i, fetchWidth, section, "Static")
-        ,btb(  i, fetchWidth, section) {
+            : BPred(i, fetchWidth, section, "Static"), btb(i, fetchWidth, section) {
         // Done
     }
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
-class BP2bit:public BPred {
+class BP2bit : public BPred {
 private:
     BPBTB btb;
 
@@ -234,18 +245,19 @@ protected:
 public:
     BP2bit(int32_t i, int32_t fetchWidth, const char *section);
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
-class BP2level:public BPred {
+class BP2level : public BPred {
 private:
     BPBTB btb;
 
     const ushort l1Size;
-    const uint32_t  l1SizeMask;
+    const uint32_t l1SizeMask;
 
     const ushort historySize;
     const HistoryType historyMask;
@@ -256,15 +268,17 @@ private:
 protected:
 public:
     BP2level(int32_t i, int32_t fetchWidth, const char *section);
+
     ~BP2level();
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
-class BPHybrid:public BPred {
+class BPHybrid : public BPred {
 private:
     BPBTB btb;
 
@@ -281,11 +295,13 @@ private:
 protected:
 public:
     BPHybrid(int32_t i, int32_t fetchWidth, const char *section);
+
     ~BPHybrid();
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -296,26 +312,28 @@ private:
     SCTable BIM;
 
     SCTable G0;
-    const ushort       G0HistorySize;
-    const HistoryType  G0HistoryMask;
+    const ushort G0HistorySize;
+    const HistoryType G0HistoryMask;
 
     SCTable G1;
-    const ushort       G1HistorySize;
-    const HistoryType  G1HistoryMask;
+    const ushort G1HistorySize;
+    const HistoryType G1HistoryMask;
 
     SCTable metaTable;
-    const ushort       MetaHistorySize;
-    const HistoryType  MetaHistoryMask;
+    const ushort MetaHistorySize;
+    const HistoryType MetaHistoryMask;
 
     HistoryType history;
 protected:
 public:
     BP2BcgSkew(int32_t i, int32_t fetchWidth, const char *section);
+
     ~BP2BcgSkew();
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -343,11 +361,13 @@ private:
 protected:
 public:
     BPyags(int32_t i, int32_t fetchWidth, const char *section);
+
     ~BPyags();
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -380,13 +400,16 @@ private:
     int32_t TC;
 protected:
     int32_t geoidx(long long Add, long long *histo, long long phisto, int32_t m, int32_t funct);
+
 public:
     BPOgehl(int32_t i, int32_t fetchWidth, const char *section);
+
     ~BPOgehl();
 
-    PredType predict(const Instruction * inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
 
     void switchIn(Pid_t pid);
+
     void switchOut(Pid_t pid);
 };
 
@@ -406,7 +429,8 @@ private:
 
 protected:
 public:
-    BPredictor(int32_t i, int32_t fetchWidth, const char *section, BPredictor *bpred=0);
+    BPredictor(int32_t i, int32_t fetchWidth, const char *section, BPredictor *bpred = 0);
+
     ~BPredictor();
 
     static BPred *getBPred(int32_t id, int32_t fetchWidth, const char *sec);
@@ -417,8 +441,8 @@ public:
         nBranches.cinc(doUpdate);
         nTaken.cinc(inst->calcNextInstID() != oracleID);
 
-        PredType p= ras.doPredict(inst, oracleID, doUpdate);
-        if( p != NoPrediction ) {
+        PredType p = ras.doPredict(inst, oracleID, doUpdate);
+        if (p != NoPrediction) {
             nMiss.cinc(p != CorrectPrediction && doUpdate);
             return p;
         }

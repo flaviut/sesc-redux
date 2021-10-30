@@ -33,10 +33,9 @@
 
 //#define DEBUG_SELALLOC
 
-SelAlloc::SelAlloc( Module *parent, const string& name,
-                    int inputs, int outputs, int iters ) :
-    SparseAllocator( parent, name, inputs, outputs )
-{
+SelAlloc::SelAlloc(Module *parent, const string &name,
+                   int inputs, int outputs, int iters) :
+        SparseAllocator(parent, name, inputs, outputs) {
     _iter = iters;
 
     _gptrs.resize(outputs, 0);
@@ -44,8 +43,7 @@ SelAlloc::SelAlloc( Module *parent, const string& name,
     _outmask.resize(outputs, 0);
 }
 
-void SelAlloc::Allocate( )
-{
+void SelAlloc::Allocate() {
     int input;
     int output;
 
@@ -61,52 +59,45 @@ void SelAlloc::Allocate( )
 
     vector<int> grants(_outputs, -1);
 
-    for ( int iter = 0; iter < _iter; ++iter )
-    {
+    for (int iter = 0; iter < _iter; ++iter) {
         // Grant phase
 
-        for( outer_iter = _out_occ.begin( );
-                outer_iter != _out_occ.end( ); ++outer_iter )
-        {
+        for (outer_iter = _out_occ.begin();
+             outer_iter != _out_occ.end(); ++outer_iter) {
             output = *outer_iter;
 
             // Skip loop if there are no requests
             // or the output is already matched or
             // the output is masked
-            if ( ( _out_req[output].empty( ) ) ||
-                    ( _outmatch[output] != -1 ) ||
-                    ( _outmask[output] != 0 ) )
-            {
+            if ((_out_req[output].empty()) ||
+                (_outmatch[output] != -1) ||
+                (_outmask[output] != 0)) {
                 continue;
             }
 
             // A round-robin arbiter between input requests
             input_offset = _gptrs[output];
 
-            p = _out_req[output].begin( );
-            while( ( p != _out_req[output].end( ) ) &&
-                    ( p->second.port < input_offset ) )
-            {
+            p = _out_req[output].begin();
+            while ((p != _out_req[output].end()) &&
+                   (p->second.port < input_offset)) {
                 p++;
             }
 
             max_index = -1;
-            max_pri   = 0;
+            max_pri = 0;
 
             wrapped = false;
-            while( (!wrapped) ||
-                    ( ( p != _out_req[output].end() ) &&
-                      ( p->second.port < input_offset ) ) )
-            {
-                if ( p == _out_req[output].end( ) )
-                {
-                    if ( wrapped )
-                    {
+            while ((!wrapped) ||
+                   ((p != _out_req[output].end()) &&
+                    (p->second.port < input_offset))) {
+                if (p == _out_req[output].end()) {
+                    if (wrapped) {
                         break;
                     }
                     // p is valid here because empty lists
                     // are skipped (above)
-                    p = _out_req[output].begin( );
+                    p = _out_req[output].begin();
                     wrapped = true;
                 }
 
@@ -115,17 +106,16 @@ void SelAlloc::Allocate( )
                 // we know the output is free (above) and
                 // if the input is free, check if request is the
                 // highest priority so far
-                if ( ( _inmatch[input] == -1 ) &&
-                        ( ( p->second.out_pri > max_pri ) || ( max_index == -1 ) ) )
-                {
-                    max_pri   = p->second.out_pri;
+                if ((_inmatch[input] == -1) &&
+                    ((p->second.out_pri > max_pri) || (max_index == -1))) {
+                    max_pri = p->second.out_pri;
                     max_index = input;
                 }
 
                 p++;
             }
 
-            if ( max_index != -1 )   // grant
+            if (max_index != -1)   // grant
             {
                 grants[output] = max_index;
             }
@@ -149,43 +139,37 @@ void SelAlloc::Allocate( )
 
         // Accept phase
 
-        for ( outer_iter = _in_occ.begin( );
-                outer_iter != _in_occ.end( ); ++outer_iter )
-        {
+        for (outer_iter = _in_occ.begin();
+             outer_iter != _in_occ.end(); ++outer_iter) {
             input = *outer_iter;
 
-            if ( _in_req[input].empty( ) )
-            {
+            if (_in_req[input].empty()) {
                 continue;
             }
 
             // A round-robin arbiter between output grants
             output_offset = _aptrs[input];
 
-            p = _in_req[input].begin( );
-            while( ( p != _in_req[input].end( ) ) &&
-                    ( p->second.port < output_offset ) )
-            {
+            p = _in_req[input].begin();
+            while ((p != _in_req[input].end()) &&
+                   (p->second.port < output_offset)) {
                 p++;
             }
 
             max_index = -1;
-            max_pri   = 0;
+            max_pri = 0;
 
             wrapped = false;
-            while( (!wrapped) ||
-                    ( ( p != _in_req[input].end() ) &&
-                      ( p->second.port < output_offset ) ) )
-            {
-                if ( p == _in_req[input].end( ) )
-                {
-                    if ( wrapped )
-                    {
+            while ((!wrapped) ||
+                   ((p != _in_req[input].end()) &&
+                    (p->second.port < output_offset))) {
+                if (p == _in_req[input].end()) {
+                    if (wrapped) {
                         break;
                     }
                     // p is valid here because empty lists
                     // are skipped (above)
-                    p = _in_req[input].begin( );
+                    p = _in_req[input].begin();
                     wrapped = true;
                 }
 
@@ -194,30 +178,27 @@ void SelAlloc::Allocate( )
                 // we know the output is free (above) and
                 // if the input is free, check if the highest
                 // priroity
-                if ( ( grants[output] == input ) &&
-                        ( !_out_req[output].empty( ) ) &&
-                        ( ( p->second.in_pri > max_pri ) || ( max_index == -1 ) ) )
-                {
-                    max_pri   = p->second.in_pri;
+                if ((grants[output] == input) &&
+                    (!_out_req[output].empty()) &&
+                    ((p->second.in_pri > max_pri) || (max_index == -1))) {
+                    max_pri = p->second.in_pri;
                     max_index = output;
                 }
 
                 p++;
             }
 
-            if ( max_index != -1 )
-            {
+            if (max_index != -1) {
                 // Accept
                 output = max_index;
 
-                _inmatch[input]   = output;
+                _inmatch[input] = output;
                 _outmatch[output] = input;
 
                 // Only update pointers if accepted during the 1st iteration
-                if ( iter == 0 )
-                {
-                    _gptrs[output] = ( input + 1 ) % _inputs;
-                    _aptrs[input]  = ( output + 1 ) % _outputs;
+                if (iter == 0) {
+                    _gptrs[output] = (input + 1) % _inputs;
+                    _aptrs[input] = (output + 1) % _outputs;
                 }
             }
         }
@@ -240,45 +221,36 @@ void SelAlloc::Allocate( )
 #endif
 }
 
-void SelAlloc::MaskOutput( int out, int mask )
-{
-    assert( ( out >= 0 ) && ( out < _outputs ) );
+void SelAlloc::MaskOutput(int out, int mask) {
+    assert((out >= 0) && (out < _outputs));
     _outmask[out] = mask;
 }
 
-void SelAlloc::PrintRequests( ostream * os ) const
-{
+void SelAlloc::PrintRequests(ostream *os) const {
     map<int, sRequest>::const_iterator iter;
 
-    if(!os) os = &cout;
+    if (!os) os = &cout;
 
     *os << "Input requests = [ ";
-    for ( int input = 0; input < _inputs; ++input )
-    {
+    for (int input = 0; input < _inputs; ++input) {
         *os << input << " -> [ ";
-        for ( iter = _in_req[input].begin( );
-                iter != _in_req[input].end( ); iter++ )
-        {
+        for (iter = _in_req[input].begin();
+             iter != _in_req[input].end(); iter++) {
             *os << iter->second.port << " ";
         }
         *os << "]  ";
     }
     *os << "], output requests = [ ";
-    for ( int output = 0; output < _outputs; ++output )
-    {
+    for (int output = 0; output < _outputs; ++output) {
         *os << output << " -> ";
-        if ( _outmask[output] == 0 )
-        {
+        if (_outmask[output] == 0) {
             *os << "[ ";
-            for ( iter = _out_req[output].begin( );
-                    iter != _out_req[output].end( ); iter++ )
-            {
+            for (iter = _out_req[output].begin();
+                 iter != _out_req[output].end(); iter++) {
                 *os << iter->second.port << " ";
             }
             *os << "]  ";
-        }
-        else
-        {
+        } else {
             *os << "masked  ";
         }
     }

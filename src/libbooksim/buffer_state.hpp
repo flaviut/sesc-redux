@@ -36,43 +36,50 @@
 #include "credit.hpp"
 #include "config_utils.hpp"
 
-class BufferState : public Module
-{
+class BufferState : public Module {
 
-    class BufferPolicy : public Module
-    {
+    class BufferPolicy : public Module {
     protected:
-        BufferState const * const _buffer_state;
+        BufferState const *const _buffer_state;
     public:
-        BufferPolicy(Configuration const & config, BufferState * parent,
-                     const string & name);
+        BufferPolicy(Configuration const &config, BufferState *parent,
+                     const string &name);
+
         virtual void SetMinLatency(int min_latency) {}
+
         virtual void TakeBuffer(int vc = 0);
-        virtual void SendingFlit(Flit const * const f);
+
+        virtual void SendingFlit(Flit const *const f);
+
         virtual void FreeSlotFor(int vc = 0);
+
         virtual bool IsFullFor(int vc = 0) const = 0;
+
         virtual int AvailableFor(int vc = 0) const = 0;
+
         virtual int LimitFor(int vc = 0) const = 0;
 
-        static BufferPolicy * New(Configuration const & config,
-                                  BufferState * parent, const string & name);
+        static BufferPolicy *New(Configuration const &config,
+                                 BufferState *parent, const string &name);
     };
 
-    class PrivateBufferPolicy : public BufferPolicy
-    {
+    class PrivateBufferPolicy : public BufferPolicy {
     protected:
         int _vc_buf_size;
     public:
-        PrivateBufferPolicy(Configuration const & config, BufferState * parent,
-                            const string & name);
-        virtual void SendingFlit(Flit const * const f);
+        PrivateBufferPolicy(Configuration const &config, BufferState *parent,
+                            const string &name);
+
+        virtual void SendingFlit(Flit const *const f);
+
         virtual bool IsFullFor(int vc = 0) const;
+
         virtual int AvailableFor(int vc = 0) const;
+
         virtual int LimitFor(int vc = 0) const;
     };
 
-    class SharedBufferPolicy : public BufferPolicy
-    {
+    class SharedBufferPolicy : public BufferPolicy {
     protected:
         int _buf_size;
         vector<int> _private_buf_vc_map;
@@ -81,60 +88,75 @@ class BufferState : public Module
         int _shared_buf_size;
         int _shared_buf_occupancy;
         vector<int> _reserved_slots;
+
         void ProcessFreeSlot(int vc = 0);
+
     public:
-        SharedBufferPolicy(Configuration const & config, BufferState * parent,
-                           const string & name);
-        virtual void SendingFlit(Flit const * const f);
+        SharedBufferPolicy(Configuration const &config, BufferState *parent,
+                           const string &name);
+
+        virtual void SendingFlit(Flit const *const f);
+
         virtual void FreeSlotFor(int vc = 0);
+
         virtual bool IsFullFor(int vc = 0) const;
+
         virtual int AvailableFor(int vc = 0) const;
+
         virtual int LimitFor(int vc = 0) const;
     };
 
-    class LimitedSharedBufferPolicy : public SharedBufferPolicy
-    {
+    class LimitedSharedBufferPolicy : public SharedBufferPolicy {
     protected:
         int _vcs;
         int _active_vcs;
         int _max_held_slots;
     public:
-        LimitedSharedBufferPolicy(Configuration const & config,
-                                  BufferState * parent,
-                                  const string & name);
+        LimitedSharedBufferPolicy(Configuration const &config,
+                                  BufferState *parent,
+                                  const string &name);
+
         virtual void TakeBuffer(int vc = 0);
-        virtual void SendingFlit(Flit const * const f);
+
+        virtual void SendingFlit(Flit const *const f);
+
         virtual bool IsFullFor(int vc = 0) const;
+
         virtual int AvailableFor(int vc = 0) const;
+
         virtual int LimitFor(int vc = 0) const;
     };
 
-    class DynamicLimitedSharedBufferPolicy : public LimitedSharedBufferPolicy
-    {
+    class DynamicLimitedSharedBufferPolicy : public LimitedSharedBufferPolicy {
     public:
-        DynamicLimitedSharedBufferPolicy(Configuration const & config,
-                                         BufferState * parent,
-                                         const string & name);
+        DynamicLimitedSharedBufferPolicy(Configuration const &config,
+                                         BufferState *parent,
+                                         const string &name);
+
         virtual void TakeBuffer(int vc = 0);
-        virtual void SendingFlit(Flit const * const f);
+
+        virtual void SendingFlit(Flit const *const f);
     };
 
-    class ShiftingDynamicLimitedSharedBufferPolicy : public DynamicLimitedSharedBufferPolicy
-    {
+    class ShiftingDynamicLimitedSharedBufferPolicy : public DynamicLimitedSharedBufferPolicy {
     public:
-        ShiftingDynamicLimitedSharedBufferPolicy(Configuration const & config,
-                BufferState * parent,
-                const string & name);
+        ShiftingDynamicLimitedSharedBufferPolicy(Configuration const &config,
+                                                 BufferState *parent,
+                                                 const string &name);
+
         virtual void TakeBuffer(int vc = 0);
-        virtual void SendingFlit(Flit const * const f);
+
+        virtual void SendingFlit(Flit const *const f);
     };
 
-    class FeedbackSharedBufferPolicy : public SharedBufferPolicy
-    {
+    class FeedbackSharedBufferPolicy : public SharedBufferPolicy {
     protected:
         int _ComputeRTT(int vc, int last_rtt) const;
+
         int _ComputeLimit(int rtt) const;
+
         int _ComputeMaxSlots(int vc) const;
+
         int _vcs;
         vector<int> _occupancy_limit;
         vector<int> _round_trip_time;
@@ -144,34 +166,41 @@ class BufferState : public Module
         int _aging_scale;
         int _offset;
     public:
-        FeedbackSharedBufferPolicy(Configuration const & config,
-                                   BufferState * parent, const string & name);
+        FeedbackSharedBufferPolicy(Configuration const &config,
+                                   BufferState *parent, const string &name);
+
         virtual void SetMinLatency(int min_latency);
-        virtual void SendingFlit(Flit const * const f);
+
+        virtual void SendingFlit(Flit const *const f);
+
         virtual void FreeSlotFor(int vc = 0);
+
         virtual bool IsFullFor(int vc = 0) const;
+
         virtual int AvailableFor(int vc = 0) const;
+
         virtual int LimitFor(int vc = 0) const;
     };
 
-    class SimpleFeedbackSharedBufferPolicy : public FeedbackSharedBufferPolicy
-    {
+    class SimpleFeedbackSharedBufferPolicy : public FeedbackSharedBufferPolicy {
     protected:
         vector<int> _pending_credits;
     public:
-        SimpleFeedbackSharedBufferPolicy(Configuration const & config,
-                                         BufferState * parent, const string & name);
-        virtual void SendingFlit(Flit const * const f);
+        SimpleFeedbackSharedBufferPolicy(Configuration const &config,
+                                         BufferState *parent, const string &name);
+
+        virtual void SendingFlit(Flit const *const f);
+
         virtual void FreeSlotFor(int vc = 0);
     };
 
     bool _wait_for_tail_credit;
-    int  _size;
-    int  _occupancy;
+    int _size;
+    int _occupancy;
     vector<int> _vc_occupancy;
-    int  _vcs;
+    int _vcs;
 
-    BufferPolicy * _buffer_policy;
+    BufferPolicy *_buffer_policy;
 
     vector<int> _in_use_by;
     vector<bool> _tail_sent;
@@ -186,62 +215,59 @@ class BufferState : public Module
 
 public:
 
-    BufferState( const Configuration& config,
-                 Module *parent, const string& name );
+    BufferState(const Configuration &config,
+                Module *parent, const string &name);
 
     ~BufferState();
 
-    inline void SetMinLatency(int min_latency)
-    {
+    inline void SetMinLatency(int min_latency) {
         _buffer_policy->SetMinLatency(min_latency);
     }
 
-    void ProcessCredit( Credit const * const c );
-    void SendingFlit( Flit const * const f );
+    void ProcessCredit(Credit const *const c);
 
-    void TakeBuffer( int vc = 0, int tag = 0 );
+    void SendingFlit(Flit const *const f);
 
-    inline bool IsFull() const
-    {
+    void TakeBuffer(int vc = 0, int tag = 0);
+
+    inline bool IsFull() const {
         //return (_occupancy < _size);
-		assert(_occupancy <= _size);
-		return (_occupancy == _size);
+        assert(_occupancy <= _size);
+        return (_occupancy == _size);
     }
-    inline bool IsFullFor( int vc = 0 ) const
-    {
+
+    inline bool IsFullFor(int vc = 0) const {
         return _buffer_policy->IsFullFor(vc);
     }
-    inline int AvailableFor( int vc = 0 ) const
-    {
+
+    inline int AvailableFor(int vc = 0) const {
         return _buffer_policy->AvailableFor(vc);
     }
-    inline int LimitFor( int vc = 0 ) const
-    {
+
+    inline int LimitFor(int vc = 0) const {
         return _buffer_policy->LimitFor(vc);
     }
-    inline bool IsEmptyFor(int vc = 0) const
-    {
+
+    inline bool IsEmptyFor(int vc = 0) const {
         assert((vc >= 0) && (vc < _vcs));
         return (_vc_occupancy[vc] == 0);
     }
-    inline bool IsAvailableFor( int vc = 0 ) const
-    {
-        assert( ( vc >= 0 ) && ( vc < _vcs ) );
+
+    inline bool IsAvailableFor(int vc = 0) const {
+        assert((vc >= 0) && (vc < _vcs));
         return _in_use_by[vc] < 0;
     }
-    inline int UsedBy(int vc = 0) const
-    {
-        assert( ( vc >= 0 ) && ( vc < _vcs ) );
+
+    inline int UsedBy(int vc = 0) const {
+        assert((vc >= 0) && (vc < _vcs));
         return _in_use_by[vc];
     }
 
-    inline int Occupancy() const
-    {
+    inline int Occupancy() const {
         return _occupancy;
     }
 
-    inline int OccupancyFor( int vc = 0 ) const
-    {
+    inline int OccupancyFor(int vc = 0) const {
         assert((vc >= 0) && (vc < _vcs));
         return _vc_occupancy[vc];
     }
@@ -254,7 +280,7 @@ public:
     }
 #endif
 
-    void Display( ostream & os = cout ) const;
+    void Display(ostream &os = cout) const;
 };
 
 #endif

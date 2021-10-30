@@ -48,40 +48,41 @@
 
 using namespace std;
 
-class Router ;
+class Router;
 
-class FlitChannel : public Channel<Flit>
-{
+class FlitChannel : public Channel<Flit> {
 public:
-    FlitChannel(Module * parent, string const & name, int classes);
+    FlitChannel(Module *parent, string const &name, int classes);
 
-    void SetSource(Router const * const router, int port) ;
-    inline Router const * GetSource() const
-    {
+    void SetSource(Router const *const router, int port);
+
+    inline Router const *GetSource() const {
         return _routerSource;
     }
-    inline int const & GetSourcePort() const
-    {
+
+    inline int const &GetSourcePort() const {
         return _routerSourcePort;
     }
-    void SetSink(Router const * const router, int port) ;
-    inline Router const * GetSink() const
-    {
+
+    void SetSink(Router const *const router, int port);
+
+    inline Router const *GetSink() const {
         return _routerSink;
     }
-    inline int const & GetSinkPort() const
-    {
+
+    inline int const &GetSinkPort() const {
         return _routerSinkPort;
     }
-    inline vector<int> const & GetActivity() const
-    {
+
+    inline vector<int> const &GetActivity() const {
         return _active;
     }
 
     // Send flit
-    virtual void Send(Flit * flit);
+    virtual void Send(Flit *flit);
 
     virtual void ReadInputs();
+
     virtual void WriteOutputs();
 
 private:
@@ -92,9 +93,9 @@ private:
     //
     ////////////////////////////////////////
 
-    Router const * _routerSource;
+    Router const *_routerSource;
     int _routerSourcePort;
-    Router const * _routerSink;
+    Router const *_routerSink;
     int _routerSinkPort;
 
     // Statistics for Activity Factors

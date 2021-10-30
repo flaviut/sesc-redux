@@ -25,46 +25,40 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "ProcessId.h"
 #include "OSSim.h"
 
-EnergyStore *EnergyMgr::enStore=0;
+EnergyStore *EnergyMgr::enStore = 0;
 
-void EnergyMgr::init()
-{
+void EnergyMgr::init() {
     enStore = new EnergyStore();
 
-    int32_t nProcs = SescConf->getRecordSize("","cpucore");
+    int32_t nProcs = SescConf->getRecordSize("", "cpucore");
 
     // Check area factor, so that it is dump in conf
-    for(Pid_t i = 0; i < nProcs; i ++) {
-        SescConf->getDouble("cpucore","areaFactor",i);
+    for (Pid_t i = 0; i < nProcs; i++) {
+        SescConf->getDouble("cpucore", "areaFactor", i);
     }
 }
 
-double EnergyMgr::get(const char *block, const char *name, int32_t procId)
-{
+double EnergyMgr::get(const char *block, const char *name, int32_t procId) {
     I(enStore);
     return enStore->get(block, name, procId);
 }
 
-double EnergyMgr::get(const char* name, int32_t procId)
-{
+double EnergyMgr::get(const char *name, int32_t procId) {
     I(enStore);
     return enStore->get(name, procId);
 }
 
-double EnergyMgr::etop(double energy)
-{   // Energy to Power
-    return (energy/globalClock) * (osSim->getFrequency()/1e9);
+double EnergyMgr::etop(double energy) {   // Energy to Power
+    return (energy / globalClock) * (osSim->getFrequency() / 1e9);
 }
 
-double EnergyMgr::ptoe(double power)
-{   // Power to Energy
-    double time = globalClock * (1e9/osSim->getFrequency());
+double EnergyMgr::ptoe(double power) {   // Power to Energy
+    double time = globalClock * (1e9 / osSim->getFrequency());
     return power * time;
 }
 
-double EnergyMgr::cycletons(double clk)
-{   // cycles to ns
-    double fac = osSim->getFrequency()/1e9;
+double EnergyMgr::cycletons(double clk) {   // cycles to ns
+    double fac = osSim->getFrequency() / 1e9;
     return clk / fac;
 }
 

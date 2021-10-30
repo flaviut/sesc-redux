@@ -42,17 +42,18 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // Class CacheGeneric, the combinational logic of Cache
 //
 template<class State, class Addr_t, bool Energy>
-CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create(int32_t size, int32_t assoc, int32_t bsize, int32_t addrUnit, const char *pStr, bool skew)
-{
+CacheGeneric<State, Addr_t, Energy> *
+CacheGeneric<State, Addr_t, Energy>::create(int32_t size, int32_t assoc, int32_t bsize, int32_t addrUnit,
+                                            const char *pStr, bool skew) {
     CacheGeneric *cache;
 
     if (skew) {
-        I(assoc=1); // Skew cache should be direct map
+        I(assoc = 1); // Skew cache should be direct map
         cache = new CacheDMSkew<State, Addr_t, Energy>(size, bsize, addrUnit, pStr);
-    } else if (assoc==1) {
+    } else if (assoc == 1) {
         // Direct Map cache
         cache = new CacheDM<State, Addr_t, Energy>(size, bsize, addrUnit, pStr);
-    } else if(size == (assoc * bsize)) {
+    } else if (size == (assoc * bsize)) {
         // TODO: Fully assoc can use STL container for speed
         cache = new CacheAssoc<State, Addr_t, Energy>(size, assoc, bsize, addrUnit, pStr);
     } else {
@@ -65,27 +66,26 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
 }
 
 template<class State, class Addr_t, bool Energy>
-PowerGroup CacheGeneric<State, Addr_t, Energy>::getRightStat(const char* type)
-{
-    if(strcasecmp(type,"icache")==0)
+PowerGroup CacheGeneric<State, Addr_t, Energy>::getRightStat(const char *type) {
+    if (strcasecmp(type, "icache") == 0)
         return FetchPower;
 
-    if(strcasecmp(type,"itlb")==0)
+    if (strcasecmp(type, "itlb") == 0)
         return FetchPower;
 
-    if(strcasecmp(type,"cache")==0)
+    if (strcasecmp(type, "cache") == 0)
         return MemPower;
 
-    if(strcasecmp(type,"tlb")==0)
+    if (strcasecmp(type, "tlb") == 0)
         return MemPower;
 
-    if(strcasecmp(type,"dir")==0)
+    if (strcasecmp(type, "dir") == 0)
         return MemPower;
 
-    if(strcasecmp(type,"revLVIDTable")==0)
+    if (strcasecmp(type, "revLVIDTable") == 0)
         return MemPower;
 
-    if(strcasecmp(type,"nicecache")==0)
+    if (strcasecmp(type, "nicecache") == 0)
         return MemPower;
 
     MSG("Unknown power group for [%s], add it to CacheCore", type);
@@ -96,8 +96,7 @@ PowerGroup CacheGeneric<State, Addr_t, Energy>::getRightStat(const char* type)
 }
 
 template<class State, class Addr_t, bool Energy>
-void CacheGeneric<State, Addr_t, Energy>::createStats(const char *section, const char *name)
-{
+void CacheGeneric<State, Addr_t, Energy>::createStats(const char *section, const char *name) {
     // get the type
     bool typeExists = SescConf->checkCharPtr(section, "deviceType");
     const char *type = 0;
@@ -105,7 +104,7 @@ void CacheGeneric<State, Addr_t, Energy>::createStats(const char *section, const
         type = SescConf->getCharPtr(section, "deviceType");
 
     int32_t procId = 0;
-    if ( name[0] == 'P' && name[1] == '(' ) {
+    if (name[0] == 'P' && name[1] == '(') {
         // This structure is assigned to an specific processor
         const char *number = &name[2];
         procId = atoi(number);
@@ -114,38 +113,26 @@ void CacheGeneric<State, Addr_t, Energy>::createStats(const char *section, const
     if (Energy) {
         PowerGroup pg;
         pg = getRightStat(type);
-        rdEnergy[0] = new GStatsEnergy("rdHitEnergy",name
-                                       ,procId
-                                       ,pg
-                                       ,EnergyMgr::get(section,"rdHitEnergy"));
+        rdEnergy[0] = new GStatsEnergy("rdHitEnergy", name, procId, pg, EnergyMgr::get(section, "rdHitEnergy"));
 
-        rdEnergy[1] = new GStatsEnergy("rdMissEnergy",name
-                                       ,procId
-                                       ,pg
-                                       ,EnergyMgr::get(section,"rdMissEnergy"));
+        rdEnergy[1] = new GStatsEnergy("rdMissEnergy", name, procId, pg, EnergyMgr::get(section, "rdMissEnergy"));
 
-        wrEnergy[0]  = new GStatsEnergy("wrHitEnergy",name
-                                        ,procId
-                                        ,pg
-                                        ,EnergyMgr::get(section,"wrHitEnergy"));
+        wrEnergy[0] = new GStatsEnergy("wrHitEnergy", name, procId, pg, EnergyMgr::get(section, "wrHitEnergy"));
 
-        wrEnergy[1] = new GStatsEnergy("wrMissEnergy",name
-                                       ,procId
-                                       ,pg
-                                       ,EnergyMgr::get(section,"wrMissEnergy"));
+        wrEnergy[1] = new GStatsEnergy("wrMissEnergy", name, procId, pg, EnergyMgr::get(section, "wrMissEnergy"));
 
     } else {
-        rdEnergy[0]  = 0;
-        rdEnergy[1]  = 0;
-        wrEnergy[0]  = 0;
-        wrEnergy[1]  = 0;
+        rdEnergy[0] = 0;
+        rdEnergy[1] = 0;
+        wrEnergy[0] = 0;
+        wrEnergy[1] = 0;
     }
 }
 
 template<class State, class Addr_t, bool Energy>
-CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create(const char *section, const char *append, const char *format, ...)
-{
-    CacheGeneric *cache=0;
+CacheGeneric<State, Addr_t, Energy> *
+CacheGeneric<State, Addr_t, Energy>::create(const char *section, const char *append, const char *format, ...) {
+    CacheGeneric *cache = 0;
     char size[STR_BUF_SIZE];
     char bsize[STR_BUF_SIZE];
     char addrUnit[STR_BUF_SIZE];
@@ -153,12 +140,12 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
     char repl[STR_BUF_SIZE];
     char skew[STR_BUF_SIZE];
 
-    snprintf(size ,STR_BUF_SIZE,"%sSize" ,append);
-    snprintf(bsize,STR_BUF_SIZE,"%sBsize",append);
-    snprintf(addrUnit,STR_BUF_SIZE,"%sAddrUnit",append);
-    snprintf(assoc,STR_BUF_SIZE,"%sAssoc",append);
-    snprintf(repl ,STR_BUF_SIZE,"%sReplPolicy",append);
-    snprintf(skew ,STR_BUF_SIZE,"%sSkew",append);
+    snprintf(size, STR_BUF_SIZE, "%sSize", append);
+    snprintf(bsize, STR_BUF_SIZE, "%sBsize", append);
+    snprintf(addrUnit, STR_BUF_SIZE, "%sAddrUnit", append);
+    snprintf(assoc, STR_BUF_SIZE, "%sAssoc", append);
+    snprintf(repl, STR_BUF_SIZE, "%sReplPolicy", append);
+    snprintf(skew, STR_BUF_SIZE, "%sSkew", append);
 
     int32_t s = SescConf->getInt(section, size);
     int32_t a = SescConf->getInt(section, assoc);
@@ -169,10 +156,10 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
 
     //For now, tolerate caches that don't have this defined.
     int32_t u;
-    if ( SescConf->checkInt(section,addrUnit) ) {
-        if ( SescConf->isBetween(section, addrUnit, 0, b) &&
-                SescConf->isPower2(section, addrUnit) )
-            u = SescConf->getInt(section,addrUnit);
+    if (SescConf->checkInt(section, addrUnit)) {
+        if (SescConf->isBetween(section, addrUnit, 0, b) &&
+            SescConf->isPower2(section, addrUnit))
+            u = SescConf->getInt(section, addrUnit);
         else
             u = 1;
     } else {
@@ -181,23 +168,23 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
 
     const char *pStr = SescConf->getCharPtr(section, repl);
 
-    if(SescConf->isGT(section, size, 0) &&
-            SescConf->isGT(section, bsize, 0) &&
-            SescConf->isGT(section, assoc, 0) &&
-            SescConf->isPower2(section, size) &&
-            SescConf->isPower2(section, bsize) &&
-            SescConf->isPower2(section, assoc) &&
-            SescConf->isInList(section, repl, k_RANDOM, k_LRU)) {
+    if (SescConf->isGT(section, size, 0) &&
+        SescConf->isGT(section, bsize, 0) &&
+        SescConf->isGT(section, assoc, 0) &&
+        SescConf->isPower2(section, size) &&
+        SescConf->isPower2(section, bsize) &&
+        SescConf->isPower2(section, assoc) &&
+        SescConf->isInList(section, repl, k_RANDOM, k_LRU)) {
 
         cache = create(s, a, b, u, pStr, sk);
     } else {
         // this is just to keep the configuration going,
         // sesc will abort before it begins
         cache = new CacheAssoc<State, Addr_t, Energy>(2,
-                1,
-                1,
-                1,
-                pStr);
+                                                      1,
+                                                      1,
+                                                      1,
+                                                      pStr);
     }
 
     I(cache);
@@ -221,24 +208,24 @@ CacheGeneric<State, Addr_t, Energy> *CacheGeneric<State, Addr_t, Energy>::create
  *********************************************************/
 
 template<class State, class Addr_t, bool Energy>
-CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32_t blksize, int32_t addrUnit, const char *pStr)
-    : CacheGeneric<State, Addr_t, Energy>(size, assoc, blksize, addrUnit)
-{
-    I(numLines>0);
+CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32_t blksize, int32_t addrUnit,
+                                              const char *pStr)
+        : CacheGeneric<State, Addr_t, Energy>(size, assoc, blksize, addrUnit) {
+    I(numLines > 0);
 
     if (strcasecmp(pStr, k_RANDOM) == 0)
         policy = RANDOM;
-    else if (strcasecmp(pStr, k_LRU)    == 0)
+    else if (strcasecmp(pStr, k_LRU) == 0)
         policy = LRU;
     else {
-        MSG("Invalid cache policy [%s]",pStr);
+        MSG("Invalid cache policy [%s]", pStr);
         exit(0);
     }
 
-    mem     = new Line [numLines + 1];
-    content = new Line* [numLines + 1];
+    mem = new Line[numLines + 1];
+    content = new Line *[numLines + 1];
 
-    for(uint32_t i = 0; i < numLines; i++) {
+    for (uint32_t i = 0; i < numLines; i++) {
         mem[i].initialize(this);
         mem[i].invalidate();
         content[i] = &mem[i];
@@ -248,8 +235,7 @@ CacheAssoc<State, Addr_t, Energy>::CacheAssoc(int32_t size, int32_t assoc, int32
 }
 
 template<class State, class Addr_t, bool Energy>
-typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Energy>::findLinePrivate(Addr_t addr)
-{
+typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Energy>::findLinePrivate(Addr_t addr) {
     Addr_t tag = this->calcTag(addr);
 
     GI(Energy, goodInterface); // If modeling energy. Do not use this
@@ -269,13 +255,13 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
         return *theSet;
     }
 
-    Line **lineHit=0;
+    Line **lineHit = 0;
     Line **setEnd = theSet + assoc;
 
     // For sure that position 0 is not (short-cut)
     {
         Line **l = theSet + 1;
-        while(l < setEnd) {
+        while (l < setEnd) {
             if ((*l)->getTag() == tag) {
                 lineHit = l;
                 break;
@@ -294,7 +280,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
     Line *tmp = *lineHit;
     {
         Line **l = lineHit;
-        while(l > theSet) {
+        while (l > theSet) {
             Line **prev = l - 1;
             *l = *prev;;
             l = prev;
@@ -307,26 +293,25 @@ typename CacheAssoc<State, Addr_t, Energy>::Line *CacheAssoc<State, Addr_t, Ener
 
 template<class State, class Addr_t, bool Energy>
 typename CacheAssoc<State, Addr_t, Energy>::Line
-*CacheAssoc<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked)
-{
-    Addr_t tag    = this->calcTag(addr);
+*CacheAssoc<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked) {
+    Addr_t tag = this->calcTag(addr);
     Line **theSet = &content[this->calcIndex4Tag(tag)];
 
     // Check most typical case
     if ((*theSet)->getTag() == tag) {
-        GI(tag,(*theSet)->isValid());
+        GI(tag, (*theSet)->isValid());
         return *theSet;
     }
 
-    Line **lineHit=0;
-    Line **lineFree=0; // Order of preference, invalid, locked
+    Line **lineHit = 0;
+    Line **lineFree = 0; // Order of preference, invalid, locked
     Line **setEnd = theSet + assoc;
 
     // Start in reverse order so that get the youngest invalid possible,
     // and the oldest isLocked possible (lineFree)
     {
-        Line **l = setEnd -1;
-        while(l >= theSet) {
+        Line **l = setEnd - 1;
+        while (l >= theSet) {
             if ((*l)->getTag() == tag) {
                 lineHit = l;
                 break;
@@ -346,9 +331,9 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
     if (lineHit)
         return *lineHit;
 
-    I(lineHit==0);
+    I(lineHit == 0);
 
-    if(lineFree == 0 && !ignoreLocked)
+    if (lineFree == 0 && !ignoreLocked)
         return 0;
 
     if (lineFree == 0) {
@@ -359,9 +344,9 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
         } else {
             I(policy == LRU);
             // Get the oldest line possible
-            lineFree = setEnd-1;
+            lineFree = setEnd - 1;
         }
-    } else if(ignoreLocked) {
+    } else if (ignoreLocked) {
         if (policy == RANDOM && (*lineFree)->isValid()) {
             lineFree = &theSet[irand];
             irand = (irand + 1) & maskAssoc;
@@ -382,7 +367,7 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
     Line *tmp = *lineFree;
     {
         Line **l = lineFree;
-        while(l > theSet) {
+        while (l > theSet) {
             Line **prev = l - 1;
             *l = *prev;;
             l = prev;
@@ -399,14 +384,13 @@ typename CacheAssoc<State, Addr_t, Energy>::Line
 
 template<class State, class Addr_t, bool Energy>
 CacheDM<State, Addr_t, Energy>::CacheDM(int32_t size, int32_t blksize, int32_t addrUnit, const char *pStr)
-    : CacheGeneric<State, Addr_t, Energy>(size, 1, blksize, addrUnit)
-{
-    I(numLines>0);
+        : CacheGeneric<State, Addr_t, Energy>(size, 1, blksize, addrUnit) {
+    I(numLines > 0);
 
-    mem     = new Line[numLines + 1];
-    content = new Line* [numLines + 1];
+    mem = new Line[numLines + 1];
+    content = new Line *[numLines + 1];
 
-    for(uint32_t i = 0; i < numLines; i++) {
+    for (uint32_t i = 0; i < numLines; i++) {
         mem[i].initialize(this);
         mem[i].invalidate();
         content[i] = &mem[i];
@@ -414,8 +398,7 @@ CacheDM<State, Addr_t, Energy>::CacheDM(int32_t size, int32_t blksize, int32_t a
 }
 
 template<class State, class Addr_t, bool Energy>
-typename CacheDM<State, Addr_t, Energy>::Line *CacheDM<State, Addr_t, Energy>::findLinePrivate(Addr_t addr)
-{
+typename CacheDM<State, Addr_t, Energy>::Line *CacheDM<State, Addr_t, Energy>::findLinePrivate(Addr_t addr) {
     Addr_t tag = this->calcTag(addr);
 
     GI(Energy, goodInterface); // If modeling energy. Do not use this
@@ -436,8 +419,7 @@ typename CacheDM<State, Addr_t, Energy>::Line *CacheDM<State, Addr_t, Energy>::f
 
 template<class State, class Addr_t, bool Energy>
 typename CacheDM<State, Addr_t, Energy>::Line
-*CacheDM<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked)
-{
+*CacheDM<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked) {
     Addr_t tag = this->calcTag(addr);
     Line *line = content[this->calcIndex4Tag(tag)];
 
@@ -445,7 +427,7 @@ typename CacheDM<State, Addr_t, Energy>::Line
         return line;
 
     if (line->getTag() == tag) {
-        GI(tag,line->isValid());
+        GI(tag, line->isValid());
         return line;
     }
 
@@ -461,14 +443,13 @@ typename CacheDM<State, Addr_t, Energy>::Line
 
 template<class State, class Addr_t, bool Energy>
 CacheDMSkew<State, Addr_t, Energy>::CacheDMSkew(int32_t size, int32_t blksize, int32_t addrUnit, const char *pStr)
-    : CacheGeneric<State, Addr_t, Energy>(size, 1, blksize, addrUnit)
-{
-    I(numLines>0);
+        : CacheGeneric<State, Addr_t, Energy>(size, 1, blksize, addrUnit) {
+    I(numLines > 0);
 
-    mem     = new Line[numLines + 1];
-    content = new Line* [numLines + 1];
+    mem = new Line[numLines + 1];
+    content = new Line *[numLines + 1];
 
-    for(uint32_t i = 0; i < numLines; i++) {
+    for (uint32_t i = 0; i < numLines; i++) {
         mem[i].initialize(this);
         mem[i].invalidate();
         content[i] = &mem[i];
@@ -476,8 +457,7 @@ CacheDMSkew<State, Addr_t, Energy>::CacheDMSkew(int32_t size, int32_t blksize, i
 }
 
 template<class State, class Addr_t, bool Energy>
-typename CacheDMSkew<State, Addr_t, Energy>::Line *CacheDMSkew<State, Addr_t, Energy>::findLinePrivate(Addr_t addr)
-{
+typename CacheDMSkew<State, Addr_t, Energy>::Line *CacheDMSkew<State, Addr_t, Energy>::findLinePrivate(Addr_t addr) {
     Addr_t tag = this->calcTag(addr);
 
     GI(Energy, goodInterface); // If modeling energy. Do not use this
@@ -494,7 +474,7 @@ typename CacheDMSkew<State, Addr_t, Energy>::Line *CacheDMSkew<State, Addr_t, En
     }
 
     // BEGIN Skew cache
-    Addr_t tag2 = this->calcTag(addr ^ (addr>>7));
+    Addr_t tag2 = this->calcTag(addr ^ (addr >> 7));
     line = content[this->calcIndex4Tag(tag2)];
 
     if (line->getTag() == tag) {
@@ -508,8 +488,7 @@ typename CacheDMSkew<State, Addr_t, Energy>::Line *CacheDMSkew<State, Addr_t, En
 
 template<class State, class Addr_t, bool Energy>
 typename CacheDMSkew<State, Addr_t, Energy>::Line
-*CacheDMSkew<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked)
-{
+*CacheDMSkew<State, Addr_t, Energy>::findLine2Replace(Addr_t addr, bool ignoreLocked) {
     Addr_t tag = this->calcTag(addr);
     Line *line = content[this->calcIndex4Tag(tag)];
 
@@ -517,7 +496,7 @@ typename CacheDMSkew<State, Addr_t, Energy>::Line
         return line;
 
     if (line->getTag() == tag) {
-        GI(tag,line->isValid());
+        GI(tag, line->isValid());
         return line;
     }
 
@@ -525,14 +504,14 @@ typename CacheDMSkew<State, Addr_t, Energy>::Line
         return 0;
 
     // BEGIN Skew cache
-    Addr_t tag2 = this->calcTag(addr ^ (addr>>7));
+    Addr_t tag2 = this->calcTag(addr ^ (addr >> 7));
     Line *line2 = content[this->calcIndex4Tag(tag2)];
 
     if (line2->getTag() == tag) {
         I(line2->isValid());
         return line2;
     }
-    static int32_t rand_number =0;
+    static int32_t rand_number = 0;
     if (rand_number++ & 1)
         return line;
     else

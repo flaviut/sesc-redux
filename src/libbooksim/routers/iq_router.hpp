@@ -40,22 +40,28 @@
 using namespace std;
 
 class VC;
+
 class Flit;
+
 class Credit;
+
 class Buffer;
+
 class BufferState;
+
 class Allocator;
+
 class SwitchMonitor;
+
 class BufferMonitor;
 
-class IQRouter : public Router
-{
+class IQRouter : public Router {
 
     int _vcs;
 
     bool _vc_busy_when_full;
     bool _vc_prioritize_empty;
-	bool _vc_shuffle_requests;
+    bool _vc_shuffle_requests;
 
     bool _speculative;
     bool _spec_check_elig;
@@ -91,7 +97,7 @@ class IQRouter : public Router
     vector<int> _vc_rr_offset;
     vector<int> _sw_rr_offset;
 
-    tRoutingFunction   _rf;
+    tRoutingFunction _rf;
 
     int _output_buffer_size;
     vector<queue<Flit *> > _output_buffer;
@@ -112,33 +118,43 @@ class IQRouter : public Router
     vector<vector<queue<int> > > _outstanding_classes;
 #endif
 
-    bool _ReceiveFlits( );
-    bool _ReceiveCredits( );
+    bool _ReceiveFlits();
 
-    virtual void _InternalStep( );
+    bool _ReceiveCredits();
+
+    virtual void _InternalStep();
 
     bool _SWAllocAddReq(int input, int vc, int output);
 
-    void _InputQueuing( );
+    void _InputQueuing();
 
-    void _RouteEvaluate( );
-    void _VCAllocEvaluate( );
-    void _SWHoldEvaluate( );
-    void _SWAllocEvaluate( );
-    void _SwitchEvaluate( );
+    void _RouteEvaluate();
 
-    void _RouteUpdate( );
-    void _VCAllocUpdate( );
-    void _SWHoldUpdate( );
-    void _SWAllocUpdate( );
-    void _SwitchUpdate( );
+    void _VCAllocEvaluate();
 
-    void _OutputQueuing( );
+    void _SWHoldEvaluate();
 
-    void _SendFlits( );
-    void _SendCredits( );
+    void _SWAllocEvaluate();
 
-    void _UpdateNOQ(int input, int vc, Flit const * f);
+    void _SwitchEvaluate();
+
+    void _RouteUpdate();
+
+    void _VCAllocUpdate();
+
+    void _SWHoldUpdate();
+
+    void _SWAllocUpdate();
+
+    void _SwitchUpdate();
+
+    void _OutputQueuing();
+
+    void _SendFlits();
+
+    void _SendCredits();
+
+    void _UpdateNOQ(int input, int vc, Flit const *f);
 
     // ----------------------------------------
     //
@@ -146,25 +162,27 @@ class IQRouter : public Router
     //
     // ----------------------------------------
 
-    SwitchMonitor * _switchMonitor ;
-    BufferMonitor * _bufferMonitor ;
+    SwitchMonitor *_switchMonitor;
+    BufferMonitor *_bufferMonitor;
 
 public:
 
-    IQRouter( Configuration const & config,
-              Module *parent, string const & name, int id,
-              int inputs, int outputs );
+    IQRouter(Configuration const &config,
+             Module *parent, string const &name, int id,
+             int inputs, int outputs);
 
-    virtual ~IQRouter( );
+    virtual ~IQRouter();
 
-    virtual void AddOutputChannel(FlitChannel * channel, CreditChannel * backchannel);
+    virtual void AddOutputChannel(FlitChannel *channel, CreditChannel *backchannel);
 
-    virtual void ReadInputs( );
-    virtual void WriteOutputs( );
+    virtual void ReadInputs();
 
-    void Display( ostream & os = cout ) const;
+    virtual void WriteOutputs();
+
+    void Display(ostream &os = cout) const;
 
     virtual int GetUsedCredit(int o) const;
+
     virtual int GetBufferOccupancy(int i) const;
 
 #ifdef TRACK_BUFFERS
@@ -173,15 +191,16 @@ public:
 #endif
 
     virtual vector<int> UsedCredits() const;
+
     virtual vector<int> FreeCredits() const;
+
     virtual vector<int> MaxCredits() const;
 
-    SwitchMonitor const * GetSwitchMonitor() const
-    {
+    SwitchMonitor const *GetSwitchMonitor() const {
         return _switchMonitor;
     }
-    BufferMonitor const * GetBufferMonitor() const
-    {
+
+    BufferMonitor const *GetBufferMonitor() const {
         return _bufferMonitor;
     }
 

@@ -33,12 +33,15 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "BloomFilter.h"
 
 class PortGeneric;
+
 class DInst;
+
 class MemObj;
+
 class Cluster;
 
 enum StallCause {
-    NoStall=0,
+    NoStall = 0,
     SmallWinStall,
     SmallROBStall,
     SmallREGStall,
@@ -52,7 +55,7 @@ enum StallCause {
 };
 
 enum RetOutcome {
-    Retired=0,
+    Retired = 0,
     NotExecuted,
     NotFinished,   // for loads only
     NoCacheSpace,  // for stores and ifetch ops only
@@ -62,7 +65,7 @@ enum RetOutcome {
 };
 
 enum NoRetResp { // instruction responsible for stall
-    Self=0,
+    Self = 0,
     Other,
     MaxNoRetResp
 };
@@ -73,12 +76,14 @@ protected:
     PortGeneric *const gen;
 
     Resource(Cluster *cls, PortGeneric *gen);
+
 public:
     virtual ~Resource();
 
     const Cluster *getCluster() const {
         return cluster;
     }
+
     Cluster *getCluster() {
         return cluster;
     }
@@ -98,8 +103,11 @@ public:
     // 4th) When the instruction is retired from the ROB retire is called
 
     virtual StallCause canIssue(DInst *dinst) = 0;
+
     virtual void simTime(DInst *dinst) = 0;
+
     virtual void executed(DInst *dinst);
+
     virtual RetOutcome retire(DInst *dinst);
 
 };
@@ -109,7 +117,7 @@ class GMemorySystem;
 class MemResource : public Resource {
 private:
 protected:
-    MemObj  *L1DCache;
+    MemObj *L1DCache;
     GMemorySystem *memorySystem;
 
 
@@ -121,6 +129,7 @@ protected:
     GStatsEnergyBase *iAluEnergy;
 
     MemResource(Cluster *cls, PortGeneric *aGen, GMemorySystem *ms, int32_t id, const char *cad);
+
 public:
 };
 
@@ -131,15 +140,17 @@ public:
     FUMemory(Cluster *cls, GMemorySystem *ms, int32_t id);
 
     StallCause canIssue(DInst *dinst);
+
     void simTime(DInst *dinst);
+
     RetOutcome retire(DInst *dinst);
 
 };
 
 class FULoad : public MemResource {
 private:
-    GStatsAvg   ldqNotUsed;
-    GStatsCntr  nForwarded;
+    GStatsAvg ldqNotUsed;
+    GStatsCntr nForwarded;
 
     const TimeDelta_t lat;
     const TimeDelta_t LSDelay;
@@ -148,19 +159,21 @@ private:
 
 protected:
     void cacheDispatched(DInst *dinst);
+
     typedef CallbackMember1<FULoad, DInst *, &FULoad::cacheDispatched> cacheDispatchedCB;
 
 public:
-    FULoad(Cluster *cls, PortGeneric *aGen
-           ,TimeDelta_t l, TimeDelta_t lsdelay
-           ,GMemorySystem *ms, size_t maxLoads
-           ,int32_t id);
+    FULoad(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, TimeDelta_t lsdelay, GMemorySystem *ms, size_t maxLoads,
+           int32_t id);
 
     StallCause canIssue(DInst *dinst);
+
     void simTime(DInst *dinst);
+
     RetOutcome retire(DInst *dinst);
 
     void executed(DInst *dinst);
+
     int32_t freeEntries() const {
         return freeLoads;
     }
@@ -174,32 +187,31 @@ public:
 class FUStore : public MemResource {
 private:
 
-    GStatsAvg   stqNotUsed;
-    GStatsCntr  nDeadStore;
+    GStatsAvg stqNotUsed;
+    GStatsCntr nDeadStore;
 
     const TimeDelta_t lat;
-    int32_t               freeStores;
-    int32_t               misStores;
+    int32_t freeStores;
+    int32_t misStores;
 
     bool pendingFence;
-    int32_t  nOutsStores;
+    int32_t nOutsStores;
 
-    GStatsCntr   nFences;
-    GStatsCntr   fenceStallCycles;
+    GStatsCntr nFences;
+    GStatsCntr fenceStallCycles;
 
 protected:
     void doRetire(DInst *dinst);
+
 public:
-    FUStore(Cluster *cls
-            ,PortGeneric *aGen
-            ,TimeDelta_t l
-            ,GMemorySystem *ms
-            ,size_t maxLoads
-            ,int32_t id);
+    FUStore(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, GMemorySystem *ms, size_t maxLoads, int32_t id);
 
     StallCause canIssue(DInst *dinst);
+
     void simTime(DInst *dinst);
+
     void executed(DInst *dinst);
+
     RetOutcome retire(DInst *dinst);
 
     int32_t freeEntries() const {
@@ -216,10 +228,13 @@ public:
             fenceStallCycles.inc();
         return pendingFence;
     }
+
     void storeCompleted();
+
     void storeSent() {
         nOutsStores++;
     }
+
     void doFence();
 };
 
@@ -234,7 +249,9 @@ public:
     FUGeneric(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, GStatsEnergyCG *eb);
 
     StallCause canIssue(DInst *dinst);
+
     void simTime(DInst *dinst);
+
     void executed(DInst *dinst);
 
 
@@ -252,7 +269,9 @@ public:
     FUBranch(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, int32_t mb);
 
     StallCause canIssue(DInst *dinst);
-    void simTime(DInst * dinst);
+
+    void simTime(DInst *dinst);
+
     void executed(DInst *dinst);
 
 #ifdef SESC_BRANCH_AT_RETIRE
@@ -267,8 +286,8 @@ public:
     FUEvent(Cluster *cls);
 
     StallCause canIssue(DInst *dinst);
-    void simTime(DInst * dinst);
 
+    void simTime(DInst *dinst);
 
 
 };

@@ -30,98 +30,89 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "libll/ExecutionFlow.h"
 
 SMTProcessor::Fetch::Fetch(GMemorySystem *gm, CPU_t cpuID, int32_t cid, GProcessor *gproc, FetchEngine *fe)
-    : IFID(cpuID, cid, gm, gproc, fe)
-    ,pipeQ(cpuID)
-{
+        : IFID(cpuID, cid, gm, gproc, fe), pipeQ(cpuID) {
 }
 
-SMTProcessor::Fetch::~Fetch()
-{
+SMTProcessor::Fetch::~Fetch() {
 }
 
 SMTProcessor::SMTProcessor(GMemorySystem *gm, CPU_t i)
-    :GProcessor(gm,i,SescConf->getInt("cpucore", "smtContexts",i))
-    ,smtContexts(SescConf->getInt("cpucore", "smtContexts",i))
-    ,smtFetchs4Clk(SescConf->getInt("cpucore", "smtFetchs4Clk",i))
-    ,smtDecodes4Clk(SescConf->getInt("cpucore", "smtDecodes4Clk",i))
-    ,smtIssues4Clk(SescConf->getInt("cpucore", "smtIssues4Clk",i))
-    ,firstContext(i*smtContexts)
-    ,fetchDist("Processor(%d)_fetchDist", i) // noFetch is on GProcessor
+        : GProcessor(gm, i, SescConf->getInt("cpucore", "smtContexts", i)),
+          smtContexts(SescConf->getInt("cpucore", "smtContexts", i)),
+          smtFetchs4Clk(SescConf->getInt("cpucore", "smtFetchs4Clk", i)),
+          smtDecodes4Clk(SescConf->getInt("cpucore", "smtDecodes4Clk", i)),
+          smtIssues4Clk(SescConf->getInt("cpucore", "smtIssues4Clk", i)), firstContext(i * smtContexts),
+          fetchDist("Processor(%d)_fetchDist", i) // noFetch is on GProcessor
 {
-    SescConf->isInt("cpucore", "smtContexts",Id);
-    SescConf->isGT("cpucore", "smtContexts", 1,Id);
+    SescConf->isInt("cpucore", "smtContexts", Id);
+    SescConf->isGT("cpucore", "smtContexts", 1, Id);
 
-    SescConf->isInt("cpucore", "smtFetchs4Clk",Id);
-    SescConf->isBetween("cpucore", "smtFetchs4Clk", 1,smtContexts,Id);
+    SescConf->isInt("cpucore", "smtFetchs4Clk", Id);
+    SescConf->isBetween("cpucore", "smtFetchs4Clk", 1, smtContexts, Id);
 
-    SescConf->isInt("cpucore", "smtDecodes4Clk",Id);
-    SescConf->isBetween("cpucore", "smtDecodes4Clk", 1,smtContexts,Id);
+    SescConf->isInt("cpucore", "smtDecodes4Clk", Id);
+    SescConf->isBetween("cpucore", "smtDecodes4Clk", 1, smtContexts, Id);
 
-    SescConf->isInt("cpucore", "smtIssues4Clk",Id);
-    SescConf->isBetween("cpucore", "smtIssues4Clk", 1,smtContexts,Id);
+    SescConf->isInt("cpucore", "smtIssues4Clk", Id);
+    SescConf->isBetween("cpucore", "smtIssues4Clk", 1, smtContexts, Id);
 
     flow.resize(smtContexts);
 
-    Fetch *f = new Fetch(gm, Id, Id*smtContexts, this);
+    Fetch *f = new Fetch(gm, Id, Id * smtContexts, this);
     flow[0] = f;
     gRAT = (DInst ***) malloc(sizeof(DInst ***) * smtContexts);
 
-    for(int32_t i = 1; i < smtContexts; i++) {
-        flow[i] = new Fetch(gm, Id,Id*smtContexts+i, this, &(f->IFID));
+    for (int32_t i = 1; i < smtContexts; i++) {
+        flow[i] = new Fetch(gm, Id, Id * smtContexts + i, this, &(f->IFID));
     }
 
-    for(int32_t i = 0; i < smtContexts; i++) {
+    for (int32_t i = 0; i < smtContexts; i++) {
         gRAT[i] = (DInst **) malloc(sizeof(DInst **) * NumArchRegs);
-        bzero(gRAT[i],sizeof(DInst*)*NumArchRegs);
+        bzero(gRAT[i], sizeof(DInst *) * NumArchRegs);
     }
 
-    cFetchId =0;
-    cDecodeId=0;
-    cIssueId =0;
+    cFetchId = 0;
+    cDecodeId = 0;
+    cIssueId = 0;
 
     spaceInInstQueue = InstQueueSize;
 }
 
-SMTProcessor::~SMTProcessor()
-{
-    for(FetchContainer::iterator it = flow.begin();
-            it != flow.end();
-            it++) {
+SMTProcessor::~SMTProcessor() {
+    for (FetchContainer::iterator it = flow.begin();
+         it != flow.end();
+         it++) {
         delete *it;
     }
 }
 
-SMTProcessor::Fetch *SMTProcessor::findFetch(Pid_t pid) const
-{
-    for(FetchContainer::const_iterator it = flow.begin();
-            it != flow.end();
-            it++) {
-        if( (*it)->IFID.getPid() == pid ) {
+SMTProcessor::Fetch *SMTProcessor::findFetch(Pid_t pid) const {
+    for (FetchContainer::const_iterator it = flow.begin();
+         it != flow.end();
+         it++) {
+        if ((*it)->IFID.getPid() == pid) {
             return *it;
         }
     }
     return 0;
 }
 
-DInst **SMTProcessor::getRAT(const int32_t contextId)
-{
+DInst **SMTProcessor::getRAT(const int32_t contextId) {
     I(firstContext >= contextId);
-    I(contextId <= firstContext+smtContexts);
+    I(contextId <= firstContext + smtContexts);
 
-    return gRAT[contextId-firstContext];
+    return gRAT[contextId - firstContext];
 }
 
-FetchEngine *SMTProcessor::currentFlow()
-{
+FetchEngine *SMTProcessor::currentFlow() {
     return &flow[cFetchId]->IFID;
 }
 
-void SMTProcessor::switchIn(Pid_t pid)
-{
-    for(FetchContainer::iterator it = flow.begin();
-            it != flow.end();
-            it++) {
-        if( (*it)->IFID.getPid() < 0 ) {
+void SMTProcessor::switchIn(Pid_t pid) {
+    for (FetchContainer::iterator it = flow.begin();
+         it != flow.end();
+         it++) {
+        if ((*it)->IFID.getPid() < 0) {
             // Free FetchEngine
             (*it)->IFID.switchIn(pid);
             return;
@@ -131,8 +122,7 @@ void SMTProcessor::switchIn(Pid_t pid)
     I(0); // No free entries??
 }
 
-void SMTProcessor::switchOut(Pid_t pid)
-{
+void SMTProcessor::switchOut(Pid_t pid) {
     Fetch *fetch = findFetch(pid);
 
     I(fetch); // Not found??
@@ -140,22 +130,20 @@ void SMTProcessor::switchOut(Pid_t pid)
     fetch->IFID.switchOut(pid);
 }
 
-size_t SMTProcessor::availableFlows() const
-{
-    size_t freeEntries=0;
+size_t SMTProcessor::availableFlows() const {
+    size_t freeEntries = 0;
 
-    for(FetchContainer::const_iterator it = flow.begin();
-            it != flow.end();
-            it++) {
-        if( (*it)->IFID.getPid() < 0 )
+    for (FetchContainer::const_iterator it = flow.begin();
+         it != flow.end();
+         it++) {
+        if ((*it)->IFID.getPid() < 0)
             freeEntries++;
     }
 
     return freeEntries;
 }
 
-long long SMTProcessor::getAndClearnGradInsts(Pid_t pid)
-{
+long long SMTProcessor::getAndClearnGradInsts(Pid_t pid) {
     Fetch *fetch = findFetch(pid);
 
     I(fetch); // Not found??
@@ -163,8 +151,7 @@ long long SMTProcessor::getAndClearnGradInsts(Pid_t pid)
     return fetch->IFID.getAndClearnGradInsts();
 }
 
-long long SMTProcessor::getAndClearnWPathInsts(Pid_t pid)
-{
+long long SMTProcessor::getAndClearnWPathInsts(Pid_t pid) {
     Fetch *fetch = findFetch(pid);
 
     I(fetch); // Not found??
@@ -172,24 +159,21 @@ long long SMTProcessor::getAndClearnWPathInsts(Pid_t pid)
     return fetch->IFID.getAndClearnWPathInsts();
 }
 
-Pid_t SMTProcessor::findVictimPid() const
-{
+Pid_t SMTProcessor::findVictimPid() const {
     // TODO: look for a Pid (random?)
     return flow[cFetchId]->IFID.getPid();
 }
 
-void SMTProcessor::goRabbitMode(long long n2Skip)
-{
+void SMTProcessor::goRabbitMode(long long n2Skip) {
     flow[cFetchId]->IFID.goRabbitMode(n2Skip);
     selectFetchFlow();
 }
 
-void SMTProcessor::selectFetchFlow()
-{
+void SMTProcessor::selectFetchFlow() {
     // ROUND-ROBIN POLICY
-    for(int32_t i=0; i<smtContexts; i++) {
-        cFetchId = (cFetchId+1) % smtContexts;
-        if( flow[cFetchId]->IFID.getPid() >= 0 )
+    for (int32_t i = 0; i < smtContexts; i++) {
+        cFetchId = (cFetchId + 1) % smtContexts;
+        if (flow[cFetchId]->IFID.getPid() >= 0)
             return;
     }
 
@@ -197,29 +181,26 @@ void SMTProcessor::selectFetchFlow()
     I(hasWork());
 }
 
-void SMTProcessor::selectDecodeFlow()
-{
+void SMTProcessor::selectDecodeFlow() {
     // ROUND-ROBIN POLICY
-    cDecodeId = (cDecodeId+1) % smtContexts;
+    cDecodeId = (cDecodeId + 1) % smtContexts;
 }
 
-void SMTProcessor::selectIssueFlow()
-{
+void SMTProcessor::selectIssueFlow() {
     // ROUND-ROBIN POLICY
-    cIssueId = (cIssueId+1) % smtContexts;
+    cIssueId = (cIssueId + 1) % smtContexts;
 }
 
-void SMTProcessor::advanceClock()
-{
+void SMTProcessor::advanceClock() {
     clockTicks++;
 
     // Fetch Stage
     int32_t nFetched = 0;
     int32_t fetchMax = FetchWidth;
 
-    for(int32_t i = 0; i < smtContexts && nFetched < FetchWidth; i++) {
+    for (int32_t i = 0; i < smtContexts && nFetched < FetchWidth; i++) {
         selectFetchFlow();
-        if (cFetchId >=0) {
+        if (cFetchId >= 0) {
             I(flow[cFetchId]->IFID.hasWork());
 
             fetchMax = fetchMax > (FetchWidth - nFetched)
@@ -228,7 +209,7 @@ void SMTProcessor::advanceClock()
             I(fetchMax > 0);
 
             IBucket *bucket = flow[cFetchId]->pipeQ.pipeLine.newItem();
-            if( bucket ) {
+            if (bucket) {
                 flow[cFetchId]->IFID.fetch(bucket, fetchMax);
                 // readyItem will be called once the bucket is fetched
                 nFetched += bucket->size();
@@ -242,11 +223,11 @@ void SMTProcessor::advanceClock()
     }
 
     // ID Stage (insert to instQueue)
-    for(int32_t i=0; i<smtContexts && spaceInInstQueue >= FetchWidth ; i++) {
+    for (int32_t i = 0; i < smtContexts && spaceInInstQueue >= FetchWidth; i++) {
         selectDecodeFlow();
 
         IBucket *bucket = flow[cDecodeId]->pipeQ.pipeLine.nextItem();
-        if( bucket ) {
+        if (bucket) {
             I(!bucket->empty());
 
             spaceInInstQueue -= bucket->size();
@@ -256,11 +237,11 @@ void SMTProcessor::advanceClock()
     }
 
     // RENAME Stage
-    int32_t totalIssuedInsts=0;
-    for(int32_t i = 0; i < smtContexts && totalIssuedInsts < IssueWidth; i++) {
+    int32_t totalIssuedInsts = 0;
+    for (int32_t i = 0; i < smtContexts && totalIssuedInsts < IssueWidth; i++) {
         selectIssueFlow();
 
-        if( flow[cIssueId]->pipeQ.instQueue.empty() )
+        if (flow[cIssueId]->pipeQ.instQueue.empty())
             continue;
 
         int32_t issuedInsts = issue(flow[cIssueId]->pipeQ);
@@ -272,14 +253,13 @@ void SMTProcessor::advanceClock()
     retire();
 }
 
-StallCause SMTProcessor::addInst(DInst *dinst)
-{
+StallCause SMTProcessor::addInst(DInst *dinst) {
     const Instruction *inst = dinst->getInst();
 
-    DInst **RAT = gRAT[dinst->getContextId()-firstContext];
+    DInst **RAT = gRAT[dinst->getContextId() - firstContext];
 
-    if( InOrderCore ) {
-        if(RAT[inst->getSrc1()] != 0 || RAT[inst->getSrc2()] != 0) {
+    if (InOrderCore) {
+        if (RAT[inst->getSrc1()] != 0 || RAT[inst->getSrc2()] != 0) {
             return SmallWinStall;
         }
     }
@@ -290,16 +270,16 @@ StallCause SMTProcessor::addInst(DInst *dinst)
 
     I(dinst->getResource() != 0); // Resource::schedule must set the resource field
 
-    if(!dinst->isSrc2Ready()) {
+    if (!dinst->isSrc2Ready()) {
         // It already has a src2 dep. It means that it is solved at
         // retirement (Memory consistency. coherence issues)
-        if( RAT[inst->getSrc1()] )
+        if (RAT[inst->getSrc1()])
             RAT[inst->getSrc1()]->addSrc1(dinst);
     } else {
-        if( RAT[inst->getSrc1()] )
+        if (RAT[inst->getSrc1()])
             RAT[inst->getSrc1()]->addSrc1(dinst);
 
-        if( RAT[inst->getSrc2()] )
+        if (RAT[inst->getSrc2()])
             RAT[inst->getSrc2()]->addSrc2(dinst);
     }
 
@@ -313,15 +293,14 @@ StallCause SMTProcessor::addInst(DInst *dinst)
     return NoStall;
 }
 
-bool SMTProcessor::hasWork() const
-{
+bool SMTProcessor::hasWork() const {
 
     if (!ROB.empty())
         return true;
 
-    for(FetchContainer::const_iterator it = flow.begin();
-            it != flow.end();
-            it++) {
+    for (FetchContainer::const_iterator it = flow.begin();
+         it != flow.end();
+         it++) {
         if ((*it)->IFID.hasWork() || (*it)->pipeQ.hasWork())
             return true;
     }

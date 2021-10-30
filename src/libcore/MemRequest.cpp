@@ -44,9 +44,7 @@ pool<ReqPathEntry> ReqPathEntry::pPool(4096, "ReqPathEntry");
  *        MemRequest
  ************************************************/
 MemRequest::MemRequest()
-    :accessCB(this)
-    ,returnAccessCB(this)
-{
+        : accessCB(this), returnAccessCB(this) {
     IS(dinst = 0);
     IS(gproc = 0);
     IS(currentMemObj = 0);
@@ -54,18 +52,15 @@ MemRequest::MemRequest()
     wToRLevel = -1;
 }
 
-MemRequest::~MemRequest()
-{
+MemRequest::~MemRequest() {
     // to avoid warnings
 }
 
-void MemRequest::access()
-{
+void MemRequest::access() {
     currentMemObj->access(this);
 }
 
-void MemRequest::returnAccess()
-{
+void MemRequest::returnAccess() {
     mutateReadToWrite();
     currentMemObj->returnAccess(this);
 }
@@ -76,10 +71,9 @@ void MemRequest::returnAccess()
 
 pool<DMemRequest, true>  DMemRequest::actPool(32, "DMemRequest");
 
-void DMemRequest::destroy()
-{
+void DMemRequest::destroy() {
     I(dinst == 0);
-    IS(currentMemObj = 0 );
+    IS(currentMemObj = 0);
     I(acknowledged);
 
 #ifdef SESC_SMP_DEBUG
@@ -89,14 +83,13 @@ void DMemRequest::destroy()
     actPool.in(this);
 }
 
-void DMemRequest::dinstAck(DInst *dinst, MemOperation memOp, TimeDelta_t lat)
-{
+void DMemRequest::dinstAck(DInst *dinst, MemOperation memOp, TimeDelta_t lat) {
     I(dinst);
 
     I(!dinst->isLoadForwarded());
     if (memOp == MemWrite) {
-        Cluster* c = dinst->getResource()->getCluster();
-        FUStore* r = (FUStore*) c->getResource(iStore);
+        Cluster *c = dinst->getResource()->getCluster();
+        FUStore *r = (FUStore *) c->getResource(iStore);
         r->storeCompleted();
         I(dinst->isExecuted());
         dinst->destroy();
@@ -108,13 +101,12 @@ void DMemRequest::dinstAck(DInst *dinst, MemOperation memOp, TimeDelta_t lat)
     }
 }
 
-void DMemRequest::create(DInst *dinst, GMemorySystem *gmem, MemOperation mop)
-{
+void DMemRequest::create(DInst *dinst, GMemorySystem *gmem, MemOperation mop) {
     // turn off address translation
     int32_t old_addr = dinst->getVaddr();
 
-    ThreadContext *context=dinst->context;
-    if(!context->isValidDataVAddr(old_addr)) {
+    ThreadContext *context = dinst->context;
+    if (!context->isValidDataVAddr(old_addr)) {
         dinstAck(dinst, mop, 0);
         return;
     }
@@ -129,7 +121,7 @@ void DMemRequest::create(DInst *dinst, GMemorySystem *gmem, MemOperation mop)
 
     r->setFields(dinst, mop, gmem->getDataSource());
     r->dataReq = true;
-    r->prefetch= false;
+    r->prefetch = false;
     r->priority = 0;
 
     int32_t ph_addr = gmem->getMemoryOS()->TLBTranslate(old_addr);
@@ -143,9 +135,8 @@ void DMemRequest::create(DInst *dinst, GMemorySystem *gmem, MemOperation mop)
     r->access();
 }
 
-void DMemRequest::ack(TimeDelta_t lat)
-{
-    if (dinst==0)
+void DMemRequest::ack(TimeDelta_t lat) {
+    if (dinst == 0)
         return; // avoid double ack
 
     I(!acknowledged);           // no double ack
@@ -156,8 +147,7 @@ void DMemRequest::ack(TimeDelta_t lat)
     dinst = 0;
 }
 
-VAddr DMemRequest::getVaddr() const
-{
+VAddr DMemRequest::getVaddr() const {
     I(dinst);
     return dinst->getVaddr();
 }
@@ -169,10 +159,9 @@ VAddr DMemRequest::getVaddr() const
 
 pool<IMemRequest, true>  IMemRequest::actPool(32, "IMemRequest");
 
-void IMemRequest::destroy()
-{
+void IMemRequest::destroy() {
     I(dinst == 0);
-    IS(currentMemObj = 0 );
+    IS(currentMemObj = 0);
     I(acknowledged);
 
 #ifdef SESC_SMP_DEBUG
@@ -182,8 +171,7 @@ void IMemRequest::destroy()
     actPool.in(this);
 }
 
-void IMemRequest::create(DInst *dinst, GMemorySystem *gmem, IBucket *bb)
-{
+void IMemRequest::create(DInst *dinst, GMemorySystem *gmem, IBucket *bb) {
     IMemRequest *r = actPool.out();
 
     IS(r->acknowledged = false);
@@ -191,10 +179,10 @@ void IMemRequest::create(DInst *dinst, GMemorySystem *gmem, IBucket *bb)
     r->currentClockStamp = (Time_t) -1;
 
     r->setFields(dinst, MemRead, gmem->getInstrSource());
-    r->buffer  = bb;
+    r->buffer = bb;
     r->dataReq = false;
-    r->prefetch= false;
-    r->priority= 0;
+    r->prefetch = false;
+    r->priority = 0;
     int32_t old_addr = dinst->getInst()->getAddr();
     int32_t ph_addr = gmem->getMemoryOS()->ITLBTranslate(old_addr);
     if (ph_addr == -1) {
@@ -206,9 +194,8 @@ void IMemRequest::create(DInst *dinst, GMemorySystem *gmem, IBucket *bb)
     r->access();
 }
 
-void IMemRequest::ack(TimeDelta_t lat)
-{
-    if (dinst==0)
+void IMemRequest::ack(TimeDelta_t lat) {
+    if (dinst == 0)
         return; // avoid double ack
 
     I(!acknowledged);           // no double ack
@@ -219,8 +206,7 @@ void IMemRequest::ack(TimeDelta_t lat)
     dinst = 0;
 }
 
-VAddr IMemRequest::getVaddr() const
-{
+VAddr IMemRequest::getVaddr() const {
     I(dinst);
     return dinst->getInst()->getAddr();
 }
@@ -231,8 +217,7 @@ VAddr IMemRequest::getVaddr() const
 
 pool<CBMemRequest, true>  CBMemRequest::actPool(32, "CBMemRequest");
 
-void CBMemRequest::destroy()
-{
+void CBMemRequest::destroy() {
     I(dinst == 0);
     I(cb == 0);
     I(acknowledged);
@@ -244,10 +229,7 @@ void CBMemRequest::destroy()
     actPool.in(this);
 }
 
-CBMemRequest *CBMemRequest::create(TimeDelta_t lat, MemObj *m
-                                   ,MemOperation mop, PAddr addr
-                                   ,CallbackBase *cb)
-{
+CBMemRequest *CBMemRequest::create(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr, CallbackBase *cb) {
     CBMemRequest *r = actPool.out();
 
     IS(r->acknowledged = false);
@@ -258,30 +240,28 @@ CBMemRequest *CBMemRequest::create(TimeDelta_t lat, MemObj *m
     r->setPAddr(addr);
     r->cb = cb;
     r->dataReq = true;
-    r->prefetch= false;
+    r->prefetch = false;
 
     r->accessCB.schedule(lat);
     return r;
 }
 
-void CBMemRequest::ack(TimeDelta_t lat)
-{
+void CBMemRequest::ack(TimeDelta_t lat) {
     IS(acknowledged = true);
 
-    if (cb==0)
+    if (cb == 0)
         return; // avoid double ack
 
-    CallbackBase *ncb=cb;
+    CallbackBase *ncb = cb;
     cb = 0;
-    if (lat==0)
+    if (lat == 0)
         ncb->call();
     else
         ncb->schedule(lat, ncb);
 }
 
 
-VAddr CBMemRequest::getVaddr() const
-{
+VAddr CBMemRequest::getVaddr() const {
     //  I(0);
     return 0; // not mapping for vaddr (only paddr)
 }
@@ -290,8 +270,7 @@ VAddr CBMemRequest::getVaddr() const
  *        StaticCBMemRequest
  ************************************************/
 
-void StaticCBMemRequest::destroy()
-{
+void StaticCBMemRequest::destroy() {
     I(dinst == 0);
     I(acknowledged);
 
@@ -304,42 +283,37 @@ void StaticCBMemRequest::destroy()
     // Do nothing
 }
 
-StaticCBMemRequest::StaticCBMemRequest(StaticCallbackBase *c)
-{
+StaticCBMemRequest::StaticCBMemRequest(StaticCallbackBase *c) {
     cb = c;
 
     ackDone = false;
 }
 
 
-void StaticCBMemRequest::launch(TimeDelta_t lat, MemObj *m
-                                , MemOperation mop, PAddr addr)
-{
-    setFields(0,mop,m);
+void StaticCBMemRequest::launch(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr) {
+    setFields(0, mop, m);
     setPAddr(addr);
 
-    ackDone=false;
+    ackDone = false;
 
     accessCB.schedule(lat);
 }
 
-void StaticCBMemRequest::ack(TimeDelta_t lat)
-{
+void StaticCBMemRequest::ack(TimeDelta_t lat) {
     IS(acknowledged = true);
 
     if (ackDone || cb == 0)
         return; // avoid double ack
 
-    ackDone=true;
+    ackDone = true;
 
-    if (lat==0)
+    if (lat == 0)
         cb->call();
     else
-        cb->schedule(lat,cb);
+        cb->schedule(lat, cb);
 }
 
-VAddr StaticCBMemRequest::getVaddr() const
-{
+VAddr StaticCBMemRequest::getVaddr() const {
     I(0);
     return 0; // not mapping for vaddr (only paddr)
 }

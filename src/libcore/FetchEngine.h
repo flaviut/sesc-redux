@@ -33,7 +33,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 class GMemorySystem;
+
 class IBucket;
+
 class GProcessor;
 
 class FetchEngine {
@@ -74,7 +76,6 @@ private:
     bool enableICache;
 
 
-
 protected:
     void instFetched(DInst *dinst) {
 #ifdef SESC_BAAD
@@ -82,11 +83,12 @@ protected:
 #endif
 
     }
+
     bool processBranch(DInst *dinst, ushort n2Fetched);
 
     // ******************* Statistics section
-    GStatsAvg  avgBranchTime;
-    GStatsAvg  avgInstsFetched;
+    GStatsAvg avgBranchTime;
+    GStatsAvg avgInstsFetched;
     GStatsCntr nDelayInst1;
     GStatsCntr nDelayInst2;
     GStatsCntr nFetched;
@@ -99,14 +101,12 @@ protected:
     // *******************
 
 public:
-    FetchEngine(int32_t cId, int32_t i
-                ,GMemorySystem *gms
-                ,GProcessor *gp
-                ,FetchEngine *fe = 0);
+    FetchEngine(int32_t cId, int32_t i, GMemorySystem *gms, GProcessor *gp, FetchEngine *fe = 0);
+
     ~FetchEngine();
 
     void addEvent(EventType ev, CallbackBase *cb, int32_t vaddr) {
-        flow.addEvent(ev,cb,vaddr);
+        flow.addEvent(ev, cb, vaddr);
     }
 
 
@@ -117,6 +117,7 @@ public:
     // Fake fetch. Fills the buffer with fake (mispredicted) instructions
     // Only active is SESC_MISPATH def'd
     void fakeFetch(IBucket *buffer, int32_t fetchMax = -1);
+
     void realFetch(IBucket *buffer, int32_t fetchMax = -1);
 
     // -1 if there is no pid
@@ -129,35 +130,41 @@ public:
     }
 
     void unBlockFetch();
-    StaticCallbackMember0<FetchEngine,&FetchEngine::unBlockFetch> unBlockFetchCB;
+
+    StaticCallbackMember0<FetchEngine, &FetchEngine::unBlockFetch> unBlockFetchCB;
 
     void dump(const char *str) const;
 
     void switchIn(Pid_t i);
+
     void switchOut(Pid_t i);
+
     long long getAndClearnGradInsts() {
         long long tmp = nGradInsts;
-        nGradInsts=0;
+        nGradInsts = 0;
         return tmp;
     }
+
     long long getAndClearnWPathInsts() {
         long long tmp = nWPathInsts;
-        nWPathInsts=0;
+        nWPathInsts = 0;
         return tmp;
     }
 
     int32_t getCPUId() const {
         return cpuId;
     }
-    GProcessor* getGProcessor() {
+
+    GProcessor *getGProcessor() {
         return gproc;
     }
 
     BPredictor *getBPred() const {
         return bpred;
     }
+
     GFlow *getFlow() {
-        return &flow ;
+        return &flow;
     }
 
     bool hasWork() const {

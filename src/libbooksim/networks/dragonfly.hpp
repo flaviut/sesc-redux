@@ -31,8 +31,7 @@
 #include "network.hpp"
 #include "routefunc.hpp"
 
-class DragonFlyNew : public Network
-{
+class DragonFlyNew : public Network {
 
     int _m;
     int _n;
@@ -49,28 +48,33 @@ class DragonFlyNew : public Network
     int _grp_num_nodes;
 
 
-    void _ComputeSize( const Configuration &config );
-    void _BuildNet( const Configuration &config );
+    void _ComputeSize(const Configuration &config);
 
+    void _BuildNet(const Configuration &config);
 
 
 public:
-    DragonFlyNew( const Configuration &config, const string & name );
+    DragonFlyNew(const Configuration &config, const string &name);
 
-    int GetN( ) const;
-    int GetK( ) const;
+    int GetN() const;
 
-    double Capacity( ) const;
+    int GetK() const;
+
+    double Capacity() const;
+
     static void RegisterRoutingFunctions();
-    void InsertRandomFaults( const Configuration &config );
+
+    void InsertRandomFaults(const Configuration &config);
 
 };
+
 int dragonfly_port(int rID, int source, int dest);
 
-void ugal_dragonflynew( const Router *r, const Flit *f, int in_channel,
-                        OutputSet *outputs, bool inject );
-void min_dragonflynew( const Router *r, const Flit *f, int in_channel,
-                       OutputSet *outputs, bool inject );
+void ugal_dragonflynew(const Router *r, const Flit *f, int in_channel,
+                       OutputSet *outputs, bool inject);
+
+void min_dragonflynew(const Router *r, const Flit *f, int in_channel,
+                      OutputSet *outputs, bool inject);
 
 int dragonflynew_hopcnt(int src, int dest);
 

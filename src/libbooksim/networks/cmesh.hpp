@@ -44,33 +44,36 @@
 #include "network.hpp"
 #include "routefunc.hpp"
 
-class CMesh : public Network
-{
+class CMesh : public Network {
 public:
-    CMesh( const Configuration &config, const string & name );
+    CMesh(const Configuration &config, const string &name);
+
     int GetN() const;
+
     int GetK() const;
 
-    static int NodeToRouter( int address ) ;
-    static int NodeToPort( int address ) ;
+    static int NodeToRouter(int address);
 
-    static void RegisterRoutingFunctions() ;
+    static int NodeToPort(int address);
+
+    static void RegisterRoutingFunctions();
 
 private:
 
-    static int _cX ;
-    static int _cY ;
+    static int _cX;
+    static int _cY;
 
-    static int _memo_NodeShiftX ;
-    static int _memo_NodeShiftY ;
-    static int _memo_PortShiftY ;
+    static int _memo_NodeShiftX;
+    static int _memo_NodeShiftY;
+    static int _memo_PortShiftY;
 
-    void _ComputeSize( const Configuration &config );
-    void _BuildNet( const Configuration& config );
+    void _ComputeSize(const Configuration &config);
 
-    int _k ;
-    int _n ;
-    int _c ;
+    void _BuildNet(const Configuration &config);
+
+    int _k;
+    int _n;
+    int _c;
     int _xcount;
     int _ycount;
     int _xrouter;
@@ -81,22 +84,28 @@ private:
 //
 // Routing Functions
 //
-void xy_yx_cmesh( const Router *r, const Flit *f, int in_channel,
-                  OutputSet *outputs, bool inject ) ;
+void xy_yx_cmesh(const Router *r, const Flit *f, int in_channel,
+                 OutputSet *outputs, bool inject);
 
-void xy_yx_no_express_cmesh( const Router *r, const Flit *f, int in_channel,
-                             OutputSet *outputs, bool inject ) ;
+void xy_yx_no_express_cmesh(const Router *r, const Flit *f, int in_channel,
+                            OutputSet *outputs, bool inject);
 
-void dor_cmesh( const Router *r, const Flit *f, int in_channel,
-                OutputSet *outputs, bool inject ) ;
+void dor_cmesh(const Router *r, const Flit *f, int in_channel,
+               OutputSet *outputs, bool inject);
 
-void dor_no_express_cmesh( const Router *r, const Flit *f, int in_channel,
-                           OutputSet *outputs, bool inject ) ;
+void dor_no_express_cmesh(const Router *r, const Flit *f, int in_channel,
+                          OutputSet *outputs, bool inject);
 
 int cmesh_xy(int, int);
+
 int cmesh_yx(int, int);
+
 int cmesh_xy_no_express(int, int);
+
 int cmesh_yx_no_express(int, int);
+
 int cmesh_next(int, int);
+
 int cmesh_next_no_express(int, int);
+
 #endif

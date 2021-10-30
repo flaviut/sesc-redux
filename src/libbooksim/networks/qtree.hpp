@@ -41,29 +41,34 @@
 
 #ifndef _QTREE_HPP_
 #define _QTREE_HPP_
+
 #include <cassert>
 #include "network.hpp"
 
-class QTree : public Network
-{
+class QTree : public Network {
 
     int _k;
     int _n;
 
-    void _ComputeSize( const Configuration& config );
-    void _BuildNet( const Configuration& config );
+    void _ComputeSize(const Configuration &config);
 
-    int _RouterIndex( int height, int pos );
-    int _InputIndex( int height, int pos, int port );
-    int _OutputIndex( int height, int pos, int port );
+    void _BuildNet(const Configuration &config);
+
+    int _RouterIndex(int height, int pos);
+
+    int _InputIndex(int height, int pos, int port);
+
+    int _OutputIndex(int height, int pos, int port);
 
 public:
 
-    QTree( const Configuration& config, const string & name );
-    static void RegisterRoutingFunctions() ;
+    QTree(const Configuration &config, const string &name);
 
-    static int HeightFromID( int id );
-    static int PosFromID( int id );
+    static void RegisterRoutingFunctions();
+
+    static int HeightFromID(int id);
+
+    static int PosFromID(int id);
 
 };
 

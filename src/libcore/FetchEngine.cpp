@@ -35,50 +35,36 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <climits>
 
 
+long long FetchEngine::nInst2Sim = 0;
+long long FetchEngine::totalnInst = 0;
 
-long long FetchEngine::nInst2Sim=0;
-long long FetchEngine::totalnInst=0;
-
-FetchEngine::FetchEngine(int32_t cId
-                         ,int32_t i
-                         // TOFIX: GMemorySystem is in GPRocessor too. This is
-                         // not consistent. Remove it from GProcessor and be
-                         // sure that everybody that uses it gets it from
-                         // FetchEngine (note that an SMT may have multiple
-                         // FetchEngine)
-                         ,GMemorySystem *gmem
-                         ,GProcessor *gp
-                         ,FetchEngine *fe)
-    : Id(i)
-    ,cpuId(cId)
-    ,gms(gmem)
-    ,gproc(gp)
-    ,pid(-1)
-    ,flow(cId, i, gmem)
-    ,avgBranchTime("FetchEngine(%d)_avgBranchTime", i)
-    ,avgInstsFetched("FetchEngine(%d)_avgInstsFetched",i)
-    ,nDelayInst1("FetchEngine(%d):nDelayInst1", i)
-    ,nDelayInst2("FetchEngine(%d):nDelayInst2", i) // Not enough BB/LVIDs per cycle
-    ,nFetched("FetchEngine(%d):nFetched",i)
-    ,nBTAC("FetchEngine(%d):nBTAC", i) // BTAC corrections to BTB
-    ,szBB("FetchEngine(%d):szBB", i)
-    ,szFB("FetchEngine(%d):szFB", i)
-    ,szFS("FetchEngine(%d):szFS", i)
-    ,unBlockFetchCB(this)
-{
+FetchEngine::FetchEngine(int32_t cId, int32_t i
+        // TOFIX: GMemorySystem is in GPRocessor too. This is
+        // not consistent. Remove it from GProcessor and be
+        // sure that everybody that uses it gets it from
+        // FetchEngine (note that an SMT may have multiple
+        // FetchEngine)
+        , GMemorySystem *gmem, GProcessor *gp, FetchEngine *fe)
+        : Id(i), cpuId(cId), gms(gmem), gproc(gp), pid(-1), flow(cId, i, gmem),
+          avgBranchTime("FetchEngine(%d)_avgBranchTime", i), avgInstsFetched("FetchEngine(%d)_avgInstsFetched", i),
+          nDelayInst1("FetchEngine(%d):nDelayInst1", i),
+          nDelayInst2("FetchEngine(%d):nDelayInst2", i) // Not enough BB/LVIDs per cycle
+        , nFetched("FetchEngine(%d):nFetched", i), nBTAC("FetchEngine(%d):nBTAC", i) // BTAC corrections to BTB
+        , szBB("FetchEngine(%d):szBB", i), szFB("FetchEngine(%d):szFB", i), szFS("FetchEngine(%d):szFS", i),
+          unBlockFetchCB(this) {
     // Constraints
-    SescConf->isInt("cpucore", "fetchWidth",cId);
+    SescConf->isInt("cpucore", "fetchWidth", cId);
     SescConf->isBetween("cpucore", "fetchWidth", 1, 1024, cId);
     FetchWidth = SescConf->getInt("cpucore", "fetchWidth", cId);
 
-    SescConf->isBetween("cpucore", "bb4Cycle",0,1024,cId);
-    BB4Cycle = SescConf->getInt("cpucore", "bb4Cycle",cId);
-    if( BB4Cycle == 0 )
+    SescConf->isBetween("cpucore", "bb4Cycle", 0, 1024, cId);
+    BB4Cycle = SescConf->getInt("cpucore", "bb4Cycle", cId);
+    if (BB4Cycle == 0)
         BB4Cycle = USHRT_MAX;
 
-    const char *bpredSection = SescConf->getCharPtr("cpucore","bpred",cId);
+    const char *bpredSection = SescConf->getCharPtr("cpucore", "bpred", cId);
 
-    if( fe )
+    if (fe)
         bpred = new BPredictor(i, FetchWidth, bpredSection, fe->bpred);
     else
         bpred = new BPredictor(i, FetchWidth, bpredSection);
@@ -92,24 +78,24 @@ FetchEngine::FetchEngine(int32_t cId
 #ifdef SESC_MISPATH
     issueWrongPath = SescConf->getBool("cpucore","issueWrongPath",cId);
 #endif
-    nGradInsts  = 0;
+    nGradInsts = 0;
     nWPathInsts = 0;
 
     // Get some icache L1 parameters
-    enableICache = SescConf->getBool("cpucore","enableICache", cId);
+    enableICache = SescConf->getBool("cpucore", "enableICache", cId);
     if (enableICache) {
         IL1HitDelay = 0;
     } else {
-        const char *iL1Section = SescConf->getCharPtr("cpucore","instrSource", cId);
+        const char *iL1Section = SescConf->getCharPtr("cpucore", "instrSource", cId);
         if (iL1Section) {
             char *sec = strdup(iL1Section);
             char *end = strchr(sec, ' ');
             if (end)
-                *end=0; // Get only the first word
+                *end = 0; // Get only the first word
             // Must be the i-cache
-            SescConf->isInList(sec,"deviceType","icache");
+            SescConf->isInList(sec, "deviceType", "icache");
 
-            IL1HitDelay = SescConf->getInt(sec,"hitDelay");
+            IL1HitDelay = SescConf->getInt(sec, "hitDelay");
         } else {
             IL1HitDelay = 1; // 1 cycle if impossible to find the information required
         }
@@ -117,48 +103,46 @@ FetchEngine::FetchEngine(int32_t cId
 
     gproc = osSim->id2GProcessor(cpuId);
 
-    bbSize=0;
-    fbSize=0;
+    bbSize = 0;
+    fbSize = 0;
     fbSizeBB = BB4Cycle;
 }
 
-FetchEngine::~FetchEngine()
-{
+FetchEngine::~FetchEngine() {
     // There should be a RunningProc::switchOut that clears the statistics
-    I(nGradInsts  == 0);
+    I(nGradInsts == 0);
     I(nWPathInsts == 0);
 
     delete bpred;
 }
 
-bool FetchEngine::processBranch(DInst *dinst, ushort n2Fetched)
-{
+bool FetchEngine::processBranch(DInst *dinst, ushort n2Fetched) {
     const Instruction *inst = dinst->getInst();
-    InstID oracleID         = flow.getNextID();
+    InstID oracleID = flow.getNextID();
 #ifdef BPRED_UPDATE_RETIRE
     PredType prediction     = bpred->predict(inst, oracleID, false);
     if (!dinst->isFake())
         dinst->setBPPred(bpred, oracleID);
 #else
-    PredType prediction     = bpred->predict(inst, oracleID, !dinst->isFake());
+    PredType prediction = bpred->predict(inst, oracleID, !dinst->isFake());
 #endif
 
-    if( oracleID != inst->calcNextInstID() ) {
+    if (oracleID != inst->calcNextInstID()) {
         fbSizeBB--;
-        if( fbSizeBB == 0 ) {
+        if (fbSizeBB == 0) {
             szFB.sample(fbSize);
-            fbSize=0;
+            fbSize = 0;
             fbSizeBB = BB4Cycle;
         }
     }
 
-    if(prediction == CorrectPrediction) {
-        if( oracleID != inst->calcNextInstID() ) { //Taken
+    if (prediction == CorrectPrediction) {
+        if (oracleID != inst->calcNextInstID()) { //Taken
             // Only when the branch is taken check maxBB
             maxBB--;
-            if( maxBB == 0 ) {
+            if (maxBB == 0) {
                 // No instructions fetched (stall)
-                if (missInstID==0)
+                if (missInstID == 0)
                     nDelayInst2.add(n2Fetched);
 
                 return false;
@@ -169,21 +153,21 @@ bool FetchEngine::processBranch(DInst *dinst, ushort n2Fetched)
 
 
 #ifdef SESC_MISPATH
-    if (missInstID==0 && !dinst->isFake()) { // Only first mispredicted instruction
-        I(missFetchTime == 0);
-        missFetchTime = globalClock;
-        missInstID    = inst->calcNextInstID();
-        dinst->setFetch(this);
-    }
+        if (missInstID==0 && !dinst->isFake()) { // Only first mispredicted instruction
+            I(missFetchTime == 0);
+            missFetchTime = globalClock;
+            missInstID    = inst->calcNextInstID();
+            dinst->setFetch(this);
+        }
 #else
-    I(missInstID==0);
-    I(missFetchTime==0);
+    I(missInstID == 0);
+    I(missFetchTime == 0);
 
     missFetchTime = globalClock;
-    missInstID    = inst->calcNextInstID();
+    missInstID = inst->calcNextInstID();
 
-    if( BTACDelay ) {
-        if( prediction == NoBTBPrediction && inst->doesJump2Label() ) {
+    if (BTACDelay) {
+        if (prediction == NoBTBPrediction && inst->doesJump2Label()) {
             nBTAC.inc();
             unBlockFetchCB.schedule(BTACDelay);
         } else {
@@ -197,18 +181,17 @@ bool FetchEngine::processBranch(DInst *dinst, ushort n2Fetched)
     return false;
 }
 
-void FetchEngine::realFetch(IBucket *bucket, int32_t fetchMax)
-{
-    int32_t n2Fetched=fetchMax > 0 ? fetchMax : FetchWidth;
+void FetchEngine::realFetch(IBucket *bucket, int32_t fetchMax) {
+    int32_t n2Fetched = fetchMax > 0 ? fetchMax : FetchWidth;
     maxBB = BB4Cycle; // Reset the max number of BB to fetch in this cycle (decreased in processBranch)
 
     // This method only can be called once per cycle or the restriction of the
     // BB4Cycle would not enforced
-    I(pid>=0);
-    I(maxBB>0);
+    I(pid >= 0);
+    I(maxBB > 0);
     I(bucket->empty());
 
-    I(missInstID==0);
+    I(missInstID == 0);
 
     Pid_t myPid = flow.currentPid();
 
@@ -230,33 +213,33 @@ void FetchEngine::realFetch(IBucket *bucket, int32_t fetchMax)
 
         bbSize++;
         fbSize++;
-        if(inst->isBranch()) {
+        if (inst->isBranch()) {
             szBB.sample(bbSize);
-            bbSize=0;
+            bbSize = 0;
 
             if (!processBranch(dinst, n2Fetched)) {
                 break;
             }
         }
 
-    } while(n2Fetched>0 && flow.currentPid()==myPid);
+    } while (n2Fetched > 0 && flow.currentPid() == myPid);
 
     ushort tmp = FetchWidth - n2Fetched;
 
-    totalnInst+=tmp;
+    totalnInst += tmp;
     // JJ
-    if(ThreadContext::simDone) {
-		if(ThreadContext::finalSkip==0) {
-			MSG("stopSimulation at %lld\n",totalnInst);
-			MSG("Begin fastforwarding: skipping instructions\n");
-			fflush(stdout);
-		}
-		ThreadContext::finalSkip += ThreadContext::skipInsts(-1);
+    if (ThreadContext::simDone) {
+        if (ThreadContext::finalSkip == 0) {
+            MSG("stopSimulation at %lld\n", totalnInst);
+            MSG("Begin fastforwarding: skipping instructions\n");
+            fflush(stdout);
+        }
+        ThreadContext::finalSkip += ThreadContext::skipInsts(-1);
         //osSim->stopSimulation();
     }
 
-    if( totalnInst >= nInst2Sim ) {
-        MSG("stopSimulation at %lld (%lld)",totalnInst, nInst2Sim);
+    if (totalnInst >= nInst2Sim) {
+        MSG("stopSimulation at %lld (%lld)", totalnInst, nInst2Sim);
         osSim->stopSimulation();
     }
 
@@ -264,15 +247,14 @@ void FetchEngine::realFetch(IBucket *bucket, int32_t fetchMax)
 }
 
 
-void FetchEngine::fetch(IBucket *bucket, int32_t fetchMax)
-{
-    if(missInstID) {
+void FetchEngine::fetch(IBucket *bucket, int32_t fetchMax) {
+    if (missInstID) {
         fakeFetch(bucket, fetchMax);
     } else {
         realFetch(bucket, fetchMax);
     }
 
-    if(enableICache && !bucket->empty()) {
+    if (enableICache && !bucket->empty()) {
         szFS.sample(bucket->size());
         if (bucket->top()->getInst()->isStoreAddr())
             IMemRequest::create(bucket->topNext(), gms, bucket);
@@ -285,8 +267,7 @@ void FetchEngine::fetch(IBucket *bucket, int32_t fetchMax)
     }
 }
 
-void FetchEngine::fakeFetch(IBucket *bucket, int32_t fetchMax)
-{
+void FetchEngine::fakeFetch(IBucket *bucket, int32_t fetchMax) {
     I(missInstID);
 #ifdef SESC_MISPATH
     if(!issueWrongPath)
@@ -325,9 +306,8 @@ void FetchEngine::fakeFetch(IBucket *bucket, int32_t fetchMax)
 #endif // SESC_MISPATH
 }
 
-void FetchEngine::dump(const char *str) const
-{
-    char *nstr = (char *)malloc(strlen(str) + 20);
+void FetchEngine::dump(const char *str) const {
+    char *nstr = (char *) malloc(strlen(str) + 20);
 
     sprintf(nstr, "%s_FE", str);
 
@@ -337,25 +317,23 @@ void FetchEngine::dump(const char *str) const
     free(nstr);
 }
 
-void FetchEngine::unBlockFetch()
-{
+void FetchEngine::unBlockFetch() {
     I(missInstID);
     missInstID = 0;
 
-    Time_t n = (globalClock-missFetchTime);
+    Time_t n = (globalClock - missFetchTime);
 
     avgBranchTime.sample(n);
     n *= FetchWidth;
     nDelayInst1.add(n);
 
-    missFetchTime=0;
+    missFetchTime = 0;
 }
 
-void FetchEngine::switchIn(Pid_t i)
-{
-    I(pid==-1);
-    I(i>=0);
-    I(nGradInsts  == 0);
+void FetchEngine::switchIn(Pid_t i) {
+    I(pid == -1);
+    I(i >= 0);
+    I(nGradInsts == 0);
     I(nWPathInsts == 0);
     pid = i;
 
@@ -363,10 +341,9 @@ void FetchEngine::switchIn(Pid_t i)
     flow.switchIn(i);
 }
 
-void FetchEngine::switchOut(Pid_t i)
-{
-    I(pid>=0);
-    I(pid==i);
+void FetchEngine::switchOut(Pid_t i) {
+    I(pid >= 0);
+    I(pid == i);
     pid = -1;
     flow.switchOut(i);
     bpred->switchOut(i);

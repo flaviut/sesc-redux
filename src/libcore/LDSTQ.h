@@ -50,10 +50,13 @@ private:
 
 public:
     LDSTQ(GProcessor *gp, const int32_t id);
-    ~LDSTQ() { }
+
+    ~LDSTQ() {}
 
     void insert(DInst *dinst);
+
     bool executed(DInst *dinst);
+
     void remove(DInst *dinst);
 
     static VAddr calcWord(const DInst *dinst) {

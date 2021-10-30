@@ -41,27 +41,23 @@
 #include <cstring>
 
 SeparableOutputFirstAllocator::
-SeparableOutputFirstAllocator( Module* parent, const string& name, int inputs,
-                               int outputs, const string& arb_type )
-    : SeparableAllocator( parent, name, inputs, outputs, arb_type )
-{}
+SeparableOutputFirstAllocator(Module *parent, const string &name, int inputs,
+                              int outputs, const string &arb_type)
+        : SeparableAllocator(parent, name, inputs, outputs, arb_type) {}
 
-void SeparableOutputFirstAllocator::Allocate()
-{
+void SeparableOutputFirstAllocator::Allocate() {
 
     set<int>::const_iterator port_iter = _out_occ.begin();
-    while(port_iter != _out_occ.end())
-    {
+    while (port_iter != _out_occ.end()) {
 
-        const int & output = *port_iter;
+        const int &output = *port_iter;
 
         // add requests to the output arbiter
 
         map<int, sRequest>::const_iterator req_iter = _out_req[output].begin();
-        while(req_iter != _out_req[output].end())
-        {
+        while (req_iter != _out_req[output].end()) {
 
-            const sRequest & req = req_iter->second;
+            const sRequest &req = req_iter->second;
 
             _output_arb[output]->AddRequest(req.port, req.label, req.out_pri);
 
@@ -75,7 +71,7 @@ void SeparableOutputFirstAllocator::Allocate()
         const int input = _output_arb[output]->Arbitrate(&label, NULL);
         assert(input > -1);
 
-        const sRequest & req = _in_req[input][output];
+        const sRequest &req = _in_req[input][output];
         assert((req.port == output) && (req.label == label));
 
         _input_arb[input]->AddRequest(req.port, req.label, req.in_pri);
@@ -84,23 +80,21 @@ void SeparableOutputFirstAllocator::Allocate()
     }
 
     port_iter = _in_occ.begin();
-    while(port_iter != _in_occ.end())
-    {
+    while (port_iter != _in_occ.end()) {
 
-        const int & input = *port_iter;
+        const int &input = *port_iter;
 
         // Execute the input arbiters.
 
         const int output = _input_arb[input]->Arbitrate(NULL, NULL);
 
-        if(output > -1)
-        {
+        if (output > -1) {
             assert((_inmatch[input] == -1) && (_outmatch[output] == -1));
 
             _inmatch[input] = output;
             _outmatch[output] = input;
-            _input_arb[input]->UpdateState() ;
-            _output_arb[output]->UpdateState() ;
+            _input_arb[input]->UpdateState();
+            _output_arb[output]->UpdateState();
         }
 
         ++port_iter;

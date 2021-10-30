@@ -33,8 +33,11 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "GStats.h"
 
 class Resource;
+
 class FetchEngine;
+
 class FReg;
+
 class BPredictor;
 
 //#define DINST_TRACK_PHYS 1
@@ -52,7 +55,7 @@ public:
     }
 
     DInstNext *nextDep;
-    bool       isUsed; // true while non-satisfied RAW dependence
+    bool isUsed; // true while non-satisfied RAW dependence
 #ifdef DINST_TRACK_PHYS
     ushort preg;
 #endif
@@ -60,15 +63,17 @@ public:
     const DInstNext *getNext() const {
         return nextDep;
     }
+
     DInstNext *getNext() {
         return nextDep;
     }
+
     void setNextDep(DInstNext *n) {
         nextDep = n;
     }
 
     void init(DInst *d) {
-        I(dinst==0);
+        I(dinst == 0);
         dinst = d;
     }
 
@@ -85,14 +90,16 @@ public:
         parentDInst = d;
     }
 #else
-    void setParentDInst(DInst *d) { }
+
+    void setParentDInst(DInst *d) {}
+
 #endif
 };
 
 class DInst {
 public:
     // In a typical RISC processor MAX_PENDING_SOURCES should be 2
-    static const int32_t MAX_PENDING_SOURCES=2;
+    static const int32_t MAX_PENDING_SOURCES = 2;
 
 private:
 
@@ -189,8 +196,8 @@ private:
 
     const Instruction *inst;
     VAddr vaddr;
-    Resource    *resource;
-    DInst      **RATEntry;
+    Resource *resource;
+    DInst **RATEntry;
     FetchEngine *fetch;
 
     CallbackBase *pendEvent;
@@ -198,10 +205,10 @@ private:
     char nDeps;              // 0, 1 or 2 for RISC processors
 
 #ifdef DEBUG
-public:
-    static int32_t currentID;
-    int32_t ID; // static ID, increased every create (currentID). pointer to the
-    // DInst may not be a valid ID because the instruction gets recycled
+    public:
+        static int32_t currentID;
+        int32_t ID; // static ID, increased every create (currentID). pointer to the
+        // DInst may not be a valid ID because the instruction gets recycled
 #endif
 public:
     ThreadContext::pointer context;
@@ -210,19 +217,25 @@ public:
     DInst();
 
     void doAtSimTime();
-    StaticCallbackMember0<DInst,&DInst::doAtSimTime>  doAtSimTimeCB;
+
+    StaticCallbackMember0<DInst, &DInst::doAtSimTime> doAtSimTimeCB;
 
     void doAtSelect();
-    StaticCallbackMember0<DInst,&DInst::doAtSelect>  doAtSelectCB;
+
+    StaticCallbackMember0<DInst, &DInst::doAtSelect> doAtSelectCB;
 
     DInst *clone();
 
     void doAtExecuted();
-    StaticCallbackMember0<DInst,&DInst::doAtExecuted> doAtExecutedCB;
+
+    StaticCallbackMember0<DInst, &DInst::doAtExecuted> doAtExecutedCB;
 
     static DInst *createInst(InstID pc, VAddr va, int32_t cId, ThreadContext *context);
+
     static DInst *createDInst(const Instruction *inst, VAddr va, int32_t cId, ThreadContext *context);
+
     void killSilently();
+
     void scrap(); // Destroys the instruction without any other effects
     void destroy();
 
@@ -230,6 +243,7 @@ public:
         I(!resource);
         resource = res;
     }
+
     Resource *getResource() const {
         return resource;
     }
@@ -297,7 +311,7 @@ public:
         return n;
     }
 
-    void addSrc1(DInst * d) {
+    void addSrc1(DInst *d) {
         I(d->nDeps < MAX_PENDING_SOURCES);
         d->nDeps++;
 
@@ -319,7 +333,7 @@ public:
         last = n;
     }
 
-    void addSrc2(DInst * d) {
+    void addSrc2(DInst *d) {
         I(d->nDeps < MAX_PENDING_SOURCES);
         d->nDeps++;
         I(!d->waitOnMemory); // pend[1] reused on memory ops. Not both!
@@ -341,7 +355,7 @@ public:
         last = n;
     }
 
-    void addFakeSrc(DInst * d, bool requeue = false) {
+    void addFakeSrc(DInst *d, bool requeue = false) {
         I(d->nDeps < MAX_PENDING_SOURCES);
         d->nDeps++;
         GI(requeue == false, !d->waitOnMemory);
@@ -375,22 +389,28 @@ public:
     bool isSrc1Ready() const {
         return !pend[0].isUsed;
     }
+
     bool isSrc2Ready() const {
         return !pend[1].isUsed;
     }
+
     bool isJustWaitingOnMemory() const {
         return !pend[0].isUsed && waitOnMemory;
     }
-    bool hasDeps()     const {
-        GI(!pend[0].isUsed && !pend[1].isUsed, nDeps==0);
-        return nDeps!=0;
+
+    bool hasDeps() const {
+        GI(!pend[0].isUsed && !pend[1].isUsed, nDeps == 0);
+        return nDeps != 0;
     }
-    bool hasPending()  const {
+
+    bool hasPending() const {
         return first != 0;
     }
+
     const DInst *getFirstPending() const {
         return first->getDInst();
     }
+
     const DInstNext *getFirst() const {
         return first;
     }
@@ -413,14 +433,16 @@ public:
     bool isLoadForwarded() const {
         return loadForwarded;
     }
+
     void setLoadForwarded() {
         I(!loadForwarded);
-        loadForwarded=true;
+        loadForwarded = true;
     }
 
     bool isIssued() const {
         return issued;
     }
+
     void markIssued() {
         I(!issued);
         I(!executed);
@@ -430,6 +452,7 @@ public:
     bool isExecuted() const {
         return executed;
     }
+
     void markExecuted() {
         I(issued);
         I(!executed);
@@ -439,6 +462,7 @@ public:
     bool isDeadStore() const {
         return deadStore;
     }
+
     void setDeadStore() {
         I(!deadStore);
         I(!hasPending());
@@ -448,6 +472,7 @@ public:
     void setDeadInst() {
         deadInst = true;
     }
+
     bool isDeadInst() {
         return deadInst;
     }
@@ -455,10 +480,12 @@ public:
     bool hasDepsAtRetire() const {
         return depsAtRetire;
     }
+
     void setDepsAtRetire() {
         I(!depsAtRetire);
         depsAtRetire = true;
     }
+
     void clearDepsAtRetire() {
         I(depsAtRetire);
         depsAtRetire = false;
@@ -467,6 +494,7 @@ public:
     bool isResolved() const {
         return resolved;
     }
+
     void markResolved() {
         resolved = true;
     }
@@ -484,15 +512,17 @@ public:
         return fake;
     }
 #else
-    bool isFake() const  {
+
+    bool isFake() const {
         return false;
     }
+
 #endif
 
 
     void awakeRemoteInstructions();
 
-    void setWakeUpTime(Time_t t)  {
+    void setWakeUpTime(Time_t t) {
         // ??? FIXME: Why fails?I(wakeUpTime <= t); // Never go back in time
         //I(wakeUpTime <= t);
         wakeUpTime = t;
@@ -522,7 +552,7 @@ public:
 class Hash4DInst {
 public:
     size_t operator()(const DInst *dinst) const {
-        return (size_t)(dinst);
+        return (size_t) (dinst);
     }
 };
 

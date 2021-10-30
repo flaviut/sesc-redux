@@ -31,15 +31,13 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 class Setltstr {
 public:
-    bool operator()(const char* s1, const char* s2) const {
+    bool operator()(const char *s1, const char *s2) const {
         return strcasecmp(s1, s2) < 0;
     }
 };
 
 MemObj::MemObj(const char *section, const char *sName)
-    :descrSection(section)
-    ,symbolicName(sName)
-{
+        : descrSection(section), symbolicName(sName) {
     highest = false;
     nUpperCaches = 0;
 
@@ -56,74 +54,63 @@ MemObj::MemObj(const char *section, const char *sName)
 #endif
 }
 
-MemObj::~MemObj()
-{
-    if(descrSection != 0)
-        delete [] descrSection;
-    if(symbolicName != 0)
-        delete [] symbolicName;
+MemObj::~MemObj() {
+    if (descrSection != 0)
+        delete[] descrSection;
+    if (symbolicName != 0)
+        delete[] symbolicName;
 }
 
-void MemObj::computenUpperCaches()
-{
+void MemObj::computenUpperCaches() {
     nUpperCaches = 0;
 
-    for(uint32_t j=0; j < upperLevel.size(); j++) {
-        if(upperLevel[j]->isCache())
+    for (uint32_t j = 0; j < upperLevel.size(); j++) {
+        if (upperLevel[j]->isCache())
             nUpperCaches++;
         else
             nUpperCaches += upperLevel[j]->getNumCachesInUpperLevels();
     }
 
     // top-down traversal of the memory objects
-    for(uint32_t i=0; i < lowerLevel.size(); i++) {
+    for (uint32_t i = 0; i < lowerLevel.size(); i++) {
         lowerLevel[i]->computenUpperCaches();
     }
 }
 
-void MemObj::dump() const
-{
-    LOG("MemObj name [%s]",symbolicName);
+void MemObj::dump() const {
+    LOG("MemObj name [%s]", symbolicName);
 }
 
 // DummyMemObj
 
 DummyMemObj::DummyMemObj()
-    : MemObj("dummySection", "dummyMem")
-{
+        : MemObj("dummySection", "dummyMem") {
 }
 
 DummyMemObj::DummyMemObj(const char *section, const char *sName)
-    : MemObj(section, sName)
-{
+        : MemObj(section, sName) {
 }
 
-Time_t DummyMemObj::getNextFreeCycle() const
-{
+Time_t DummyMemObj::getNextFreeCycle() const {
     return globalClock;
 }
 
-void DummyMemObj::access(MemRequest *req)
-{
+void DummyMemObj::access(MemRequest *req) {
     req->goUp(1);
 }
 
-bool DummyMemObj::canAcceptStore(PAddr addr)
-{
+bool DummyMemObj::canAcceptStore(PAddr addr) {
     return true;
 }
 
-void DummyMemObj::invalidate(PAddr addr, ushort size, MemObj *oc)
-{
+void DummyMemObj::invalidate(PAddr addr, ushort size, MemObj *oc) {
     invUpperLevel(addr, size, oc);
 }
 
-void DummyMemObj::doInvalidate(PAddr addr, ushort size)
-{
+void DummyMemObj::doInvalidate(PAddr addr, ushort size) {
     I(0);
 }
 
-void DummyMemObj::returnAccess(MemRequest *req)
-{
+void DummyMemObj::returnAccess(MemRequest *req) {
     I(0);
 }

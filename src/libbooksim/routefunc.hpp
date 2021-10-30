@@ -33,9 +33,9 @@
 #include "outputset.hpp"
 #include "config_utils.hpp"
 
-typedef void (*tRoutingFunction)( const Router *, const Flit *, int in_channel, OutputSet *, bool );
+typedef void (*tRoutingFunction)(const Router *, const Flit *, int in_channel, OutputSet *, bool);
 
-void InitializeRoutingMap( const Configuration & config );
+void InitializeRoutingMap(const Configuration &config);
 
 extern map<string, tRoutingFunction> gRoutingFunctionMap;
 
@@ -45,49 +45,74 @@ extern int gWriteReqBeginVC, gWriteReqEndVC;
 extern int gReadReplyBeginVC, gReadReplyEndVC;
 extern int gWriteReplyBeginVC, gWriteReplyEndVC;
 
-void qtree_nca( const Router *r, const Flit *f,
-                int in_channel, OutputSet* outputs, bool inject);
-void tree4_anca( const Router *r, const Flit *f,
-                 int in_channel, OutputSet* outputs, bool inject);
-void tree4_nca( const Router *r, const Flit *f,
-                int in_channel, OutputSet* outputs, bool inject);
-void fattree_nca( const Router *r, const Flit *f,
-                  int in_channel, OutputSet* outputs, bool inject);
-void fattree_anca( const Router *r, const Flit *f,
-                   int in_channel, OutputSet* outputs, bool inject);
-void adaptive_xy_yx_mesh( const Router *r, const Flit *f,
-                          int in_channel, OutputSet *outputs, bool inject );
-void xy_yx_mesh( const Router *r, const Flit *f,
-                 int in_channel, OutputSet *outputs, bool inject );
-void dor_next_torus( int cur, int dest, int in_port,
-                     int *out_port, int *partition,
-                     bool balance);
-void dim_order_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void dim_order_ni_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void dim_order_pni_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void romm_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void romm_ni_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void min_adapt_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void planar_adapt_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void limited_adapt_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void valiant_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void valiant_torus( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void valiant_ni_torus( const Router *r, const Flit *f, int in_channel,
-                       OutputSet *outputs, bool inject );
-void dim_order_torus( const Router *r, const Flit *f, int in_channel,
-                      OutputSet *outputs, bool inject );
-void dim_order_ni_torus( const Router *r, const Flit *f, int in_channel,
-                         OutputSet *outputs, bool inject );
-void dim_order_bal_torus( const Router *r, const Flit *f, int in_channel,
-                          OutputSet *outputs, bool inject );
-void min_adapt_torus( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject );
-void dest_tag_fly( const Router *r, const Flit *f, int in_channel,
-                   OutputSet *outputs, bool inject );
-void chaos_torus( const Router *r, const Flit *f,
-                  int in_channel, OutputSet *outputs, bool inject );
-void chaos_mesh( const Router *r, const Flit *f,
-                 int in_channel, OutputSet *outputs, bool inject );
+void qtree_nca(const Router *r, const Flit *f,
+               int in_channel, OutputSet *outputs, bool inject);
 
-int rand_min_intr_mesh( int src, int dest );
+void tree4_anca(const Router *r, const Flit *f,
+                int in_channel, OutputSet *outputs, bool inject);
+
+void tree4_nca(const Router *r, const Flit *f,
+               int in_channel, OutputSet *outputs, bool inject);
+
+void fattree_nca(const Router *r, const Flit *f,
+                 int in_channel, OutputSet *outputs, bool inject);
+
+void fattree_anca(const Router *r, const Flit *f,
+                  int in_channel, OutputSet *outputs, bool inject);
+
+void adaptive_xy_yx_mesh(const Router *r, const Flit *f,
+                         int in_channel, OutputSet *outputs, bool inject);
+
+void xy_yx_mesh(const Router *r, const Flit *f,
+                int in_channel, OutputSet *outputs, bool inject);
+
+void dor_next_torus(int cur, int dest, int in_port,
+                    int *out_port, int *partition,
+                    bool balance);
+
+void dim_order_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void dim_order_ni_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void dim_order_pni_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void romm_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void romm_ni_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void min_adapt_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void planar_adapt_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void limited_adapt_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void valiant_mesh(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void valiant_torus(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void valiant_ni_torus(const Router *r, const Flit *f, int in_channel,
+                      OutputSet *outputs, bool inject);
+
+void dim_order_torus(const Router *r, const Flit *f, int in_channel,
+                     OutputSet *outputs, bool inject);
+
+void dim_order_ni_torus(const Router *r, const Flit *f, int in_channel,
+                        OutputSet *outputs, bool inject);
+
+void dim_order_bal_torus(const Router *r, const Flit *f, int in_channel,
+                         OutputSet *outputs, bool inject);
+
+void min_adapt_torus(const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject);
+
+void dest_tag_fly(const Router *r, const Flit *f, int in_channel,
+                  OutputSet *outputs, bool inject);
+
+void chaos_torus(const Router *r, const Flit *f,
+                 int in_channel, OutputSet *outputs, bool inject);
+
+void chaos_mesh(const Router *r, const Flit *f,
+                int in_channel, OutputSet *outputs, bool inject);
+
+int rand_min_intr_mesh(int src, int dest);
 
 #endif

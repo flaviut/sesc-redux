@@ -29,10 +29,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 LDSTBuffer::EntryType      LDSTBuffer::stores;
 LDSTBuffer::FenceEntryType LDSTBuffer::fences;
 
-DInst *LDSTBuffer::pendingBarrier=0;
+DInst *LDSTBuffer::pendingBarrier = 0;
 
-void LDSTBuffer::getFenceEntry(DInst *dinst)
-{
+void LDSTBuffer::getFenceEntry(DInst *dinst) {
     /* TODO: My suggestion of implementation for whoever is the nice guy to do
      * it (James?)
      *
@@ -88,8 +87,7 @@ void LDSTBuffer::getFenceEntry(DInst *dinst)
     fences[cid] = dinst;
 }
 
-void LDSTBuffer::fenceLocallyPerformed(DInst *dinst)
-{
+void LDSTBuffer::fenceLocallyPerformed(DInst *dinst) {
     int32_t cid = dinst->getContextId();
     FenceEntryType::iterator it = fences.find(cid);
 
@@ -98,9 +96,8 @@ void LDSTBuffer::fenceLocallyPerformed(DInst *dinst)
 }
 
 
-void LDSTBuffer::getStoreEntry(DInst *dinst)
-{
-    I( dinst->getInst()->isStore() );
+void LDSTBuffer::getStoreEntry(DInst *dinst) {
+    I(dinst->getInst()->isStore());
 
 #ifdef LDSTBUFFER_IGNORE_DEPS
     return;
@@ -117,8 +114,7 @@ void LDSTBuffer::getStoreEntry(DInst *dinst)
     stores[calcWord(dinst)] = dinst;
 }
 
-void LDSTBuffer::getLoadEntry(DInst *dinst)
-{
+void LDSTBuffer::getLoadEntry(DInst *dinst) {
     I(dinst->getInst()->isLoad());
 
 #ifdef LDSTBUFFER_IGNORE_DEPS
@@ -164,8 +160,7 @@ void LDSTBuffer::getLoadEntry(DInst *dinst)
     }
 }
 
-void LDSTBuffer::storeLocallyPerformed(DInst *dinst)
-{
+void LDSTBuffer::storeLocallyPerformed(DInst *dinst) {
     I(dinst->getInst()->isStore());
 
 #ifdef LDSTBUFFER_IGNORE_DEPS
@@ -180,24 +175,21 @@ void LDSTBuffer::storeLocallyPerformed(DInst *dinst)
         stores.erase(sit);
 }
 
-void LDSTBuffer::dump(const char *str)
-{
+void LDSTBuffer::dump(const char *str) {
     EntryType::const_iterator sit;
 
-    fprintf(stderr,"LDSTBuffer %s @%d:",str,(int)globalClock);
+    fprintf(stderr, "LDSTBuffer %s @%d:", str, (int) globalClock);
 
-    fprintf(stderr,"pendingStores ");
-    for( sit = stores.begin();
-            sit != stores.end();
-            sit++ ) {
+    fprintf(stderr, "pendingStores ");
+    for (sit = stores.begin();
+         sit != stores.end();
+         sit++) {
 
-        fprintf(stderr,": pc=0x%x, addr=0x%x %d"
-                ,(int)(sit->second->getInst()->getAddr())
-                ,(int)((sit->first)<<2)
-                ,sit->second->getContextId()
-               );
+        fprintf(stderr, ": pc=0x%x, addr=0x%x %d", (int) (sit->second->getInst()->getAddr()), (int) ((sit->first) << 2),
+                sit->second->getContextId()
+        );
     }
-    fprintf(stderr,"\n");
+    fprintf(stderr, "\n");
 
 }
 
