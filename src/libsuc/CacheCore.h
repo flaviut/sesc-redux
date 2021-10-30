@@ -93,7 +93,7 @@ protected:
         // TODO : assoc and sets must be a power of 2
     }
 
-    virtual ~CacheGeneric() {}
+    virtual ~CacheGeneric() = default;
 
     GStatsEnergy *getEnergy(const char *section, PowerGroup grp, const char *format, const char *name);
 

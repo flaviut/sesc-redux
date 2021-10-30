@@ -26,9 +26,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 #define CACHECORE_CPP
 
-#include <stddef.h>
-#include <stdarg.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdarg>
+#include <cstring>
 #include <strings.h>
 
 #include "CacheCore.h"
@@ -99,7 +99,7 @@ template<class State, class Addr_t, bool Energy>
 void CacheGeneric<State, Addr_t, Energy>::createStats(const char *section, const char *name) {
     // get the type
     bool typeExists = SescConf->checkCharPtr(section, "deviceType");
-    const char *type = 0;
+    const char *type = nullptr;
     if (typeExists)
         type = SescConf->getCharPtr(section, "deviceType");
 
@@ -122,10 +122,10 @@ void CacheGeneric<State, Addr_t, Energy>::createStats(const char *section, const
         wrEnergy[1] = new GStatsEnergy("wrMissEnergy", name, procId, pg, EnergyMgr::get(section, "wrMissEnergy"));
 
     } else {
-        rdEnergy[0] = 0;
-        rdEnergy[1] = 0;
-        wrEnergy[0] = 0;
-        wrEnergy[1] = 0;
+        rdEnergy[0] = nullptr;
+        rdEnergy[1] = nullptr;
+        wrEnergy[0] = nullptr;
+        wrEnergy[1] = nullptr;
     }
 }
 

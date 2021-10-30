@@ -63,7 +63,7 @@ protected:
         CallbackBase *cb;
         Entry() {
             outsResps = 0;
-            cb = 0;
+            cb = nullptr;
             invalidate = false;
             writeback = false;
         }
@@ -143,27 +143,27 @@ protected:
 
 public:
     SMPCache(SMemorySystem *gms, const char *section, const char *name);
-    ~SMPCache();
+    ~SMPCache() override;
 
     // BEGIN MemObj interface
 
-    bool isCache() const {
+    bool isCache() const override {
         return true;
     }
     //const bool isCache() const { return true; }
 
     // port availability
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
     // interface with upper level
-    bool canAcceptStore(PAddr addr);
-    void access(MemRequest *mreq);
+    bool canAcceptStore(PAddr addr) override;
+    void access(MemRequest *mreq) override;
 
     // interface with lower level
-    void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
     void realInvalidate(PAddr addr, ushort size, bool writeBack);
 
     // END MemObj interface

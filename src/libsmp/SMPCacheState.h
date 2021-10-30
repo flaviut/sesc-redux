@@ -57,11 +57,11 @@ public:
     }
 
     // BEGIN CacheCore interface
-    bool isValid() const {
+    bool isValid() const override {
         return (state != SMP_INVALID);
     }
 
-    void invalidate() {
+    void invalidate() override {
         // cannot invalidate if line is in transient state,
         // except when this is the end of an invalidate chain
         GI(isLocked(), (state & SMP_TRANS_BIT) && (state & SMP_INV_BIT));
@@ -69,7 +69,7 @@ public:
         state = SMP_INVALID;
     }
 
-    bool isLocked() const {
+    bool isLocked() const override {
         return (state & SMP_TRANS_BIT);
     }
 
