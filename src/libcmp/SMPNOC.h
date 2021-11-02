@@ -146,7 +146,7 @@ public:
     ~SMPNOC();
 	
 	static void doAdvanceNOCCycle();
-	static std::list<std::pair<void *, std::pair<int, int> > > returnPackets;
+	static std::deque<std::pair<void *, std::pair<int, int> > > returnPackets;
 	static SMPNOC *myself;
 	static void PrintStat();
 	void _PrintStat();

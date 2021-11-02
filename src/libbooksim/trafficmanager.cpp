@@ -1088,7 +1088,7 @@ void TrafficManager::_DisplayRemaining(ostream &os) const {
     }
 }
 
-void TrafficManager::Init(list<pair<void *, pair<int, int> > > *returnPackets, ofstream *os_out) {
+void TrafficManager::Init(deque<pair<void *, pair<int, int> > > *returnPackets, ofstream *os_out) {
     //_time = 2147483000;
     _time = 0;
 
@@ -1321,7 +1321,7 @@ void TrafficManager::CallEveryCycle() {
             int class_limit = _classes;
 
             if (_hold_switch_for_packet) {
-                list<Flit *> const &pp = _partial_packets[n][last_class];
+                deque<Flit *> const &pp = _partial_packets[n][last_class];
                 if (!pp.empty() && !pp.front()->head &&
                     !dest_buf->IsFullFor(pp.front()->vc)) {
                     f = pp.front();
@@ -1337,7 +1337,7 @@ void TrafficManager::CallEveryCycle() {
 
                 int const c = (last_class + i) % _classes;
 
-                list<Flit *> const &pp = _partial_packets[n][c];
+                deque<Flit *> const &pp = _partial_packets[n][c];
 
                 if (pp.empty()) {
                     continue;

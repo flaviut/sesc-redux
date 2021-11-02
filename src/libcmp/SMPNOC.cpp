@@ -29,7 +29,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 pool<SMPNOC::SMPPacket> SMPNOC::SMPPacket::rPool(5192, "SMPPacket");
 SMPNOC *SMPNOC::myself = NULL;
 int SMPNOC::bs_sample = 0;
-list<pair<void *, pair<int, int> > > SMPNOC::returnPackets;
+deque<pair<void *, pair<int, int> > > SMPNOC::returnPackets;
 
 /* the current traffic manager instance */
 TrafficManager * trafficManager = NULL;

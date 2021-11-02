@@ -28,7 +28,7 @@
 #ifndef _TRAFFICMANAGER_HPP_
 #define _TRAFFICMANAGER_HPP_
 
-#include <list>
+#include <deque>
 #include <map>
 #include <set>
 #include <cassert>
@@ -59,7 +59,7 @@ private:
     vector<int> _packet_size_max_val;
 
     // JJ
-    list<pair<void *, pair<int, int> > > *_returnPackets;
+    deque<pair<void *, pair<int, int> > > *_returnPackets;
 
 protected:
     int _nodes;
@@ -126,7 +126,7 @@ protected:
 
     vector<vector<int> > _qtime;
     vector<vector<bool> > _qdrained;
-    vector<vector<list<Flit *> > > _partial_packets;
+    vector<vector<deque<Flit *>>> _partial_packets;
 
     vector<map<BId_t, Flit *> > _total_in_flight_flits;
     vector<map<BId_t, Flit *> > _measured_in_flight_flits;
@@ -338,7 +338,7 @@ protected:
         void *_pkt;
     };
 
-    vector<vector<list<SESCPacket *> > > _packetBuffer;
+    vector<vector<deque<SESCPacket *> > > _packetBuffer;
 
     void _GenerateSESCPacket(int source, int cl, SESCPacket *p, BTime_t time);
 
@@ -363,7 +363,7 @@ public:
     //bool Run( );
 
     // New Funcs
-    void Init(list<pair<void *, pair<int, int> > > *returnPackets, ofstream *os_out);
+    void Init(deque<pair<void *, pair<int, int> > > *returnPackets, ofstream *os_out);
 
     bool Checkpoint();
 
