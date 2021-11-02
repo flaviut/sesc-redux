@@ -48,9 +48,9 @@ class FlatFlyOnChip : public Network {
     int _stages;
     int _num_of_switch;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
     int _OutChannel(int stage, int addr, int port, int outputs) const;
 
@@ -65,9 +65,9 @@ public:
 
     static void RegisterRoutingFunctions();
 
-    double Capacity() const;
+    double Capacity() const override;
 
-    void InsertRandomFaults(const Configuration &config);
+    void InsertRandomFaults(const Configuration &config) override;
 };
 
 void adaptive_xyyx_flatfly(const Router *r, const Flit *f, int in_channel,

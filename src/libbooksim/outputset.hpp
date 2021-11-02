@@ -53,7 +53,7 @@ public:
 
     const set<sSetElement> &GetSet() const;
 
-    int GetVC(int output_port, int vc_index, BPri_t *pri = 0) const;
+    int GetVC(int output_port, int vc_index, BPri_t *pri = nullptr) const;
 
     bool GetPortVC(int *out_port, int *out_vc) const;
 

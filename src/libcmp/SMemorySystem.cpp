@@ -26,7 +26,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "SMPNOC.h"
 #include "SMPSliceCache.h"
 #include "SMPMemCtrl.h"
-#include <math.h>
+#include <cmath>
 
 #include "SMPDebug.h" // debugging defines
 

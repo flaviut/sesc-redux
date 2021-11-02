@@ -20,7 +20,7 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <string.h>
+#include <cstring>
 #include <set>
 
 #include "SescConf.h"
@@ -89,7 +89,7 @@ void DMemRequest::dinstAck(DInst *dinst, MemOperation memOp, TimeDelta_t lat) {
     I(!dinst->isLoadForwarded());
     if (memOp == MemWrite) {
         Cluster *c = dinst->getResource()->getCluster();
-        FUStore *r = (FUStore *) c->getResource(iStore);
+        auto *r = (FUStore *) c->getResource(iStore);
         r->storeCompleted();
         I(dinst->isExecuted());
         dinst->destroy();
@@ -136,7 +136,7 @@ void DMemRequest::create(DInst *dinst, GMemorySystem *gmem, MemOperation mop) {
 }
 
 void DMemRequest::ack(TimeDelta_t lat) {
-    if (dinst == 0)
+    if (dinst == nullptr)
         return; // avoid double ack
 
     I(!acknowledged);           // no double ack
@@ -144,7 +144,7 @@ void DMemRequest::ack(TimeDelta_t lat) {
 
     dinstAck(dinst, memOp, lat);
 
-    dinst = 0;
+    dinst = nullptr;
 }
 
 VAddr DMemRequest::getVaddr() const {
@@ -195,7 +195,7 @@ void IMemRequest::create(DInst *dinst, GMemorySystem *gmem, IBucket *bb) {
 }
 
 void IMemRequest::ack(TimeDelta_t lat) {
-    if (dinst == 0)
+    if (dinst == nullptr)
         return; // avoid double ack
 
     I(!acknowledged);           // no double ack
@@ -203,7 +203,7 @@ void IMemRequest::ack(TimeDelta_t lat) {
 
     buffer->markFetchedCB.schedule(lat);
 
-    dinst = 0;
+    dinst = nullptr;
 }
 
 VAddr IMemRequest::getVaddr() const {
@@ -236,7 +236,7 @@ CBMemRequest *CBMemRequest::create(TimeDelta_t lat, MemObj *m, MemOperation mop,
     I(r->memStack.empty());
     r->currentClockStamp = (Time_t) -1;
 
-    r->setFields(0, mop, m);
+    r->setFields(nullptr, mop, m);
     r->setPAddr(addr);
     r->cb = cb;
     r->dataReq = true;
@@ -249,15 +249,15 @@ CBMemRequest *CBMemRequest::create(TimeDelta_t lat, MemObj *m, MemOperation mop,
 void CBMemRequest::ack(TimeDelta_t lat) {
     IS(acknowledged = true);
 
-    if (cb == 0)
+    if (cb == nullptr)
         return; // avoid double ack
 
     CallbackBase *ncb = cb;
-    cb = 0;
+    cb = nullptr;
     if (lat == 0)
         ncb->call();
     else
-        ncb->schedule(lat, ncb);
+        CallbackBase::schedule(lat, ncb);
 }
 
 
@@ -291,7 +291,7 @@ StaticCBMemRequest::StaticCBMemRequest(StaticCallbackBase *c) {
 
 
 void StaticCBMemRequest::launch(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr) {
-    setFields(0, mop, m);
+    setFields(nullptr, mop, m);
     setPAddr(addr);
 
     ackDone = false;
@@ -302,7 +302,7 @@ void StaticCBMemRequest::launch(TimeDelta_t lat, MemObj *m, MemOperation mop, PA
 void StaticCBMemRequest::ack(TimeDelta_t lat) {
     IS(acknowledged = true);
 
-    if (ackDone || cb == 0)
+    if (ackDone || cb == nullptr)
         return; // avoid double ack
 
     ackDone = true;
@@ -310,7 +310,7 @@ void StaticCBMemRequest::ack(TimeDelta_t lat) {
     if (lat == 0)
         cb->call();
     else
-        cb->schedule(lat, cb);
+        StaticCallbackBase::schedule(lat, cb);
 }
 
 VAddr StaticCBMemRequest::getVaddr() const {

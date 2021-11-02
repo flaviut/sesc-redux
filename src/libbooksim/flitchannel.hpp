@@ -79,11 +79,11 @@ public:
     }
 
     // Send flit
-    virtual void Send(Flit *flit);
+    void Send(Flit *flit) override;
 
-    virtual void ReadInputs();
+    void ReadInputs() override;
 
-    virtual void WriteOutputs();
+    void WriteOutputs() override;
 
 private:
 

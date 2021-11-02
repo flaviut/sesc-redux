@@ -70,7 +70,7 @@ InjectionProcess *InjectionProcess::New(string const &inject, int nodes,
     }
     vector<string> params = tokenize_str(param_str);
 
-    InjectionProcess *result = NULL;
+    InjectionProcess *result = nullptr;
     if (process_name == "bernoulli") {
         result = new BernoulliInjectionProcess(nodes, load);
     } else if (process_name == "on_off") {

@@ -39,9 +39,9 @@ public:
     PIM(Module *parent, const string &name,
         int inputs, int outputs, int iters);
 
-    ~PIM();
+    ~PIM() override;
 
-    void Allocate();
+    void Allocate() override;
 };
 
 #endif

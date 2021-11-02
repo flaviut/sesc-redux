@@ -280,7 +280,7 @@ bool SparseAllocator::ReadRequest(sRequest &req, int in, int out) const {
     assert((in >= 0) && (in < _inputs));
     assert((out >= 0) && (out < _outputs));
 
-    map<int, sRequest>::const_iterator match = _in_req[in].find(out);
+    auto match = _in_req[in].find(out);
     if (match != _in_req[in].end()) {
         req = match->second;
         found = true;
@@ -400,7 +400,7 @@ Allocator *Allocator::NewAllocator(Module *parent, const string &name,
                                    const string &alloc_type,
                                    int inputs, int outputs,
                                    Configuration const *const config) {
-    Allocator *a = 0;
+    Allocator *a = nullptr;
 
     string alloc_name;
     string param_str;

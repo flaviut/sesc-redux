@@ -82,7 +82,7 @@ public:
     SignalSet mask;
     SaSigFlags flags;
 
-    SignalDesc(void)
+    SignalDesc()
             : handler(SigActTerm), mask(), flags(SaSigFlags(0)) {
     }
 
@@ -104,7 +104,7 @@ public:
 private:
     SignalDesc table[NumSignals];
 public:
-    SignalTable(void) : GCObject() {
+    SignalTable() : GCObject() {
         for (size_t i = 0; i < NumSignals; i++)
             table[i].handler = getDflSigAction((SignalID) i);
     }
@@ -114,7 +114,7 @@ public:
             table[i] = src.table[i];
     }
 
-    ~SignalTable(void);
+    ~SignalTable() override;
 
     SignalDesc &operator[](size_t sig) {
         return table[sig];

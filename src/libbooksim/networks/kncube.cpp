@@ -165,7 +165,7 @@ void KNCube::_BuildNet(const Configuration &config) {
     }
 }
 
-int KNCube::_LeftChannel(int node, int dim) {
+int KNCube::_LeftChannel(int node, int dim) const {
     // The base channel for a node is 2*_n*node
     int base = 2 * _n * node;
     // The offset for a left channel is 2*dim + 1
@@ -174,7 +174,7 @@ int KNCube::_LeftChannel(int node, int dim) {
     return (base + off);
 }
 
-int KNCube::_RightChannel(int node, int dim) {
+int KNCube::_RightChannel(int node, int dim) const {
     // The base channel for a node is 2*_n*node
     int base = 2 * _n * node;
     // The offset for a right channel is 2*dim
@@ -182,7 +182,7 @@ int KNCube::_RightChannel(int node, int dim) {
     return (base + off);
 }
 
-int KNCube::_LeftNode(int node, int dim) {
+int KNCube::_LeftNode(int node, int dim) const {
     int k_to_dim = powi(_k, dim);
     int loc_in_dim = (node / k_to_dim) % _k;
     int left_node;
@@ -196,7 +196,7 @@ int KNCube::_LeftNode(int node, int dim) {
     return left_node;
 }
 
-int KNCube::_RightNode(int node, int dim) {
+int KNCube::_RightNode(int node, int dim) const {
     int k_to_dim = powi(_k, dim);
     int loc_in_dim = (node / k_to_dim) % _k;
     int right_node;

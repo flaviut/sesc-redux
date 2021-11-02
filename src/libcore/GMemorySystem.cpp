@@ -22,7 +22,7 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <math.h>
+#include <cmath>
 #include "GMemorySystem.h"
 
 ushort GMemorySystem::Log2PageSize = 0;
@@ -44,7 +44,7 @@ MemObj *MemoryObjContainer::searchMemoryObj(const char *descr_section,
     I(descr_section);
     I(device_name);
 
-    StrToMemoryObjMapper::const_iterator it = intlMemoryObjContainer.find(device_name);
+    auto it = intlMemoryObjContainer.find(device_name);
 
     if (it != intlMemoryObjContainer.end()) {
 
@@ -61,7 +61,7 @@ MemObj *MemoryObjContainer::searchMemoryObj(const char *descr_section,
         return (*it).second;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /* Only returns a pointer if there is only one with that name */
@@ -69,7 +69,7 @@ MemObj *MemoryObjContainer::searchMemoryObj(const char *device_name) const {
     I(device_name);
 
     if (intlMemoryObjContainer.count(device_name) != 1)
-        return NULL;
+        return nullptr;
 
     return (*(intlMemoryObjContainer.find(device_name))).second;
 }
@@ -94,8 +94,8 @@ GMemorySystem::GMemorySystem(int32_t processorId)
         PageMask = (1 << Log2PageSize) - 1;
     }
 
-    dataSource = 0;
-    instrSource = 0;
+    dataSource = nullptr;
+    instrSource = nullptr;
 }
 
 GMemorySystem::~GMemorySystem() {
@@ -154,7 +154,7 @@ void GMemorySystem::buildMemorySystem() {
 char *GMemorySystem::buildUniqueName(const char *device_type) {
     int32_t num;
 
-    StrCounterType::iterator it = usedNames.find(device_type);
+    auto it = usedNames.find(device_type);
     if (it == usedNames.end()) {
 
         usedNames[device_type] = 0;
@@ -200,11 +200,11 @@ MemObj *GMemorySystem::declareMemoryObj(const char *block, const char *field) {
         MSG("Required format: memoryDevice = descriptionSection [name] [shared|private]\n");
         SescConf->notCorrect();
         I(0);
-        return 0; // Known-error mode
+        return nullptr; // Known-error mode
     }
 
     const char *device_descr_section = vPars[0];
-    char *device_name = (vPars.size() > 1) ? vPars[1] : 0;
+    char *device_name = (vPars.size() > 1) ? vPars[1] : nullptr;
 
     if (vPars.size() > 2) {
 
@@ -233,7 +233,7 @@ MemObj *GMemorySystem::declareMemoryObj(const char *block, const char *field) {
 
         if (strcasecmp(device_name, "shared") == 0) {
             delete[] device_name;
-            device_name = 0;
+            device_name = nullptr;
             shared = true;
         }
 

@@ -51,7 +51,7 @@ private:
 
     class Fetch {
     public:
-        Fetch(GMemorySystem *gm, CPU_t cpuID, int32_t cid, GProcessor *gproc, FetchEngine *fe = 0);
+        Fetch(GMemorySystem *gm, CPU_t cpuID, int32_t cid, GProcessor *gproc, FetchEngine *fe = nullptr);
 
         ~Fetch();
 
@@ -74,9 +74,9 @@ private:
 
 protected:
     // BEGIN VIRTUAL FUNCTIONS of GProcessor
-    DInst **getRAT(const int32_t contextId);
+    DInst **getRAT(const int32_t contextId) override;
 
-    FetchEngine *currentFlow();
+    FetchEngine *currentFlow() override;
 
     void saveThreadContext(Pid_t pid);
 
@@ -84,31 +84,31 @@ protected:
 
     ThreadContext *getThreadContext(Pid_t pid);
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 
-    size_t availableFlows() const;
+    size_t availableFlows() const override;
 
-    long long getAndClearnGradInsts(Pid_t pid);
+    long long getAndClearnGradInsts(Pid_t pid) override;
 
-    long long getAndClearnWPathInsts(Pid_t pid);
+    long long getAndClearnWPathInsts(Pid_t pid) override;
 
 
-    void goRabbitMode(long long n2Skip);
+    void goRabbitMode(long long n2Skip) override;
 
-    Pid_t findVictimPid() const;
+    Pid_t findVictimPid() const override;
 
-    bool hasWork() const;
+    bool hasWork() const override;
 
-    void advanceClock();
+    void advanceClock() override;
 
-    StallCause addInst(DInst *dinst);
+    StallCause addInst(DInst *dinst) override;
 
     // END VIRTUAL FUNCTIONS of GProcessor
 
 public:
-    virtual ~SMTProcessor();
+    ~SMTProcessor() override;
 
     SMTProcessor(GMemorySystem *gm, CPU_t i);
 

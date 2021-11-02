@@ -30,12 +30,12 @@ extern const char* MEDIA_SELECT_STR[];
 SMPMemCtrl::SMPMemCtrl(SMemorySystem *dms, const char *section, const char *name)
     : MemObj(section, name)
 {
-    MemObj *ll = NULL;
+    MemObj *ll = nullptr;
 
     I(dms);
     ll = dms->declareMemoryObj(section, "lowerLevel");
 
-    if (ll != NULL)
+    if (ll != nullptr)
         addLowerLevel(ll);
 
     SescConf->isInt(section, "numPorts");
@@ -68,7 +68,7 @@ Time_t SMPMemCtrl::getNextFreeCycle() const
     return busPort->nextSlot();
 }
 
-Time_t SMPMemCtrl::nextSlot(MemRequest *mreq)
+Time_t SMPMemCtrl::nextSlot(MemRequest *mreq) const
 {
     return getNextFreeCycle();
 }
@@ -117,7 +117,7 @@ void SMPMemCtrl::read(MemRequest *mreq)
 
 void SMPMemCtrl::write(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     IJ(0);
 }
 
@@ -134,7 +134,7 @@ void SMPMemCtrl::specialOp(MemRequest *mreq)
 
 void SMPMemCtrl::doRead(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     DEBUGPRINT("         MemoryController access for %x at %lld  (%p)\n",
                sreq->getPAddr(), globalClock, mreq);
@@ -144,13 +144,13 @@ void SMPMemCtrl::doRead(MemRequest *mreq)
 
 void SMPMemCtrl::doWrite(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     IJ(0);
 }
 
 void SMPMemCtrl::doPush(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     IJ(0);
 }
 
@@ -166,8 +166,8 @@ void SMPMemCtrl::goToMem(MemRequest *mreq)
 
 void SMPMemCtrl::returnAccess(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
-    IJ(sreq!=NULL);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
+    IJ(sreq!=nullptr);
     DEBUGPRINT("         MemoryController return access for %x at %lld  (%p)\n",
                sreq->getPAddr(), globalClock, mreq);
 

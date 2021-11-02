@@ -53,8 +53,8 @@ TreeArbiter::TreeArbiter(Module *parent, const string &name,
 }
 
 TreeArbiter::~TreeArbiter() {
-    for (int i = 0; i < (int) _group_arbiters.size(); ++i) {
-        delete _group_arbiters[i];
+    for (auto & _group_arbiter : _group_arbiters) {
+        delete _group_arbiter;
     }
     delete _global_arbiter;
 }
@@ -96,7 +96,7 @@ int TreeArbiter::Arbitrate(int *id, BPri_t *pri) {
             _global_arbiter->AddRequest(i, group_id, group_pri);
         }
     }
-    int group = _global_arbiter->Arbitrate(NULL, NULL);
+    int group = _global_arbiter->Arbitrate(nullptr, nullptr);
     assert(group >= 0 && group < (int) _group_arbiters.size());
     int group_sel = _group_arbiters[group]->LastWinner();
     assert(group_sel >= 0 && group_sel < _group_size);

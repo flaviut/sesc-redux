@@ -46,7 +46,7 @@ StridePrefetcher::StridePrefetcher(MemorySystem* current
     ,nonUnitStrideStreams("%s:nonUnitStrideStreams", name)
     ,ignoredStreams("%s:ignoredStreams", name)
 {
-    MemObj *lower_level = NULL;
+    MemObj *lower_level = nullptr;
 
     SescConf->isInt(section, "depth");
     depth = SescConf->getInt(section, "depth");
@@ -108,7 +108,7 @@ StridePrefetcher::StridePrefetcher(MemorySystem* current
 
     I(current);
     lower_level = current->declareMemoryObj(section, k_lowerLevel);
-    if (lower_level != NULL)
+    if (lower_level != nullptr)
         addLowerLevel(lower_level);
 }
 
@@ -125,11 +125,11 @@ void StridePrefetcher::read(MemRequest *mreq)
         return;
     }
 
-    penFetchSet::iterator it = pendingFetches.find(paddr);
+    auto it = pendingFetches.find(paddr);
     if(it != pendingFetches.end()) { // half-miss
         LOG("SP: half-miss on %08x", paddr);
         halfMiss.inc();
-        penReqMapper::iterator itR = pendingRequests.find(paddr);
+        auto itR = pendingRequests.find(paddr);
 
         if (itR == pendingRequests.end()) {
             pendingRequests[paddr] = activeMemReqPool.out();
@@ -155,7 +155,7 @@ void StridePrefetcher::learnHit(PAddr addr)
     pEntry *pe = table->readLine(paddr);
     Time_t lat = nextTableSlot() - globalClock;
 
-    if(pe == 0) // this hit in the buffer came from data
+    if(pe == nullptr) // this hit in the buffer came from data
         return;   // from a no longer active stream
 
     prefetch(pe, lat + learnHitDelay);
@@ -169,7 +169,7 @@ void StridePrefetcher::learnMiss(PAddr addr)
     Time_t lat = nextTableSlot() - globalClock;
     bool foundUnitStride = false;
     uint32_t newStride = 0;
-    uint32_t minDelta = (uint) -1;
+    auto minDelta = (uint) -1;
     bool goingUp = true;
 
     if(lastMissesQ.empty()) {
@@ -178,7 +178,7 @@ void StridePrefetcher::learnMiss(PAddr addr)
     }
 
     // man, this is baad. i have to do a better search here
-    std::deque<PAddr>::iterator it = lastMissesQ.begin();
+    auto it = lastMissesQ.begin();
     while(it != lastMissesQ.end()) {
 
         uint32_t delta;
@@ -239,7 +239,7 @@ void StridePrefetcher::prefetch(pEntry *pe, Time_t lat)
 
     for(int32_t i = 0; i < depth; i++) {
         if(!buff->readLine(prefAddr)) { // it is not in the buff
-            penFetchSet::iterator it = pendingFetches.find(prefAddr);
+            auto it = pendingFetches.find(prefAddr);
             if(it == pendingFetches.end()) {
                 CBMemRequest *r;
                 r = CBMemRequest::create(lat, lowerLevel[0], MemRead, prefAddr,
@@ -289,13 +289,13 @@ void StridePrefetcher::processAck(PAddr addr)
 {
     uint32_t paddr = addr & defaultMask;
 
-    penFetchSet::iterator itF = pendingFetches.find(paddr);
+    auto itF = pendingFetches.find(paddr);
     if(itF == pendingFetches.end())
         return;
 
     bLine *l = buff->fillLine(paddr);
 
-    penReqMapper::iterator it = pendingRequests.find(paddr);
+    auto it = pendingRequests.find(paddr);
 
     if(it != pendingRequests.end()) {
         LOG("SP:returnAccess addr=%08x", paddr);

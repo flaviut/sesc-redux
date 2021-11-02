@@ -111,28 +111,28 @@ public:
 
 class ExecutedCluster : public Cluster {
 public:
-    virtual ~ExecutedCluster() {
+    ~ExecutedCluster() override {
     }
 
     ExecutedCluster(const char *clusterName, GProcessor *gp)
             : Cluster(clusterName, gp) {}
 
-    void executed(DInst *dinst);
+    void executed(DInst *dinst) override;
 
-    void retire(DInst *dinst);
+    void retire(DInst *dinst) override;
 };
 
 class RetiredCluster : public Cluster {
 public:
-    virtual ~RetiredCluster() {
+    ~RetiredCluster() override {
     }
 
     RetiredCluster(const char *clusterName, GProcessor *gp)
             : Cluster(clusterName, gp) {}
 
-    void executed(DInst *dinst);
+    void executed(DInst *dinst) override;
 
-    void retire(DInst *dinst);
+    void retire(DInst *dinst) override;
 };
 
 

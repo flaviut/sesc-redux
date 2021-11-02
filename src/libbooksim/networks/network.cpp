@@ -50,7 +50,7 @@
 
 
 Network::Network(const Configuration &config, const string &name) :
-        TimedModule(0, name) {
+        TimedModule(nullptr, name) {
     _size = -1;
     _nodes = -1;
     _channels = -1;
@@ -77,7 +77,7 @@ Network::~Network() {
 
 Network *Network::New(const Configuration &config, const string &name) {
     const string topo = config.GetStr("topology");
-    Network *n = NULL;
+    Network *n = nullptr;
     if (topo == "torus") {
         KNCube::RegisterRoutingFunctions();
         n = new KNCube(config, name, false);
@@ -141,7 +141,7 @@ void Network::_Alloc() {
         ostringstream name;
         name << Name() << "_fchan_ingress" << s;
         _inject[s] = new FlitChannel(this, name.str(), _classes);
-        _inject[s]->SetSource(NULL, s);
+        _inject[s]->SetSource(nullptr, s);
         _timed_modules.push_back(_inject[s]);
         name.str("");
         name << Name() << "_cchan_ingress" << s;
@@ -154,7 +154,7 @@ void Network::_Alloc() {
         ostringstream name;
         name << Name() << "_fchan_egress" << d;
         _eject[d] = new FlitChannel(this, name.str(), _classes);
-        _eject[d]->SetSink(NULL, d);
+        _eject[d]->SetSink(nullptr, d);
         _timed_modules.push_back(_eject[d]);
         name.str("");
         name << Name() << "_cchan_egress" << d;
@@ -176,26 +176,20 @@ void Network::_Alloc() {
 }
 
 void Network::ReadInputs() {
-    for (deque<TimedModule *>::const_iterator iter = _timed_modules.begin();
-         iter != _timed_modules.end();
-         ++iter) {
-        (*iter)->ReadInputs();
+    for (auto _timed_module : _timed_modules) {
+        _timed_module->ReadInputs();
     }
 }
 
 void Network::Evaluate() {
-    for (deque<TimedModule *>::const_iterator iter = _timed_modules.begin();
-         iter != _timed_modules.end();
-         ++iter) {
-        (*iter)->Evaluate();
+    for (auto _timed_module : _timed_modules) {
+        _timed_module->Evaluate();
     }
 }
 
 void Network::WriteOutputs() {
-    for (deque<TimedModule *>::const_iterator iter = _timed_modules.begin();
-         iter != _timed_modules.end();
-         ++iter) {
-        (*iter)->WriteOutputs();
+    for (auto _timed_module : _timed_modules) {
+        _timed_module->WriteOutputs();
     }
 }
 

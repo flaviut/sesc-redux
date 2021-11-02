@@ -22,7 +22,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "FileSys.h"
 
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #include <poll.h>
 #include <iostream>
@@ -56,18 +56,18 @@ namespace FileSys {
             : natInode(natInode), dev(dev), simInode(simInodeCounter++), uid(uid), gid(gid), mode(mode), size(0) {
     }
 
-    Node::~Node(void) {
+    Node::~Node() {
     }
 
     Node *Node::lookup(const std::string &name) {
-        ByNatName::iterator nameIt = byNatName.find(name);
+        auto nameIt = byNatName.find(name);
         if (nameIt != byNatName.end())
             return nameIt->second;
-        Node *node = 0;
+        Node *node = nullptr;
         struct stat stbuf;
         if (lstat(name.c_str(), &stbuf) != 0)
             return node;
-        ByNatKey::iterator keyIt = byNatKey.find(NatKey(stbuf.st_dev, stbuf.st_ino));
+        auto keyIt = byNatKey.find(NatKey(stbuf.st_dev, stbuf.st_ino));
         if (keyIt == byNatKey.end()) {
             switch (stbuf.st_mode & S_IFMT) {
                 case S_IFLNK: {
@@ -102,7 +102,7 @@ namespace FileSys {
     std::string Node::resolve(const std::string &name) {
         std::string res(name);
         for (size_t i = 0; i < 1024; i++) {
-            LinkNode *lnode = dynamic_cast<LinkNode *>(lookup(res));
+            auto *lnode = dynamic_cast<LinkNode *>(lookup(res));
             if (!lnode)
                 return res;
             const std::string &lnk = lnode->read();
@@ -132,7 +132,7 @@ namespace FileSys {
     void Node::remove(const std::string &name, Node *node) {
         I(byNatName.count(name) == 1);
         byNatName.erase(name);
-        ToNatName::iterator nodeIt = toNatName.lower_bound(node);
+        auto nodeIt = toNatName.lower_bound(node);
         I(nodeIt != toNatName.end());
         I(nodeIt->first == node);
         while (nodeIt->second != name) {
@@ -143,10 +143,10 @@ namespace FileSys {
         toNatName.erase(nodeIt);
     }
 
-    const std::string *Node::getName(void) {
+    const std::string *Node::getName() {
         ToNatName::const_iterator it = toNatName.lower_bound(this);
         if (it == toNatName.upper_bound(this))
-            return 0;
+            return nullptr;
         return &(it->second);
     }
 
@@ -156,13 +156,13 @@ namespace FileSys {
     }
 
     Description *Description::create(Node *node, flags_t flags) {
-        NullNode *nnode = dynamic_cast<NullNode *>(node);
+        auto *nnode = dynamic_cast<NullNode *>(node);
         if (nnode)
             return new NullDescription(nnode, flags);
-        FileNode *fnode = dynamic_cast<FileNode *>(node);
+        auto *fnode = dynamic_cast<FileNode *>(node);
         if (fnode)
             return new FileDescription(fnode, flags);
-        DirectoryNode *dnode = dynamic_cast<DirectoryNode *>(node);
+        auto *dnode = dynamic_cast<DirectoryNode *>(node);
         if (dnode)
             return new DirectoryDescription(dnode, flags);
         fail("Description::create for unknown node type\n");
@@ -173,7 +173,7 @@ namespace FileSys {
         if (!node) {
             if (!(flags & O_CREAT)) {
                 errno = ENOENT;
-                return 0;
+                return nullptr;
             }
             fd_t fd = ::open(name.c_str(), flags, mode);
             if (fd == -1)
@@ -187,7 +187,7 @@ namespace FileSys {
         } else {
             if ((flags & O_CREAT) && (flags & O_EXCL)) {
                 errno = EEXIST;
-                return 0;
+                return nullptr;
             }
         }
         return create(node, flags);
@@ -197,27 +197,27 @@ namespace FileSys {
             : node(node), flags(flags) {
     }
 
-    Description::~Description(void) {
+    Description::~Description() {
     }
 
-    const std::string Description::getName(void) const {
+    const std::string Description::getName() const {
         const std::string *str = node->getName();
         return str ? *str : std::string("Anonymous");
     }
 
-    bool Description::canRd(void) const {
+    bool Description::canRd() const {
         return ((flags & O_ACCMODE) != O_WRONLY);
     }
 
-    bool Description::canWr(void) const {
+    bool Description::canWr() const {
         return ((flags & O_ACCMODE) != O_RDONLY);
     }
 
-    bool Description::isNonBlock(void) const {
+    bool Description::isNonBlock() const {
         return ((flags & O_NONBLOCK) == O_NONBLOCK);
     }
 
-    flags_t Description::getFlags(void) const {
+    flags_t Description::getFlags() const {
         return flags;
     }
 
@@ -227,7 +227,7 @@ namespace FileSys {
 
     NullNode NullNode::node;
 
-    NullNode *NullNode::create(void) {
+    NullNode *NullNode::create() {
         return &node;
     }
 
@@ -256,11 +256,11 @@ namespace FileSys {
             : Description(node, flags), pos(0) {
     }
 
-    off_t SeekableDescription::getSize(void) const {
+    off_t SeekableDescription::getSize() const {
         return node->getSize();
     }
 
-    off_t SeekableDescription::getPos(void) const {
+    off_t SeekableDescription::getPos() const {
         return pos;
     }
 
@@ -305,7 +305,7 @@ namespace FileSys {
         off_t endoff = getSize();
         if (offs >= endoff)
             return;
-        size_t wsize = (size_t) (endoff - offs);
+        auto wsize = (size_t) (endoff - offs);
         if (size < wsize)
             wsize = size;
         ssize_t nbytes = pwrite(data, wsize, offs);
@@ -318,7 +318,7 @@ namespace FileSys {
         close(fd);
     }
 
-    FileNode::~FileNode(void) {
+    FileNode::~FileNode() {
 //    if(close(fd)!=0)
 //      fail("FileSys::FileNode destructor could not close file %s\n",name.c_str());
     }
@@ -360,14 +360,14 @@ namespace FileSys {
             : SeekableDescription(node, flags) {
     }
 
-    FileDescription::~FileDescription(void) {
+    FileDescription::~FileDescription() {
     }
 
     DirectoryNode::DirectoryNode(struct stat &buf)
-            : SeekableNode(buf.st_dev, buf.st_uid, buf.st_gid, buf.st_mode, -1, buf.st_ino), dirp(0), entries() {
+            : SeekableNode(buf.st_dev, buf.st_uid, buf.st_gid, buf.st_mode, -1, buf.st_ino), dirp(nullptr), entries() {
     }
 
-    DirectoryNode::~DirectoryNode(void) {
+    DirectoryNode::~DirectoryNode() {
     }
 
     void DirectoryNode::setSize(off_t nlen) {
@@ -382,7 +382,7 @@ namespace FileSys {
         fail("DirectoryNode::pwrite called\n");
     }
 
-    void DirectoryNode::refresh(void) {
+    void DirectoryNode::refresh() {
         DIR *dir = opendir(getName()->c_str());
         entries.clear();
         for (size_t i = 0; true; i++) {
@@ -406,10 +406,10 @@ namespace FileSys {
             : SeekableDescription(node, flags) {
     }
 
-    DirectoryDescription::~DirectoryDescription(void) {
+    DirectoryDescription::~DirectoryDescription() {
     }
 
-    off_t DirectoryDescription::getSize(void) const {
+    off_t DirectoryDescription::getSize() const {
         if (node->getSize() == -1)
             dynamic_cast<DirectoryNode *>(node)->refresh();
         return node->getSize();
@@ -420,7 +420,7 @@ namespace FileSys {
         SeekableDescription::setPos(npos);
     }
 
-    std::string DirectoryDescription::readDir(void) {
+    std::string DirectoryDescription::readDir() {
         off_t opos = SeekableDescription::getPos();
         if (opos >= getSize())
             fail("DirectoryDescription::readDir past the end\n");
@@ -429,11 +429,10 @@ namespace FileSys {
     }
 
     void StreamNode::unblock(PidSet &pids, SigCode sigCode) {
-        for (PidSet::iterator it = pids.begin(); it != pids.end(); it++) {
-            pid_t pid = *it;
+        for (int pid : pids) {
             ThreadContext *context = osSim->getContext(pid);
             if (context) {
-                SigInfo *sigInfo = new SigInfo(SigIO, sigCode);
+                auto *sigInfo = new SigInfo(SigIO, sigCode);
                 //        sigInfo->pid=pid;
                 //        sigInfo->data=fd;
                 context->signal(sigInfo);
@@ -446,7 +445,7 @@ namespace FileSys {
             : Node(dev, uid, gid, mode, (ino_t) -1), rdev(rdev), rdBlocked(), wrBlocked() {
     }
 
-    StreamNode::~StreamNode(void) {
+    StreamNode::~StreamNode() {
         I(rdBlocked.empty());
         I(wrBlocked.empty());
     }
@@ -461,25 +460,25 @@ namespace FileSys {
         wrBlocked.push_back(pid);
     }
 
-    void StreamNode::rdUnblock(void) {
+    void StreamNode::rdUnblock() {
         I(!willRdBlock());
         if (!rdBlocked.empty())
             unblock(rdBlocked, SigCodeIn);
         I(rdBlocked.empty());
     }
 
-    void StreamNode::wrUnblock(void) {
+    void StreamNode::wrUnblock() {
         I(!willWrBlock());
         if (!wrBlocked.empty())
             unblock(wrBlocked, SigCodeOut);
         I(wrBlocked.empty());
     }
 
-    bool StreamDescription::willRdBlock(void) const {
+    bool StreamDescription::willRdBlock() const {
         return dynamic_cast<const StreamNode *>(node)->willRdBlock();
     }
 
-    bool StreamDescription::willWrBlock(void) const {
+    bool StreamDescription::willWrBlock() const {
         return dynamic_cast<const StreamNode *>(node)->willWrBlock();
     }
 
@@ -503,32 +502,32 @@ namespace FileSys {
         return dynamic_cast<StreamNode *>(node)->write(buf, count);
     }
 
-    PipeNode::PipeNode(void)
+    PipeNode::PipeNode()
             : StreamNode(0x0007, 0x0000, getuid(), getgid(), S_IFIFO | S_IREAD | S_IWRITE), data(), readers(0),
               writers(0) {
     }
 
-    PipeNode::~PipeNode(void) {
+    PipeNode::~PipeNode() {
         I(!readers);
         I(!writers);
     }
 
-    void PipeNode::addReader(void) {
+    void PipeNode::addReader() {
         readers++;
     }
 
-    void PipeNode::delReader(void) {
+    void PipeNode::delReader() {
         I(readers);
         readers--;
         if ((readers == 0) && (writers == 0))
             delete this;
     }
 
-    void PipeNode::addWriter(void) {
+    void PipeNode::addWriter() {
         writers++;
     }
 
-    void PipeNode::delWriter(void) {
+    void PipeNode::delWriter() {
         I(writers);
         writers--;
         if ((readers == 0) && (writers == 0))
@@ -544,8 +543,8 @@ namespace FileSys {
         size_t ncount = count;
         if (data.size() < ncount)
             ncount = data.size();
-        Data::iterator begIt = data.begin();
-        Data::iterator endIt = begIt + ncount;
+        auto begIt = data.begin();
+        auto endIt = begIt + ncount;
         copy(begIt, endIt, (uint8_t *) buf);
         data.erase(begIt, endIt);
         I(ncount > 0);
@@ -555,18 +554,18 @@ namespace FileSys {
 
     ssize_t PipeNode::write(const void *buf, size_t count) {
         I(writers);
-        const uint8_t *ptr = (const uint8_t *) buf;
+        const auto *ptr = (const uint8_t *) buf;
         data.resize(data.size() + count);
         copy(ptr, ptr + count, data.end() - count);
         rdUnblock();
         return count;
     }
 
-    bool PipeNode::willRdBlock(void) const {
+    bool PipeNode::willRdBlock() const {
         return data.empty() && writers;
     }
 
-    bool PipeNode::willWrBlock(void) const {
+    bool PipeNode::willWrBlock() const {
         return false;
     }
 
@@ -578,7 +577,7 @@ namespace FileSys {
             dynamic_cast<PipeNode *>(node)->addWriter();
     }
 
-    PipeDescription::~PipeDescription(void) {
+    PipeDescription::~PipeDescription() {
         if (canRd())
             dynamic_cast<PipeNode *>(node)->delReader();
         if (canWr())
@@ -589,7 +588,7 @@ namespace FileSys {
             : StreamDescription(node, flags) {
     }
 
-    TtyDescription::~TtyDescription(void) {
+    TtyDescription::~TtyDescription() {
     }
 
     TtyNode::TtyNode(fd_t srcfd)
@@ -598,7 +597,7 @@ namespace FileSys {
             fail("TtyNode constructor cannot dup()\n");
     }
 
-    TtyNode::~TtyNode(void) {
+    TtyNode::~TtyNode() {
         close(fd);
     }
 
@@ -610,7 +609,7 @@ namespace FileSys {
         return ::write(fd, buf, count);
     }
 
-    bool TtyNode::willRdBlock(void) const {
+    bool TtyNode::willRdBlock() const {
         struct pollfd pollFd;
         pollFd.fd = fd;
         pollFd.events = POLLIN;
@@ -618,7 +617,7 @@ namespace FileSys {
         return (res <= 0);
     }
 
-    bool TtyNode::willWrBlock(void) const {
+    bool TtyNode::willWrBlock() const {
         struct pollfd pollFd;
         pollFd.fd = fd;
         pollFd.events = POLLOUT;
@@ -629,16 +628,16 @@ namespace FileSys {
     TtyDescription *TtyDescription::wrap(fd_t fd) {
         flags_t flags = fcntl(fd, F_GETFL);
         if (flags == -1)
-            return 0;
-        TtyNode *node = new TtyNode(fd);
+            return nullptr;
+        auto *node = new TtyNode(fd);
         return new TtyDescription(node, flags);
     }
 
-    OpenFiles::FileDescriptor::FileDescriptor(void)
-            : description(0), cloexec(false) {
+    OpenFiles::FileDescriptor::FileDescriptor()
+            : description(nullptr), cloexec(false) {
     }
 
-    OpenFiles::OpenFiles(void)
+    OpenFiles::OpenFiles()
             : GCObject(), fileDescriptors() {
     }
 
@@ -646,11 +645,11 @@ namespace FileSys {
             : GCObject(), fileDescriptors(src.fileDescriptors) {
     }
 
-    OpenFiles::~OpenFiles(void) {
+    OpenFiles::~OpenFiles() {
     }
 
     fd_t OpenFiles::nextFreeFd(fd_t minfd) const {
-        for (FileDescriptors::const_iterator it = fileDescriptors.lower_bound(minfd);
+        for (auto it = fileDescriptors.lower_bound(minfd);
              (it != fileDescriptors.end()) && (it->first == minfd); minfd++, it++);
         return minfd;
     }
@@ -677,30 +676,30 @@ namespace FileSys {
     }
 
     Description *OpenFiles::getDescription(fd_t fd) {
-        FileDescriptors::iterator it = fileDescriptors.find(fd);
+        auto it = fileDescriptors.find(fd);
         I(it != fileDescriptors.end());
         I(it->second.description);
         return it->second.description;
     }
 
     void OpenFiles::setCloexec(fd_t fd, bool cloex) {
-        FileDescriptors::iterator it = fileDescriptors.find(fd);
+        auto it = fileDescriptors.find(fd);
         I(it != fileDescriptors.end());
         I(it->second.description);
         it->second.cloexec = cloex;
     }
 
     bool OpenFiles::getCloexec(fd_t fd) const {
-        FileDescriptors::const_iterator it = fileDescriptors.find(fd);
+        auto it = fileDescriptors.find(fd);
         I(it != fileDescriptors.end());
         I(it->second.description);
         return it->second.cloexec;
     }
 
-    void OpenFiles::exec(void) {
-        FileDescriptors::iterator it = fileDescriptors.begin();
+    void OpenFiles::exec() {
+        auto it = fileDescriptors.begin();
         while (it != fileDescriptors.end()) {
-            FileDescriptors::iterator nxit = it;
+            auto nxit = it;
             nxit++;
             I(it->second.description);
             if (it->second.cloexec)
@@ -711,9 +710,8 @@ namespace FileSys {
 
     void OpenFiles::save(ChkWriter &out) const {
         out << "Descriptors: " << fileDescriptors.size() << endl;
-        for (FileDescriptors::const_iterator it = fileDescriptors.begin();
-             it != fileDescriptors.end(); it++) {
-            out << "Desc " << it->first << " Cloex " << (it->second.cloexec ? '+' : '-');
+        for (const auto & fileDescriptor : fileDescriptors) {
+            out << "Desc " << fileDescriptor.first << " Cloex " << (fileDescriptor.second.cloexec ? '+' : '-');
             /*
             BaseStatus *st=it->second.description_old;
             bool hasIndex=out.hasIndex(st);
@@ -788,8 +786,8 @@ namespace FileSys {
 #if (defined DEBUG_MOUNTS)
         cout << "toTarget called with " << fname << endl;
 #endif
-        Mounts::const_iterator found = mounts.end();
-        for (Mounts::const_iterator it = mounts.begin(); it != mounts.end(); it++) {
+        auto found = mounts.end();
+        for (auto it = mounts.begin(); it != mounts.end(); it++) {
             // If exact match, no need to look for a better one
             if (fname.compare(it->second) == 0)
                 return it->first;
@@ -836,7 +834,7 @@ namespace FileSys {
         string lookStr = fname;
         string::size_type lookLen = fnameLen;
         while (true) {
-            Mounts::const_iterator it = mounts.lower_bound(lookStr);
+            auto it = mounts.lower_bound(lookStr);
             if (it == mounts.end())
                 fail("Namespace::toHost: Cannot find the mapping for %s\n", fname.c_str());
             const string &targFound = it->first;

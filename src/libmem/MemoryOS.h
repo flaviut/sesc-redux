@@ -83,10 +83,10 @@ protected:
 public:
     MemoryOS(GMemorySystem *ms, const char *section);
 
-    virtual ~MemoryOS() { }
+    ~MemoryOS() override { }
 
-    int32_t TLBTranslate(VAddr vAddr);
-    int32_t ITLBTranslate(VAddr vAddr);
+    int32_t TLBTranslate(VAddr vAddr) override;
+    int32_t ITLBTranslate(VAddr vAddr) override;
 
 };
 
@@ -203,13 +203,13 @@ protected:
 
 public:
     StdMemoryOS(GMemorySystem *ms, const char *descr_section);
-    ~StdMemoryOS();
+    ~StdMemoryOS() override;
 
     /*long translate(long vAddr);*/
 
-    void solveRequest(MemRequest *r);
-    void boot();
-    void report(const char *str) {};
+    void solveRequest(MemRequest *r) override;
+    void boot() override;
+    void report(const char *str) override {};
 };
 
 

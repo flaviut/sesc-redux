@@ -42,7 +42,7 @@ public:
     iSLIP_Sparse(Module *parent, const string &name,
                  int inputs, int outputs, int iters);
 
-    void Allocate();
+    void Allocate() override;
 };
 
 #endif

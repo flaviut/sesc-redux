@@ -35,7 +35,7 @@ class TimedModule : public Module {
 public:
     TimedModule(Module *parent, string const &name) : Module(parent, name) {}
 
-    virtual ~TimedModule() {}
+    ~TimedModule() override {}
 
     virtual void ReadInputs() = 0;
 

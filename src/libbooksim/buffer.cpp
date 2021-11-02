@@ -56,8 +56,8 @@ Buffer::Buffer(const Configuration &config, int outputs,
 }
 
 Buffer::~Buffer() {
-    for (vector<VC *>::iterator i = _vc.begin(); i != _vc.end(); ++i) {
-        delete *i;
+    for (auto & i : _vc) {
+        delete i;
     }
 }
 
@@ -73,7 +73,7 @@ void Buffer::AddFlit(int vc, Flit *f) {
 }
 
 void Buffer::Display(ostream &os) const {
-    for (vector<VC *>::const_iterator i = _vc.begin(); i != _vc.end(); ++i) {
-        (*i)->Display(os);
+    for (auto i : _vc) {
+        i->Display(os);
     }
 }

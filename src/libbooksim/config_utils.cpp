@@ -39,11 +39,11 @@
 
 #include "config_utils.hpp"
 
-Configuration *Configuration::theConfig = 0;
+Configuration *Configuration::theConfig = nullptr;
 
 Configuration::Configuration() {
     theConfig = this;
-    _config_file = 0;
+    _config_file = nullptr;
 }
 
 void Configuration::AddStrField(string const &field, string const &value) {
@@ -135,7 +135,7 @@ vector<double> Configuration::GetFloatArray(string const &field) const {
 }
 
 void Configuration::ParseFile(string const &filename) {
-    if ((_config_file = fopen(filename.c_str(), "r")) == 0) {
+    if ((_config_file = fopen(filename.c_str(), "r")) == nullptr) {
         cerr << "Could not open configuration file " << filename << endl;
         exit(-1);
     }
@@ -143,7 +143,7 @@ void Configuration::ParseFile(string const &filename) {
     yyparse();
 
     fclose(_config_file);
-    _config_file = 0;
+    _config_file = nullptr;
 }
 
 void Configuration::ParseString(string const &str) {
@@ -274,26 +274,20 @@ void Configuration::WriteFile(string const &filename) {
 void Configuration::WriteMatlabFile(ostream *config_out) const {
 
 
-    for (map<string, string>::const_iterator i = _str_map.begin();
-         i != _str_map.end();
-         i++) {
+    for (const auto & i : _str_map) {
         //the parser won't read blanks lolz
-        if (i->second[0] != '\0') {
-            *config_out << "%" << i->first << " = \'" << i->second << "\';" << endl;
+        if (i.second[0] != '\0') {
+            *config_out << "%" << i.first << " = \'" << i.second << "\';" << endl;
         }
     }
 
-    for (map<string, int>::const_iterator i = _int_map.begin();
-         i != _int_map.end();
-         i++) {
-        *config_out << "%" << i->first << " = " << i->second << ";" << endl;
+    for (const auto & i : _int_map) {
+        *config_out << "%" << i.first << " = " << i.second << ";" << endl;
 
     }
 
-    for (map<string, double>::const_iterator i = _float_map.begin();
-         i != _float_map.end();
-         i++) {
-        *config_out << "%" << i->first << " = " << i->second << ";" << endl;
+    for (const auto & i : _float_map) {
+        *config_out << "%" << i.first << " = " << i.second << ";" << endl;
 
     }
     config_out->flush();

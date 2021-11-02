@@ -20,7 +20,7 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "LDSTBuffer.h"
 #include "libll/Instruction.h"
@@ -29,7 +29,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 LDSTBuffer::EntryType      LDSTBuffer::stores;
 LDSTBuffer::FenceEntryType LDSTBuffer::fences;
 
-DInst *LDSTBuffer::pendingBarrier = 0;
+DInst *LDSTBuffer::pendingBarrier = nullptr;
 
 void LDSTBuffer::getFenceEntry(DInst *dinst) {
     /* TODO: My suggestion of implementation for whoever is the nice guy to do
@@ -89,7 +89,7 @@ void LDSTBuffer::getFenceEntry(DInst *dinst) {
 
 void LDSTBuffer::fenceLocallyPerformed(DInst *dinst) {
     int32_t cid = dinst->getContextId();
-    FenceEntryType::iterator it = fences.find(cid);
+    auto it = fences.find(cid);
 
     if (it->second == dinst)
         fences.erase(it);
@@ -103,7 +103,7 @@ void LDSTBuffer::getStoreEntry(DInst *dinst) {
     return;
 #endif
 
-    EntryType::iterator sit = stores.find(calcWord(dinst));
+    auto sit = stores.find(calcWord(dinst));
     if (sit != stores.end()) {
         DInst *pdinst = sit->second;
         I(pdinst->getInst()->isStore());
@@ -122,7 +122,7 @@ void LDSTBuffer::getLoadEntry(DInst *dinst) {
 #endif
 
     // LOAD
-    EntryType::iterator sit = stores.find(calcWord(dinst));
+    auto sit = stores.find(calcWord(dinst));
     if (sit == stores.end())
         return;
 
@@ -167,7 +167,7 @@ void LDSTBuffer::storeLocallyPerformed(DInst *dinst) {
     return;
 #endif
 
-    EntryType::iterator sit = stores.find(calcWord(dinst));
+    auto sit = stores.find(calcWord(dinst));
     if (sit == stores.end())
         return; // accross processors stores can be removed out-of-order
 

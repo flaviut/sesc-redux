@@ -66,31 +66,31 @@ protected:
     virtual void finalizeRead(MemRequest *mreq);
     virtual void finalizeWrite(MemRequest *mreq);
     void finalizeAccess(MemRequest *mreq);
-    virtual void goToMem(MemRequest *mreq);
+    void goToMem(MemRequest *mreq) override;
     virtual unsigned getNumSnoopCaches(SMPMemRequest *sreq) {
         return upperLevel.size() - 1;
     }
 
 public:
     SMPSystemBus(SMemorySystem *gms, const char *section, const char *name);
-    ~SMPSystemBus();
+    ~SMPSystemBus() override;
 
     // BEGIN MemObj interface
 
     // port usage accounting
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
     // interface with upper level
     bool canAcceptStore(PAddr addr) const;
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
 
     // interface with lower level
-    virtual void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
 
-    bool canAcceptStore(PAddr addr) {
+    bool canAcceptStore(PAddr addr) override {
         return true;
     }
 

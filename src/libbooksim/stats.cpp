@@ -114,8 +114,8 @@ void Stats::Display(ostream &os) const {
 ostream &operator<<(ostream &os, const Stats &s) {
     vector<int> const &v = s._hist;
     os << "[ ";
-    for (size_t i = 0; i < v.size(); ++i) {
-        os << v[i] << " ";
+    for (int i : v) {
+        os << i << " ";
     }
     os << "]";
     return os;

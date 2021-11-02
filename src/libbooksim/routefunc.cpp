@@ -1611,7 +1611,7 @@ void dim_order_ni_torus(const Router *r, const Flit *f, int in_channel,
         int dest = f->dest;
 
         dor_next_torus(cur, dest, in_channel,
-                       &out_port, NULL, false);
+                       &out_port, nullptr, false);
 
         // at the destination router, we don't need to separate VCs by destination
         if (cur != dest) {

@@ -84,7 +84,7 @@ public:
         return desc;
     }
 
-    int32_t size() {  //# of elements encoded
+    int32_t size() const {  //# of elements encoded
         return nElements;
     }
 
@@ -109,8 +109,8 @@ public:
 
     BitSelection() {
         nBits = 0;
-        for(int32_t i = 0; i < 32; i++) {
-            bits[i] = 0;
+        for(int & bit : bits) {
+            bit = 0;
         }
     }
 
@@ -122,7 +122,7 @@ public:
 
     ~BitSelection() {}
 
-    int32_t getNBits() {
+    int32_t getNBits() const {
         return nBits;
     }
 

@@ -67,9 +67,9 @@ private:
     static int _memo_NodeShiftY;
     static int _memo_PortShiftY;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
     int _k;
     int _n;

@@ -14,15 +14,15 @@ namespace MemSys {
 
     FrameDesc *FrameDesc::create(FileSys::SeekableDescription *fdesc, off_t offs) {
         FileMapKey key(fdesc, offs);
-        FileToFrame::iterator it = fileToFrame.find(key);
+        auto it = fileToFrame.find(key);
         if (it != fileToFrame.end())
             return it->second;
-        FrameDesc *ptr = new FrameDesc(fdesc, offs);
+        auto *ptr = new FrameDesc(fdesc, offs);
         fileToFrame[key] = ptr;
         return ptr;
     }
 
-    void FrameDesc::sync(void) {
+    void FrameDesc::sync() {
         if (dirty) {
             if (fileDesc)
                 fileDesc->msync(data, AddrSpacPageSize, fileOff);
@@ -30,7 +30,7 @@ namespace MemSys {
         }
     }
 
-    FrameDesc::FrameDesc() : GCObject(), basePAddr(newPAddr()), shared(false), dirty(false), fileDesc(0) {
+    FrameDesc::FrameDesc() : GCObject(), basePAddr(newPAddr()), shared(false), dirty(false), fileDesc(nullptr) {
         memset(data, 0, AddrSpacPageSize);
     }
 
@@ -83,16 +83,16 @@ namespace MemSys {
 
 }
 
-AddressSpace::PageTable::Cache::Cache(void) {
-    for (size_t i = 0; i < AddrSpaceCacheSize; i++)
-        cache[i].pageNum = 0;
+AddressSpace::PageTable::Cache::Cache() {
+    for (auto & i : cache)
+        i.pageNum = 0;
 }
 
 void AddressSpace::PageTable::Cache::unmap(PageNum pageNumLb, PageNum pageNumUb) {
     if (AddrSpaceCacheSize < (pageNumUb - pageNumLb)) {
-        for (size_t i = 0; i < AddrSpaceCacheSize; i++) {
-            if ((cache[i].pageNum >= pageNumLb) && (cache[i].pageNum < pageNumUb))
-                cache[i].pageNum = 0;
+        for (auto & i : cache) {
+            if ((i.pageNum >= pageNumLb) && (i.pageNum < pageNumUb))
+                i.pageNum = 0;
         }
     } else {
         for (PageNum pageNum = pageNumLb; pageNum < pageNumUb; pageNum++) {
@@ -103,14 +103,14 @@ void AddressSpace::PageTable::Cache::unmap(PageNum pageNumLb, PageNum pageNumUb)
     }
 }
 
-AddressSpace::PageTable::PageTable(void)
+AddressSpace::PageTable::PageTable()
         : pageMap(), cache() {
 }
 
 AddressSpace::PageTable::PageTable(PageTable &src)
         : pageMap(), cache() {
-    for (PageMap::iterator it = src.pageMap.begin(); it != src.pageMap.end(); it++)
-        pageMap[it->first] = it->second;
+    for (auto & it : src.pageMap)
+        pageMap[it.first] = it.second;
 }
 
 void AddressSpace::PageTable::map(PageNum pageNumLb, PageNum pageNumUb,
@@ -156,9 +156,9 @@ ChkReader &AddressSpace::SegmentDesc::operator=(ChkReader &in) {
     return in;
 }
 
-AddressSpace::PageDesc::PageDesc(void)
+AddressSpace::PageDesc::PageDesc()
         : flags(static_cast<Flags>(0)),
-          frame(0) {
+          frame(nullptr) {
 }
 
 AddressSpace::PageDesc::PageDesc(PageDesc &src) {
@@ -172,12 +172,12 @@ AddressSpace::PageDesc::PageDesc(const PageDesc &src)
         fail("Const copy constructor called!\n");
 }
 
-AddressSpace::PageDesc::~PageDesc(void) {
+AddressSpace::PageDesc::~PageDesc() {
     if (frame)
         frameTable.erase(FrameTableEntry(frame, this));
 }
 
-void AddressSpace::PageDesc::copyFrame(void) {
+void AddressSpace::PageDesc::copyFrame() {
 //  if(frame->getRefCount()<=1)
 //    fail("Copying uniquely-mapped frame\n");
     frameTable.erase(FrameTableEntry(frame, this));
@@ -185,11 +185,11 @@ void AddressSpace::PageDesc::copyFrame(void) {
     frameTable.insert(FrameTableEntry(frame, this));
 }
 
-void AddressSpace::PageDesc::doWrCopy(void) {
+void AddressSpace::PageDesc::doWrCopy() {
     flags = static_cast<Flags>(flags & ~WrCopy);
     if (frame->isShared())
         return copyFrame();
-    FrameTable::iterator it = frameTable.lower_bound(FrameTableEntry(frame, 0));
+    auto it = frameTable.lower_bound(FrameTableEntry(frame, nullptr));
     if (it->page != this)
         return copyFrame();
     it++;
@@ -208,7 +208,7 @@ AddressSpace::PageDesc &AddressSpace::PageDesc::operator=(PageDesc &src) {
     if (frame)
         frameTable.insert(FrameTableEntry(frame, this));
     if (!(flags & Shared)) {
-        FrameTable::iterator it = frameTable.lower_bound(FrameTableEntry(frame, 0));
+        auto it = frameTable.lower_bound(FrameTableEntry(frame, nullptr));
         while ((it != frameTable.end()) && (it->frame == frame)) {
             PageDesc *pg = it->page;
             if (!(pg->flags & Shared))
@@ -234,16 +234,16 @@ ChkReader &AddressSpace::PageDesc::operator=(ChkReader &in) {
     return in;
 }
 
-AddressSpace::InstTable::Cache::Cache(void) {
-    for (size_t i = 0; i < AddrSpaceCacheSize; i++)
-        cache[i].instAddr = 0;
+AddressSpace::InstTable::Cache::Cache() {
+    for (auto & i : cache)
+        i.instAddr = 0;
 }
 
 void AddressSpace::InstTable::Cache::unmap(VAddr instAddrLb, VAddr instAddrUb) {
     if (AddrSpaceCacheSize < (instAddrUb - instAddrLb)) {
-        for (size_t i = 0; i < AddrSpaceCacheSize; i++) {
-            if ((cache[i].instAddr >= instAddrLb) && (cache[i].instAddr < instAddrUb))
-                cache[i].instAddr = 0;
+        for (auto & i : cache) {
+            if ((i.instAddr >= instAddrLb) && (i.instAddr < instAddrUb))
+                i.instAddr = 0;
         }
     } else {
         for (VAddr instAddr = instAddrLb; instAddr < instAddrUb; instAddr++) {
@@ -254,18 +254,18 @@ void AddressSpace::InstTable::Cache::unmap(VAddr instAddrLb, VAddr instAddrUb) {
     }
 }
 
-AddressSpace::InstTable::InstTable(void)
+AddressSpace::InstTable::InstTable()
         : instMap(), cache() {
 }
 
 void AddressSpace::InstTable::unmap(VAddr instAddrLb, VAddr instAddrUb) {
-    InstMap::iterator instItLb = instMap.lower_bound(instAddrLb);
-    InstMap::iterator instItUb = instMap.lower_bound(instAddrUb);
+    auto instItLb = instMap.lower_bound(instAddrLb);
+    auto instItUb = instMap.lower_bound(instAddrUb);
     instMap.erase(instItLb, instItUb);
     cache.unmap(instAddrLb, instAddrUb);
 }
 
-void AddressSpace::createTrace(ThreadContext *context, VAddr addr) {
+void AddressSpace::createTrace(ThreadContext *context, VAddr addr) const {
     VAddr segAddr = getSegmentAddr(addr);
     VAddr segSize = getSegmentSize(segAddr);
     VAddr funcAddr = getFuncAddr(addr);
@@ -296,14 +296,14 @@ void AddressSpace::mapTrace(InstDesc *binst, InstDesc *einst, VAddr baddr, VAddr
 
 void AddressSpace::delInsts(VAddr begAddr, VAddr endAddr) {
     // We erase all traces that overlap and extend bounds to cover these traces
-    TraceMap::iterator trcItLb = traceMap.upper_bound(endAddr);
+    auto trcItLb = traceMap.upper_bound(endAddr);
     if (trcItLb == traceMap.end())
         return;
     if (trcItLb->second.eaddr <= begAddr)
         return;
     if (trcItLb->second.eaddr > endAddr)
         endAddr = trcItLb->second.eaddr;
-    TraceMap::iterator trcItUb = trcItLb;
+    auto trcItUb = trcItLb;
     while ((trcItUb != traceMap.end()) && (trcItUb->second.eaddr > begAddr)) {
         if (trcItUb->second.baddr < begAddr)
             begAddr = trcItUb->second.baddr;
@@ -316,7 +316,7 @@ void AddressSpace::delInsts(VAddr begAddr, VAddr endAddr) {
     instTable.unmap(begAddr, endAddr);
 }
 
-AddressSpace::AddressSpace(void) :
+AddressSpace::AddressSpace() :
         GCObject(),
         brkBase(0) {
 }
@@ -326,13 +326,13 @@ AddressSpace::AddressSpace(AddressSpace &src) :
         segmentMap(src.segmentMap),
         pageTable(src.pageTable),
         brkBase(src.brkBase) {
-    for (NamesByAddr::const_iterator it = src.namesByAddr.begin(); it != src.namesByAddr.end(); it++)
-        addFuncName(it->addr, it->func, it->file);
+    for (const auto & it : src.namesByAddr)
+        addFuncName(it.addr, it.func, it.file);
 }
 
-AddressSpace::~AddressSpace(void) {
-    for (TraceMap::iterator traceit = traceMap.begin(); traceit != traceMap.end(); traceit++)
-        delete[] traceit->second.binst;
+AddressSpace::~AddressSpace() {
+    for (auto & traceit : traceMap)
+        delete[] traceit.second.binst;
 }
 
 void AddressSpace::save(ChkWriter &out) const {
@@ -348,8 +348,8 @@ void AddressSpace::save(ChkWriter &out) const {
 //   out << 0 << endl;
     // Segment dump
     out << "Segments " << segmentMap.size() << endl;
-    for (SegmentMap::const_iterator segIt = segmentMap.begin(); segIt != segmentMap.end(); segIt++)
-        segIt->second.save(out);
+    for (const auto & segIt : segmentMap)
+        segIt.second.save(out);
     // Dump function name mappings
 //   out << "FuncNames " << funcAddrToName.size() << endl;
 //   for(AddrToNameMap::const_iterator addrIt=funcAddrToName.begin();
@@ -404,8 +404,8 @@ void AddressSpace::addFuncName(VAddr addr, const std::string &func, const std::s
 
 // Removes all existing function name mappings in a given address range
 void AddressSpace::delFuncNames(VAddr begAddr, VAddr endAddr) {
-    NamesByAddr::iterator begIt = namesByAddr.upper_bound(endAddr);
-    NamesByAddr::iterator endIt = begIt;
+    auto begIt = namesByAddr.upper_bound(endAddr);
+    auto endIt = begIt;
     while (endIt->addr >= begAddr) {
         namesByName.erase(&(*endIt));
         endIt++;
@@ -416,7 +416,7 @@ void AddressSpace::delFuncNames(VAddr begAddr, VAddr endAddr) {
 
 // Return name of the function with given entry point
 const std::string &AddressSpace::getFuncName(VAddr addr) const {
-    NamesByAddr::const_iterator nameIt = namesByAddr.lower_bound(addr);
+    auto nameIt = namesByAddr.lower_bound(addr);
     if (nameIt == namesByAddr.end())
         fail("");
     if (nameIt->addr != addr)
@@ -426,7 +426,7 @@ const std::string &AddressSpace::getFuncName(VAddr addr) const {
 
 // Return name of the ELF file in which the function is, given the entry point
 const std::string &AddressSpace::getFuncFile(VAddr addr) const {
-    NamesByAddr::const_iterator nameIt = namesByAddr.lower_bound(addr);
+    auto nameIt = namesByAddr.lower_bound(addr);
     if (nameIt == namesByAddr.end())
         fail("");
     if (nameIt->addr != addr)
@@ -437,7 +437,7 @@ const std::string &AddressSpace::getFuncFile(VAddr addr) const {
 // Given the name, return where the function begins
 VAddr AddressSpace::getFuncAddr(const std::string &name) const {
     NameEntry key(0, name, "");
-    NamesByName::const_iterator nameIt = namesByName.lower_bound(&key);
+    auto nameIt = namesByName.lower_bound(&key);
     if (nameIt == namesByName.end())
         return 0;
     if ((*nameIt)->func != name)
@@ -447,7 +447,7 @@ VAddr AddressSpace::getFuncAddr(const std::string &name) const {
 
 // Given a code address, return where the function begins (best guess)
 VAddr AddressSpace::getFuncAddr(VAddr addr) const {
-    NamesByAddr::const_iterator nameIt = namesByAddr.lower_bound(addr);
+    auto nameIt = namesByAddr.lower_bound(addr);
     if (nameIt == namesByAddr.end())
         fail("");
     return nameIt->addr;
@@ -455,7 +455,7 @@ VAddr AddressSpace::getFuncAddr(VAddr addr) const {
 
 // Given a code address, return the function size (best guess)
 size_t AddressSpace::getFuncSize(VAddr addr) const {
-    NamesByAddr::const_iterator nameIt = namesByAddr.lower_bound(addr);
+    auto nameIt = namesByAddr.lower_bound(addr);
     I(nameIt != namesByAddr.end());
     VAddr abeg = nameIt->addr;
     do {
@@ -468,7 +468,7 @@ size_t AddressSpace::getFuncSize(VAddr addr) const {
 
 // Print name(s) of function(s) with given entry point
 void AddressSpace::printFuncName(VAddr addr) const {
-    NamesByAddr::const_iterator it = namesByAddr.lower_bound(addr);
+    auto it = namesByAddr.lower_bound(addr);
     bool first = true;
     while ((it != namesByAddr.end()) && (it->addr == addr)) {
         std::cout << (first ? "" : ", ") << it->file << ":" << it->func;
@@ -483,8 +483,8 @@ void AddressSpace::addHandler(const std::string &name, NameToFuncMap &map, EmulF
 }
 
 void AddressSpace::delHandler(const std::string &name, NameToFuncMap &map, EmulFunc *func) {
-    HandlerSet::iterator curIt = map[name].begin();
-    HandlerSet::iterator endIt = map[name].end();
+    auto curIt = map[name].begin();
+    auto endIt = map[name].end();
     while ((curIt != endIt) && (*curIt != func))
         curIt++;
     if (curIt == endIt)
@@ -503,7 +503,7 @@ void AddressSpace::delHandler(const std::string &name, NameToFuncMap &map, EmulF
 }
 
 bool AddressSpace::getHandlers(const std::string &name, const NameToFuncMap &map, HandlerSet &set) {
-    NameToFuncMap::const_iterator it = map.find(name);
+    auto it = map.find(name);
     if (it == map.end())
         return false;
     const HandlerSet &srcSet = it->second;
@@ -537,7 +537,7 @@ void AddressSpace::delRetHandler(const std::string &name, EmulFunc *func) {
 
 bool AddressSpace::getCallHandlers(VAddr addr, HandlerSet &set) const {
     bool rv = false;
-    for (NamesByAddr::iterator it = namesByAddr.lower_bound(addr);
+    for (auto it = namesByAddr.lower_bound(addr);
          (it != namesByAddr.end()) && (it->addr == addr); it++)
         rv = rv || getHandlers(it->func, nameToCallHandler, set);
     return rv || getHandlers("", nameToCallHandler, set);
@@ -545,7 +545,7 @@ bool AddressSpace::getCallHandlers(VAddr addr, HandlerSet &set) const {
 
 bool AddressSpace::getRetHandlers(VAddr addr, HandlerSet &set) const {
     bool rv = false;
-    for (NamesByAddr::iterator it = namesByAddr.lower_bound(addr);
+    for (auto it = namesByAddr.lower_bound(addr);
          (it != namesByAddr.end()) && (it->addr == addr); it++)
         rv = rv || getHandlers(it->func, nameToRetHandler, set);
     return rv || getHandlers("", nameToRetHandler, set);
@@ -571,7 +571,7 @@ void AddressSpace::splitSegment(VAddr pivot) {
     if (pivot % AddrSpacPageSize)
         fail("AddressSpace::splitSegment with non-aligned pivot\n");
     // Find segment that begins below pivot - this will be the one to split
-    SegmentMap::iterator segIt = segmentMap.upper_bound(pivot);
+    auto segIt = segmentMap.upper_bound(pivot);
     // Return if no such segment
     if (segIt == segmentMap.end())
         return;
@@ -608,7 +608,7 @@ void AddressSpace::growSegmentDown(VAddr oldaddr, VAddr newaddr) {
     newSeg.len = oldaddr + oldSeg.len - newaddr;
     I(newSeg.pageNumUb() == oldSeg.pageNumUb());
     pageTable.map(newSeg.pageNumLb(), oldSeg.pageNumLb(), newSeg.canRead, newSeg.canWrite, newSeg.canExec,
-                  newSeg.shared, 0, 0);
+                  newSeg.shared, nullptr, 0);
     segmentMap.erase(oldaddr);
 }
 
@@ -625,7 +625,7 @@ void AddressSpace::resizeSegment(VAddr addr, size_t newlen) {
     mySeg.len = newlen;
     size_t newPageNumUb = mySeg.pageNumUb();
     if (oldPageNumUb < newPageNumUb) {
-        pageTable.map(oldPageNumUb, newPageNumUb, mySeg.canRead, mySeg.canWrite, mySeg.canExec, mySeg.shared, 0, 0);
+        pageTable.map(oldPageNumUb, newPageNumUb, mySeg.canRead, mySeg.canWrite, mySeg.canExec, mySeg.shared, nullptr, 0);
     } else if (oldPageNumUb > newPageNumUb) {
         pageTable.unmap(newPageNumUb, oldPageNumUb);
     }
@@ -663,17 +663,17 @@ void AddressSpace::deleteSegment(VAddr addr, size_t len) {
     splitSegment(addr);
     splitSegment(addr + len);
     // Find the segment that begins before the end of deletion region
-    SegmentMap::iterator begIt = segmentMap.upper_bound(addr + len);
+    auto begIt = segmentMap.upper_bound(addr + len);
     // If nothing begins before the end of deletion, nothing to do
     if (begIt == segmentMap.end())
         return;
     // This segment should not go past the end of deletion (we did the split)
     I(begIt->second.addr + begIt->second.len <= addr + len);
     // Find the segment that begins before the start of deletion region
-    SegmentMap::iterator endIt = segmentMap.upper_bound(addr);
+    auto endIt = segmentMap.upper_bound(addr);
     // This segment should not go past the start of deletion (we did the split)
     I((endIt == segmentMap.end()) || (endIt->second.addr + endIt->second.len <= addr));
-    for (SegmentMap::iterator segIt = begIt; segIt != endIt; segIt++) {
+    for (auto segIt = begIt; segIt != endIt; segIt++) {
         SegmentDesc &seg = segIt->second;
         I((seg.addr >= addr) && (seg.addr + seg.len <= addr + len));
         pageTable.unmap(seg.pageNumLb(), seg.pageNumUb());
@@ -705,7 +705,7 @@ void AddressSpace::newSegment(VAddr addr, size_t len, bool canRead, bool canWrit
     newSeg.autoGrow = false;
     newSeg.growDown = false;
     newSeg.shared = shared;
-    newSeg.fileDesc = shared ? fdesc : 0;
+    newSeg.fileDesc = shared ? fdesc : nullptr;
     newSeg.fileOffset = shared ? offs : 0;
     pageTable.map(newSeg.pageNumLb(), newSeg.pageNumUb(), canRead, canWrite, canExec, shared, fdesc, offs);
 }

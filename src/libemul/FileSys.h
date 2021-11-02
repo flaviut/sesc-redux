@@ -1,7 +1,7 @@
 #if !(defined FILE_SYS_H)
 #define FILE_SYS_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -24,7 +24,7 @@ namespace MemSys {
 
 namespace FileSys {
 // Type of a file descriptor
-    typedef decltype(((struct pollfd *) 0)->fd) fd_t;
+    typedef decltype(((struct pollfd *) nullptr)->fd) fd_t;
 //typedef typeof(((struct pollfd *)0)->fd) fd_t;
 }
 namespace FileSys {
@@ -82,31 +82,31 @@ namespace FileSys {
 
         static void remove(const std::string &name, Node *node);
 
-        virtual const std::string *getName(void);
+        virtual const std::string *getName();
 
-        virtual ~Node(void);
+        virtual ~Node();
 
-        dev_t getDev(void) const {
+        dev_t getDev() const {
             return dev;
         }
 
-        size_t getIno(void) const {
+        size_t getIno() const {
             return simInode;
         }
 
-        uid_t getUid(void) const {
+        uid_t getUid() const {
             return uid;
         }
 
-        gid_t getGid(void) const {
+        gid_t getGid() const {
             return gid;
         }
 
-        mode_t getMode(void) const {
+        mode_t getMode() const {
             return mode;
         }
 
-        off_t getSize(void) const {
+        off_t getSize() const {
             return size;
         }
     };
@@ -117,7 +117,7 @@ namespace FileSys {
     public:
         LinkNode(const std::string &link, struct stat &buf);
 
-        const std::string &read(void) const {
+        const std::string &read() const {
             return link;
         }
     };
@@ -136,21 +136,21 @@ namespace FileSys {
 
         static Description *open(const std::string &name, flags_t flags, mode_t mode);
 
-        virtual ~Description(void);
+        ~Description() override;
 
-        Node *getNode(void) const {
+        Node *getNode() const {
             return node;
         }
 
-        virtual const std::string getName(void) const;
+        virtual const std::string getName() const;
 
-        virtual bool canRd(void) const;
+        virtual bool canRd() const;
 
-        virtual bool canWr(void) const;
+        virtual bool canWr() const;
 
-        virtual bool isNonBlock(void) const;
+        virtual bool isNonBlock() const;
 
-        virtual flags_t getFlags(void) const;
+        virtual flags_t getFlags() const;
 
         virtual ssize_t read(void *buf, size_t count) = 0;
 
@@ -161,9 +161,9 @@ namespace FileSys {
     protected:
         static NullNode node;
     public:
-        NullNode(void);
+        NullNode();
 
-        static NullNode *create(void);
+        static NullNode *create();
     };
 
     class NullDescription : public Description {
@@ -172,9 +172,9 @@ namespace FileSys {
 
         NullDescription(flags_t flags);
 
-        virtual ssize_t read(void *buf, size_t count);
+        ssize_t read(void *buf, size_t count) override;
 
-        virtual ssize_t write(const void *buf, size_t count);
+        ssize_t write(const void *buf, size_t count) override;
     };
 
     class SeekableNode : public Node {
@@ -196,15 +196,15 @@ namespace FileSys {
         SeekableDescription(Node *node, flags_t flags);
 
     public:
-        virtual off_t getSize(void) const;
+        virtual off_t getSize() const;
 
-        virtual off_t getPos(void) const;
+        virtual off_t getPos() const;
 
         virtual void setPos(off_t npos);
 
-        virtual ssize_t read(void *buf, size_t count);
+        ssize_t read(void *buf, size_t count) override;
 
-        virtual ssize_t write(const void *buf, size_t count);
+        ssize_t write(const void *buf, size_t count) override;
 
         virtual ssize_t pread(void *buf, size_t count, off_t offs);
 
@@ -221,20 +221,20 @@ namespace FileSys {
     public:
         FileNode(struct stat &buf);
 
-        virtual ~FileNode(void);
+        ~FileNode() override;
 
-        virtual void setSize(off_t nlen);
+        void setSize(off_t nlen) override;
 
-        virtual ssize_t pread(void *buf, size_t count, off_t offs);
+        ssize_t pread(void *buf, size_t count, off_t offs) override;
 
-        virtual ssize_t pwrite(const void *buf, size_t count, off_t offs);
+        ssize_t pwrite(const void *buf, size_t count, off_t offs) override;
     };
 
     class FileDescription : public SeekableDescription {
     public:
         FileDescription(FileNode *node, flags_t flags);
 
-        virtual ~FileDescription(void);
+        ~FileDescription() override;
     };
 
     class DirectoryNode : public SeekableNode {
@@ -245,30 +245,30 @@ namespace FileSys {
     public:
         DirectoryNode(struct stat &buf);
 
-        virtual ~DirectoryNode(void);
+        ~DirectoryNode() override;
 
-        virtual void setSize(off_t nlen);
+        void setSize(off_t nlen) override;
 
-        virtual ssize_t pread(void *buf, size_t count, off_t offs);
+        ssize_t pread(void *buf, size_t count, off_t offs) override;
 
-        virtual ssize_t pwrite(const void *buf, size_t count, off_t offs);
+        ssize_t pwrite(const void *buf, size_t count, off_t offs) override;
 
-        virtual void refresh(void);
+        virtual void refresh();
 
         virtual std::string getEntry(off_t index);
     };
 
     class DirectoryDescription : public SeekableDescription {
     public:
-        virtual off_t getSize(void) const;
+        off_t getSize() const override;
 
         DirectoryDescription(DirectoryNode *node, flags_t flags);
 
-        virtual ~DirectoryDescription(void);
+        ~DirectoryDescription() override;
 
-        virtual void setPos(off_t npos);
+        void setPos(off_t npos) override;
 
-        virtual std::string readDir(void);
+        virtual std::string readDir();
     };
 
     class StreamNode : public Node {
@@ -288,23 +288,23 @@ namespace FileSys {
     public:
         StreamNode(dev_t dev, dev_t rdev, uid_t uid, gid_t gid, mode_t mode);
 
-        virtual ~StreamNode(void);
+        ~StreamNode() override;
 
-        dev_t getRdev(void) const {
+        dev_t getRdev() const {
             return rdev;
         }
 
-        virtual bool willRdBlock(void) const = 0;
+        virtual bool willRdBlock() const = 0;
 
-        virtual bool willWrBlock(void) const = 0;
+        virtual bool willWrBlock() const = 0;
 
         void rdBlock(pid_t pid);
 
         void wrBlock(pid_t pid);
 
-        void rdUnblock(void);
+        void rdUnblock();
 
-        void wrUnblock(void);
+        void wrUnblock();
 
         virtual ssize_t read(void *buf, size_t count) = 0;
 
@@ -316,17 +316,17 @@ namespace FileSys {
         StreamDescription(StreamNode *node, flags_t flags);
 
     public:
-        bool willRdBlock(void) const;
+        bool willRdBlock() const;
 
-        bool willWrBlock(void) const;
+        bool willWrBlock() const;
 
         void rdBlock(pid_t pid);
 
         void wrBlock(pid_t pid);
 
-        virtual ssize_t read(void *buf, size_t count);
+        ssize_t read(void *buf, size_t count) override;
 
-        virtual ssize_t write(const void *buf, size_t count);
+        ssize_t write(const void *buf, size_t count) override;
     };
 
     class PipeNode : public StreamNode {
@@ -335,32 +335,32 @@ namespace FileSys {
         size_t readers;
         size_t writers;
     public:
-        PipeNode(void);
+        PipeNode();
 
-        virtual ~PipeNode(void);
+        ~PipeNode() override;
 
-        virtual void addReader(void);
+        virtual void addReader();
 
-        virtual void delReader(void);
+        virtual void delReader();
 
-        virtual void addWriter(void);
+        virtual void addWriter();
 
-        virtual void delWriter(void);
+        virtual void delWriter();
 
-        virtual ssize_t read(void *buf, size_t count);
+        ssize_t read(void *buf, size_t count) override;
 
-        virtual ssize_t write(const void *buf, size_t count);
+        ssize_t write(const void *buf, size_t count) override;
 
-        virtual bool willRdBlock(void) const;
+        bool willRdBlock() const override;
 
-        virtual bool willWrBlock(void) const;
+        bool willWrBlock() const override;
     };
 
     class PipeDescription : public StreamDescription {
     public:
         PipeDescription(PipeNode *node, flags_t flags);
 
-        virtual ~PipeDescription(void);
+        ~PipeDescription() override;
     };
 
     class TtyNode : public StreamNode {
@@ -369,22 +369,22 @@ namespace FileSys {
     public:
         TtyNode(fd_t srcfd);
 
-        ~TtyNode(void);
+        ~TtyNode() override;
 
-        virtual ssize_t read(void *buf, size_t count);
+        ssize_t read(void *buf, size_t count) override;
 
-        virtual ssize_t write(const void *buf, size_t count);
+        ssize_t write(const void *buf, size_t count) override;
 
-        virtual bool willRdBlock(void) const;
+        bool willRdBlock() const override;
 
-        virtual bool willWrBlock(void) const;
+        bool willWrBlock() const override;
     };
 
     class TtyDescription : public StreamDescription {
     protected:
         TtyDescription(TtyNode *node, flags_t flags);
 
-        virtual ~TtyDescription(void);
+        ~TtyDescription() override;
 
     public:
         static TtyDescription *wrap(fd_t fd);
@@ -400,17 +400,17 @@ namespace FileSys {
             // Cloexec flag for this descriptor
             bool cloexec;
 
-            FileDescriptor(void);
+            FileDescriptor();
         };
 
         typedef std::map<fd_t, FileDescriptor> FileDescriptors;
         FileDescriptors fileDescriptors;
     public:
-        OpenFiles(void);
+        OpenFiles();
 
         OpenFiles(const OpenFiles &src);
 
-        ~OpenFiles(void);
+        ~OpenFiles() override;
 
         // Returns the first available (non-open) fd whose number is at least minfd
         fd_t nextFreeFd(fd_t minfd) const;
@@ -434,7 +434,7 @@ namespace FileSys {
         bool getCloexec(fd_t fd) const;
 
         // Closes all file descriptors whose cloexec flag is set
-        void exec(void);
+        void exec();
 
         // Checkpointing save/restore
         void save(ChkWriter &out) const;
@@ -473,7 +473,7 @@ namespace FileSys {
 
         FileSys(const FileSys &src, bool newNameSpace);
 
-        const std::string &getCwd(void) const {
+        const std::string &getCwd() const {
             return cwd;
         }
 

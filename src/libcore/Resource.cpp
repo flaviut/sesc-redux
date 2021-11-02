@@ -24,7 +24,7 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <limits.h>
+#include <climits>
 
 #include "Cluster.h"
 #include "DInst.h"
@@ -92,7 +92,7 @@ MemResource::MemResource(Cluster *cls, PortGeneric *aGen, GMemorySystem *ms, int
 /***********************************************/
 
 FUMemory::FUMemory(Cluster *cls, GMemorySystem *ms, int32_t id)
-        : MemResource(cls, 0, ms, id, "FUMemory") {
+        : MemResource(cls, nullptr, ms, id, "FUMemory") {
     I(ms);
     I(L1DCache);
 }
@@ -134,7 +134,7 @@ RetOutcome FUMemory::retire(DInst *dinst) {
     if (inst->getSubCode() == iFetchOp) {
         if (L1DCache->canAcceptStore(static_cast<PAddr>(dinst->getVaddr())) == false)
             return NoCacheSpace;
-        FUStore *r = (FUStore *) getCluster()->getResource(iStore);
+        auto *r = (FUStore *) getCluster()->getResource(iStore);
 #ifdef TS_CHERRY
         dinst->setCanBeRecycled();
         dinst->setMemoryIssued();
@@ -490,7 +490,7 @@ RetOutcome FUBranch::retire(DInst *dinst)
 /***********************************************/
 
 FUEvent::FUEvent(Cluster *cls)
-        : Resource(cls, 0) {
+        : Resource(cls, nullptr) {
 }
 
 StallCause FUEvent::canIssue(DInst *dinst) {

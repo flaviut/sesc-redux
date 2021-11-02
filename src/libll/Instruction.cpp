@@ -66,7 +66,7 @@ static const char *opcode2NameTable[] = {
 
 int32_t Instruction::maxFuncID=0;
 
-Instruction *Instruction::InstTable = 0;
+Instruction *Instruction::InstTable = nullptr;
 Instruction::InstHash Instruction::instHash;
 
 size_t Instruction::InstTableSize = 0;
@@ -82,7 +82,7 @@ void Instruction::initialize(int32_t argc
 void Instruction::finalize()
 {
     free(InstTable);
-    InstTable = 0;
+    InstTable = nullptr;
 }
 
 const char *Instruction::opcode2Name(InstType op)

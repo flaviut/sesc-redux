@@ -48,9 +48,9 @@ class DragonFlyNew : public Network {
     int _grp_num_nodes;
 
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
 
 public:
@@ -60,11 +60,11 @@ public:
 
     int GetK() const;
 
-    double Capacity() const;
+    double Capacity() const override;
 
     static void RegisterRoutingFunctions();
 
-    void InsertRandomFaults(const Configuration &config);
+    void InsertRandomFaults(const Configuration &config) override;
 
 };
 

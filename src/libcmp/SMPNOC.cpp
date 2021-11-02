@@ -27,12 +27,12 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <set>
 
 pool<SMPNOC::SMPPacket> SMPNOC::SMPPacket::rPool(5192, "SMPPacket");
-SMPNOC *SMPNOC::myself = NULL;
+SMPNOC *SMPNOC::myself = nullptr;
 int SMPNOC::bs_sample = 0;
 deque<pair<void *, pair<int, int> > > SMPNOC::returnPackets;
 
 /* the current traffic manager instance */
-TrafficManager * trafficManager = NULL;
+TrafficManager * trafficManager = nullptr;
 
 long long GetSimTime()
 {
@@ -43,7 +43,7 @@ class Stats;
 Stats * GetStats(const std::string & name)
 {
 	Stats* test =  trafficManager->getStats(name);
-	if(test == 0)
+	if(test == nullptr)
 	{   
 		cout<<"warning statistics "<<name<<" not found"<<endl;
 	}   
@@ -79,7 +79,7 @@ void SMPNOC::SMPPacket::Set(MemRequest *mreq, int32_t from, int32_t to, int32_t 
 
 void SMPNOC::SMPPacket::destroy()
 {
-	_mreq = NULL;
+	_mreq = nullptr;
 	_from = -1;
 	_to = -1;
 	_meshOp = NOP;
@@ -98,9 +98,9 @@ SMPNOC::SMPNOC(SMemorySystem *dms, const char *section, const char *name)
     , DATAmsgLatS1Hist("%s_MESH_DATAmsgS1Hist", name)
     , DATAmsgLatS2Hist("%s_MESH_DATAmsgS2Hist", name)
 {
-    MemObj *ll = NULL;
+    MemObj *ll = nullptr;
 
-	if(myself!=NULL) {
+	if(myself!=nullptr) {
 		printf("Error: Cannot create more than one SMPNOC\n");
 		exit(1);
 	}
@@ -109,7 +109,7 @@ SMPNOC::SMPNOC(SMemorySystem *dms, const char *section, const char *name)
     I(dms);
     ll = dms->declareMemoryObj(section, "lowerLevel");
 
-    if (ll != NULL) {
+    if (ll != nullptr) {
         addLowerLevel(ll);
     }
 
@@ -146,7 +146,7 @@ SMPNOC::SMPNOC(SMemorySystem *dms, const char *section, const char *name)
 	string watch_out_file = bs_config.GetStr( "watch_out" );
 	if(watch_out_file == "") 
 	{   
-		gWatchOut = NULL;
+		gWatchOut = nullptr;
 	}   
 	else if(watch_out_file == "-")
 	{   
@@ -174,14 +174,14 @@ SMPNOC::SMPNOC(SMemorySystem *dms, const char *section, const char *name)
      *not sure how to use them
      */
 
-    assert(trafficManager == NULL);
+    assert(trafficManager == nullptr);
     trafficManager = TrafficManager::New( bs_config, net ) ; 
 
     /*Start the simulation run
      */
 
     total_time = 0.0;
-    gettimeofday(&start_time, NULL);
+    gettimeofday(&start_time, nullptr);
 
     //bool result = trafficManager->Run() ;
 
@@ -303,7 +303,7 @@ SMPNOC::SMPNOC(SMemorySystem *dms, const char *section, const char *name)
 
 void SMPNOC::doAdvanceNOCCycle()
 {
-	assert(trafficManager!=NULL);
+	assert(trafficManager!=nullptr);
 		
 	trafficManager->CallEveryCycle();
 
@@ -314,10 +314,10 @@ void SMPNOC::doAdvanceNOCCycle()
 		int hops = returnPackets.front().second.first;
 		int plat = returnPackets.front().second.second;
 		returnPackets.pop_front();
-		SMPPacket *packet = static_cast<SMPPacket *>(p_pkt);
+		auto *packet = static_cast<SMPPacket *>(p_pkt);
 
 		MemRequest *mreq = packet->GetMemRequest();
-    	SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    	auto *sreq = static_cast<SMPMemRequest *>(mreq);
 		sreq->hops = hops;
 		sreq->plat = plat;
 		packet->destroy();
@@ -336,7 +336,7 @@ void SMPNOC::doAdvanceNOCCycle()
 
 void SMPNOC::PrintStat() 
 {
-	assert(myself!=NULL);
+	assert(myself!=nullptr);
 	myself->_PrintStat();
 }
 
@@ -345,7 +345,7 @@ void SMPNOC::_PrintStat()
 	trafficManager->Checkpoint();
 	trafficManager->Finish();
 
-    gettimeofday(&end_time, NULL);
+    gettimeofday(&end_time, nullptr);
     total_time = ((double)(end_time.tv_sec) + (double)(end_time.tv_usec)/1000000.0)
                  - ((double)(start_time.tv_sec) + (double)(start_time.tv_usec)/1000000.0);
 
@@ -364,7 +364,7 @@ void SMPNOC::_PrintStat()
     }
 
     delete trafficManager;
-    trafficManager = NULL;
+    trafficManager = nullptr;
 	fs_booksim.close();
 }
 
@@ -481,7 +481,7 @@ void SMPNOC::read(MemRequest *mreq)
     //doReadCB::scheduleAbs(nextSlot(mreq)+delay, this, mreq);
 
 
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
 
     int nDst = sreq->numDstNode();
@@ -798,7 +798,7 @@ void SMPNOC::doInvalidate(PAddr addr, ushort size)
 void SMPNOC::returnAccess(MemRequest *mreq)
 {
 
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     // Measure
     if( (sreq->hops>=0) ) {
@@ -855,9 +855,9 @@ void SMPNOC::returnAccess(MemRequest *mreq)
 		DEBUGPRINT("\t\t\tNoC recieve from %d to %d msg %x (size %d) for %x at %lld  (%p)\n"
 				, from, to, meshOp, msgSize, addr, globalClock, sreq);
 
-		for(uint32_t i = 0; i<upperLevel.size(); i++) {
-			if(upperLevel[i]->getNodeID()==to) {
-				upperLevel[i]->returnAccess(mreq);
+		for(auto & i : upperLevel) {
+			if(i->getNodeID()==to) {
+				i->returnAccess(mreq);
 				break;
 			}
 		}

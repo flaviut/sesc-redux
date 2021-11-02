@@ -21,9 +21,9 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <string.h>
+#include <cstring>
 #include <strings.h>
-#include <math.h>
+#include <cmath>
 #include <alloca.h>
 
 #include "ReportGen.h"
@@ -50,7 +50,7 @@ BPred::BPred(int32_t i, int32_t fetchWidth, const char *sec, const char *name)
       (unsigned) bpred4CycleAddrShift <= roundUpPower2((unsigned) fetchWidth));
 
     // Energy counters
-    if (strstr(name, "RAS") == 0 && strstr(name, "BTB") == 0) {
+    if (strstr(name, "RAS") == nullptr && strstr(name, "BTB") == nullptr) {
         // RAS and BTB have their own energy counters (do not replicate counters)
 
         char cadena[100];
@@ -58,7 +58,7 @@ BPred::BPred(int32_t i, int32_t fetchWidth, const char *sec, const char *name)
         sprintf(cadena, "BPred(%d)_%s", i, name);
         bpredEnergy = new GStatsEnergy("bpredEnergy", cadena, i, FetchPower, EnergyMgr::get("bpredEnergy", i));
     } else {
-        bpredEnergy = 0;
+        bpredEnergy = nullptr;
     }
 }
 
@@ -82,7 +82,7 @@ BPRas::BPRas(int32_t i, int32_t fetchWidth, const char *section)
     SescConf->isBetween(section, "rasSize", 0, 128);    // More than 128???
 
     if (RasSize == 0) {
-        stack = 0;
+        stack = nullptr;
         return;
     }
 
@@ -105,7 +105,7 @@ PredType BPRas::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
 
     if (inst->isFuncRet()) {
         rasEnergy->inc();
-        if (stack == 0)
+        if (stack == nullptr)
             return CorrectPrediction;
 
         //    I(oracleID);
@@ -155,7 +155,7 @@ BPBTB::BPBTB(int32_t i, int32_t fetchWidth, const char *section, const char *nam
 
     if (SescConf->getInt(section, "btbSize") == 0) {
         // Oracle
-        data = 0;
+        data = nullptr;
         return;
     }
 
@@ -170,7 +170,7 @@ BPBTB::~BPBTB() {
 }
 
 void BPBTB::updateOnly(const Instruction *inst, InstID oracleID) {
-    if (data == 0)
+    if (data == nullptr)
         return;
 
     bool ntaken = inst->calcNextInstID() == oracleID;
@@ -191,7 +191,7 @@ PredType BPBTB::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
 
     btbEnergy->inc();
 
-    if (data == 0) {
+    if (data == nullptr) {
         // required when BPOracle
         nHit.cinc(doUpdate);
 
@@ -210,7 +210,7 @@ PredType BPBTB::predict(const Instruction *inst, InstID oracleID, bool doUpdate)
         // The branch is not taken. Do not update the cache
         BTBCache::CacheLine *cl = data->readLine(key);
 
-        if (cl == 0) {
+        if (cl == nullptr) {
             nMiss.cinc(doUpdate);
             return NoBTBPrediction; // NoBTBPrediction because BTAC would hide the prediction
         }
@@ -893,7 +893,7 @@ PredType BPOgehl::predict(const Instruction *inst, InstID oracleID, bool doUpdat
     bool ptaken = false;
 
     int32_t S = (M_SIZ / 2);
-    HistoryType *iID = (HistoryType *) alloca(M_SIZ * sizeof(HistoryType));
+    auto *iID = (HistoryType *) alloca(M_SIZ * sizeof(HistoryType));
 
     // Prediction is sum of entries in M tables (table 1 is half-size to fit in 64k)
     for (int32_t i = 0; i < M_SIZ; i++) {
@@ -1072,7 +1072,7 @@ void BPOgehl::switchOut(Pid_t pid) {
 
 
 BPred *BPredictor::getBPred(int32_t id, int32_t fetchWidth, const char *sec) {
-    BPred *pred = 0;
+    BPred *pred = nullptr;
 
     const char *type = SescConf->getCharPtr(sec, "type");
 
@@ -1107,7 +1107,7 @@ BPred *BPredictor::getBPred(int32_t id, int32_t fetchWidth, const char *sec) {
 }
 
 BPredictor::BPredictor(int32_t i, int32_t fetchWidth, const char *sec, BPredictor *bpred)
-        : id(i), SMTcopy(bpred != 0), ras(i, fetchWidth, sec), nBranches("BPred(%d):nBranches", i),
+        : id(i), SMTcopy(bpred != nullptr), ras(i, fetchWidth, sec), nBranches("BPred(%d):nBranches", i),
           nTaken("BPred(%d):nTaken", i), nMiss("BPred(%d):nMiss", i), section(strdup(sec ? sec : "null")) {
 
     // Threads in SMT system share the predictor. Only the Ras is duplicated

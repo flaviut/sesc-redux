@@ -65,8 +65,8 @@ protected:
     bool allQueuesEmpty() {
         bool ret = true;;
 
-        for(int32_t q = 0; q < LastQ; q++)
-            ret &= reqQs[q].empty();
+        for(auto & reqQ : reqQs)
+            ret &= reqQ.empty();
 
         return ret;
     }
@@ -82,14 +82,14 @@ protected:
 public:
 
     PriorityBus(MemorySystem* current, const char *device_descr_section,
-                const char *device_name = NULL);
-    ~PriorityBus() {}
+                const char *device_name = nullptr);
+    ~PriorityBus() override {}
 
-    void access(MemRequest *mreq);
-    void returnAccess(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
+    void returnAccess(MemRequest *mreq) override;
 
-    bool canAcceptStore(PAddr addr);
-    void invalidate(PAddr addr,ushort size,MemObj *oc);
-    Time_t getNextFreeCycle() const;
+    bool canAcceptStore(PAddr addr) override;
+    void invalidate(PAddr addr,ushort size,MemObj *oc) override;
+    Time_t getNextFreeCycle() const override;
 };
 #endif

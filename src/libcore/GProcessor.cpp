@@ -82,7 +82,7 @@ GProcessor::GProcessor(GMemorySystem *gm, CPU_t i, size_t numFlows)
         misRegPool[j] = 0;
 #endif
 
-    nStall[0] = 0; // crash if used
+    nStall[0] = nullptr; // crash if used
     nStall[SmallWinStall] = new GStatsCntr("ExeEngine(%d):nSmallWin", i);
     nStall[SmallROBStall] = new GStatsCntr("ExeEngine(%d):nSmallROB", i);
     nStall[SmallREGStall] = new GStatsCntr("ExeEngine(%d):nSmallREG", i);
@@ -93,10 +93,10 @@ GProcessor::GProcessor(GMemorySystem *gm, CPU_t i, size_t numFlows)
     nStall[PortConflictStall] = new GStatsCntr("ExeEngine(%d):PortConflict", i);
     nStall[SwitchStall] = new GStatsCntr("ExeEngine(%d):switch", i);
 
-    for (unsigned r = 0; r < MaxNoRetResp; r++) {
+    for (auto & r : notRetired) {
         for (unsigned s = 0; s < MaxInstType; s++) {
             for (unsigned t = 0; t < MaxRetOutcome; t++) {
-                notRetired[r][s][t] = &notRetiredOtherCause;
+                r[s][t] = &notRetiredOtherCause;
             }
         }
     }
@@ -217,7 +217,7 @@ GProcessor::~GProcessor() {
 }
 
 
-void GProcessor::buildInstStats(GStatsCntr *i[MaxInstType], const char *txt) {
+void GProcessor::buildInstStats(GStatsCntr *i[MaxInstType], const char *txt) const {
     bzero(i, sizeof(GStatsCntr *) * MaxInstType);
 
     i[iOpInvalid] = new GStatsCntr("%s(%d)_iOpInvalid:n", txt, Id);

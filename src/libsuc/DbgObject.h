@@ -2,24 +2,24 @@
 #define _DBGOBJECT_H_
 #include "nanassert.h"
 
-typedef void _magic_type(void);
+typedef void _magic_type();
 
 template<class T>
 class DbgObject {
 private:
-    static void _magic(void) {
+    static void _magic() {
     }
 #if (defined DEBUG)
     _magic_type *magic;
 #endif
 protected:
-    DbgObject(void)
+    DbgObject()
 #if (defined DEBUG)
         : magic(&_magic)
 #endif
     {
     }
-    ~DbgObject(void) {
+    ~DbgObject() {
         I(magic==&_magic);
 #if (defined DEBUG)
         magic=0;

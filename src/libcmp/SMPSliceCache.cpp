@@ -22,9 +22,9 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include <iostream>
 
 #include "nanassert.h"
@@ -99,7 +99,7 @@ SMPSliceCache::SMPSliceCache(SMemorySystem *gms, const char *section, const char
     ,mshrBWHist(100, "%s:mshrAcceses", name)
 #endif
 {
-    MemObj *lower_level = NULL;
+    MemObj *lower_level = nullptr;
     char busName[512];
     char tmpName[512];
 
@@ -244,7 +244,7 @@ SMPSliceCache::SMPSliceCache(SMemorySystem *gms, const char *section, const char
     }
 #endif
 
-    if (lower_level != NULL)
+    if (lower_level != nullptr)
         addLowerLevel(lower_level);
 }
 
@@ -321,7 +321,7 @@ void SMPSliceCache::L2writeBackReturn(MemRequest *mreq, TimeDelta_t d) {
 
 
 void SMPSliceCache::L2requestReturn(MemRequest *mreq, TimeDelta_t d) {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     if(sreq->getMeshOperation()==MeshMemAccessReply) {
         IJ(sreq->saveReq);
         sreq->saveReq->goDown(d, lowerLevel[0]);
@@ -348,7 +348,7 @@ void SMPSliceCache::doRead(MemRequest *mreq)
 {
     Line *l = getCacheBank(mreq->getPAddr())->readLine(mreq->getPAddr());
 
-    if (l == 0) {
+    if (l == nullptr) {
         if(isInWBuff(mreq->getPAddr())) {
             nForwarded.inc();
             //mreq->goUp(fwdDelay);
@@ -439,7 +439,7 @@ void SMPSliceCache::activateOverflow(MemRequest *mreq)
 
         Line *l = getCacheBank(mreq->getPAddr())->readLine(mreq->getPAddr());
 
-        if (l == 0) {
+        if (l == nullptr) {
             // no need to add to the MSHR, it is already there
             // since it came from the overflow
             readMiss.inc();
@@ -485,7 +485,7 @@ void SMPSliceCache::activateOverflow(MemRequest *mreq)
 
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if (l == 0) {
+    if (l == nullptr) {
         // no need to add to the MSHR, it is already there
         // since it came from the overflow
         writeMiss.inc();
@@ -525,7 +525,7 @@ void SMPSliceCache::doWrite(MemRequest *mreq)
 {
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if (l == 0) {
+    if (l == nullptr) {
         writeMissHandler(mreq);
         return;
     }
@@ -583,7 +583,7 @@ void SMPSliceCache::specialOp(MemRequest *mreq)
 
 void SMPSliceCache::doAccessDir(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     PAddr addr = mreq->getPAddr();
     PAddr taddr = calcTag(addr);
 
@@ -922,14 +922,14 @@ void SMPSliceCache::doAccessDir(MemRequest *mreq)
 							nSharer = dstObj.size();
 							IJ(nSharer>0);
 
-							for(std::set<MemObj*>::iterator it = dstObj.begin(); it!=dstObj.end(); it++) {
+							for(auto it : dstObj) {
 
 								SMPMemRequest *nsreq = SMPMemRequest::create(sreq, this, Invalidation);
 								nsreq->clearDstNodes();
 								nsreq->dstObj.clear();
 
-								nsreq->addDstNode((*it)->getNodeID());
-								nsreq->dstObj.insert((*it));
+								nsreq->addDstNode(it->getNodeID());
+								nsreq->dstObj.insert(it);
 
 
 								DEBUGPRINT("   [%s] Data in SHARED, sending Invalidations to %d shareres for %x at %lld\n",
@@ -1079,12 +1079,12 @@ void SMPSliceCache::doAccessDir(MemRequest *mreq)
                 de->clearSharers();
 
                 {
-                    SMPMemRequest *nsreq = SMPMemRequest::create(this, addr, MemPush, false, 0, WriteBackExAck);
+                    SMPMemRequest *nsreq = SMPMemRequest::create(this, addr, MemPush, false, nullptr, WriteBackExAck);
                     nsreq->addDst(sreq->msgOwner);
 
                     nsreq->newAddr = sreq->newAddr;
                     nsreq->invCB = sreq->invCB;
-                    sreq->invCB = NULL;
+                    sreq->invCB = nullptr;
 
                     DEBUGPRINT("   [%s] WriteBack data in EXCLUSIVE, sending WriteBackExAck to %s for %x at %lld\n",
                                getSymbolicName(),
@@ -1148,12 +1148,12 @@ void SMPSliceCache::doAccessDir(MemRequest *mreq)
                     }
 
                     {
-                        SMPMemRequest *nsreq = SMPMemRequest::create(this, addr, MemPush, false, 0, WriteBackBusyAck);
+                        SMPMemRequest *nsreq = SMPMemRequest::create(this, addr, MemPush, false, nullptr, WriteBackBusyAck);
                         nsreq->addDst(sreq->msgOwner);
 
                         nsreq->newAddr = sreq->newAddr;
                         nsreq->invCB = sreq->invCB;
-                        sreq->invCB = NULL;
+                        sreq->invCB = nullptr;
 
                         DEBUGPRINT("   [%s] WriteBack data in BUSY-shared, sending Writeback busy ack to requestor %s for %x at %lld\n",
                                    getSymbolicName(), sreq->msgOwner->getSymbolicName(), mreq->getPAddr(), globalClock);
@@ -1214,12 +1214,12 @@ void SMPSliceCache::doAccessDir(MemRequest *mreq)
                 //read(nsreq);
             }
             {
-                SMPMemRequest *nsreq = SMPMemRequest::create(this, addr, MemPush, false, 0, WriteBackBusyAck);
+                SMPMemRequest *nsreq = SMPMemRequest::create(this, addr, MemPush, false, nullptr, WriteBackBusyAck);
                 nsreq->addDst(sreq->msgOwner);
 
                 nsreq->newAddr = sreq->newAddr;
                 nsreq->invCB = sreq->invCB;
-                sreq->invCB = NULL;
+                sreq->invCB = nullptr;
 
                 DEBUGPRINT("   [%s] WriteBack data in BUSY-exclusive, sending Writeback busy ack to requestor %s for %x at %lld\n",
                            getSymbolicName(), sreq->msgOwner->getSymbolicName(), mreq->getPAddr(), globalClock);
@@ -1362,7 +1362,7 @@ else if (sreq->meshOp == MeshDirUpdate) {
 
 void SMPSliceCache::returnAccess(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     //MemOperation memOp = sreq->getMemOperation();
     MeshOperation meshOp = sreq->getMeshOperation();
 
@@ -1523,7 +1523,7 @@ void SMPSliceCache::processWriteBack(MemRequest *mreq) {
 void SMPSliceCache::preReturnAccess(MemRequest *mreq)
 {
     //if (mreq->getMemOperation() == MemPush) {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 #if 0
     if (sreq->getMeshOperation() == MeshMemPushReply) {
         DEBUGPRINT("   [%s] Memory Access Reply is PUSH (writeback) for %x at %lld\n",
@@ -1538,13 +1538,13 @@ void SMPSliceCache::preReturnAccess(MemRequest *mreq)
 
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(addr);
 
-    if (l == 0) {
+    if (l == nullptr) {
         nextBankSlot(addr); // had to check the bank if it can accept the new line
         CallbackBase *cb = doReturnAccessCB::create(this, mreq);
         DEBUGPRINT(" ************** [%s] allocating line...\n", getSymbolicName());
         l = allocateLine(mreq->getPAddr(), cb);
 
-        if(l != 0) {
+        if(l != nullptr) {
             // the allocation was successfull, no need for the callback
             cb->destroy();
         } else {
@@ -1613,9 +1613,9 @@ SMPSliceCache::Line *SMPSliceCache::allocateLine(PAddr addr, CallbackBase *cb)
     Line *l = getCacheBank(addr)->fillLine(addr, rpl_addr);
     lineFill.inc();
 
-    if(l == 0) {
+    if(l == nullptr) {
         doAllocateLineRetryCB::scheduleAbs(globalClock + 100, this, addr, cb);
-        return 0;
+        return nullptr;
     }
 
     if(!l->isValid()) {
@@ -1652,7 +1652,7 @@ SMPSliceCache::Line *SMPSliceCache::allocateLine(PAddr addr, CallbackBase *cb)
     pendInvTable[rpl_addr].outsResps = getNumCachesInUpperLevels();
     pendInvTable[rpl_addr].cb = doAllocateLineCB::create(this, addr, rpl_addr, cb);
     invUpperLevel(rpl_addr, cacheBanks[0]->getLineSize(), this);
-    return 0;
+    return nullptr;
 }
 
 void SMPSliceCache::doAllocateLine(PAddr addr, PAddr rpl_addr, CallbackBase *cb)
@@ -1741,9 +1741,9 @@ void SMPSliceCache::invalidate(PAddr addr, ushort size, MemObj *lowerCache)
 void SMPSliceCache::doInvalidate(PAddr addr, ushort size)
 {
     I(pendInvTable.find(addr) != pendInvTable.end());
-    CallbackBase *cb = 0;
+    CallbackBase *cb = nullptr;
 
-    PendInvTable::iterator it = pendInvTable.find(addr);
+    auto it = pendInvTable.find(addr);
     Entry *record = &(it->second);
     record->outsResps--;
 
@@ -1808,7 +1808,7 @@ void SMPSliceCache::wbuffAdd(PAddr addr)
 
 void SMPSliceCache::wbuffRemove(PAddr addr)
 {
-    WBuff::iterator it = wbuff.find(addr);
+    auto it = wbuff.find(addr);
     if(it == wbuff.end())
         return;
 
@@ -1862,17 +1862,17 @@ void WBSMPSliceCache::pushLine(MemRequest *mreq)
 
     // Line has to be pushed from a higher level to this level
     I(!isHighestLevel());
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     linePush.inc();
 
     nextBankSlot(mreq->getPAddr());
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if (inclusiveCache || l != 0) {
+    if (inclusiveCache || l != nullptr) {
         // l == 0 if the upper level is sending a push due to a
         // displacement of the lower level
-        if (l != 0) {
+        if (l != nullptr) {
             DEBUGPRINT("   [%s] L2cache write back (cache hit) %x %lld\n",
                        getSymbolicName(), mreq->getPAddr(), globalClock);
             l->validate();
@@ -1891,7 +1891,7 @@ void WBSMPSliceCache::pushLine(MemRequest *mreq)
 
     //mreq->goDown(0, lowerLevel[0]);
     //SMPMemRequest *nsreq = SMPMemRequest::create(sreq, this, MeshMemPush);
-    SMPMemRequest *nsreq = SMPMemRequest::create(this, sreq->getPAddr(), MemPush, true, 0, MeshMemPush);
+    SMPMemRequest *nsreq = SMPMemRequest::create(this, sreq->getPAddr(), MemPush, true, nullptr, MeshMemPush);
     nsreq->msgOwner = this;
     sreq->destroy();
     nsreq->goDown(0, lowerLevel[0]);
@@ -1899,7 +1899,7 @@ void WBSMPSliceCache::pushLine(MemRequest *mreq)
 
 void WBSMPSliceCache::sendMiss(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     //printf("M\t%5d\t%10x\t%10x\t%lld\n", getNodeID(), mreq->getPAddr(), calcTag(mreq->getPAddr()), globalClock);
 
@@ -1929,7 +1929,7 @@ void WBSMPSliceCache::doWriteBack(PAddr addr)
 
     DEBUGPRINT("   [%s] L2 writeback to memory for %x at %lld\n",
                getSymbolicName(), addr, globalClock);
-    SMPMemRequest *sreq = SMPMemRequest::create(this, addr, MemPush, true, 0, MeshMemPush);
+    SMPMemRequest *sreq = SMPMemRequest::create(this, addr, MemPush, true, nullptr, MeshMemPush);
     sreq->msgOwner = this;
     sreq->goDown(1, lowerLevel[0]);
 

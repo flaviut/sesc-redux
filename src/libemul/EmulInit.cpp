@@ -23,11 +23,11 @@ void fail(const char *fmt, ...) {
 
 void emulInit(int32_t argc, char **argv, char **envp) {
     FileSys::Node::insert("/dev/null", new FileSys::NullNode());
-    FileSys::Node::insert("/dev/tty", 0);
+    FileSys::Node::insert("/dev/tty", nullptr);
 
-    FileSys::Description *inDescription = 0;
-    FileSys::Description *outDescription = 0;
-    FileSys::Description *errDescription = 0;
+    FileSys::Description *inDescription = nullptr;
+    FileSys::Description *outDescription = nullptr;
+    FileSys::Description *errDescription = nullptr;
 
     extern char *optarg;
     int32_t opt;
@@ -84,7 +84,7 @@ void emulInit(int32_t argc, char **argv, char **envp) {
 
     FileSys::NameSpace::pointer nameSpace(new FileSys::NameSpace(SescConf->getCharPtr("FileSys", "mount")));
     char hostCwd[PATH_MAX];
-    if (getcwd(hostCwd, PATH_MAX) == 0)
+    if (getcwd(hostCwd, PATH_MAX) == nullptr)
         fail("emulInit: Failed to get host current directory (getcwd)\n");
     const string targetCwd(nameSpace->toTarget(nameSpace->normalize("/", hostCwd)));
     FileSys::FileSys::pointer fileSys(new FileSys::FileSys(nameSpace, targetCwd));
@@ -95,12 +95,12 @@ void emulInit(int32_t argc, char **argv, char **envp) {
     FileSys::Node *node = FileSys::Node::lookup(exeRealName);
     if (!node)
         fail("emulInit: Executable %s does not exist\n", exeLinkName.c_str());
-    FileSys::FileNode *fnode = dynamic_cast<FileSys::FileNode *>(node);
+    auto *fnode = dynamic_cast<FileSys::FileNode *>(node);
     if (!fnode)
         fail("emulInit: Executable %s is not a regular file\n", exeLinkName.c_str());
-    FileSys::FileDescription *fdesc = new FileSys::FileDescription(fnode, O_RDONLY);
+    auto *fdesc = new FileSys::FileDescription(fnode, O_RDONLY);
     FileSys::Description::pointer pdesc(fdesc);
-    ThreadContext *mainThread = new ThreadContext(fileSys);
+    auto *mainThread = new ThreadContext(fileSys);
     // TODO: Use ELF_ET_DYN_BASE instead of a constant here
     loadElfObject(mainThread, fdesc, 0x200000);
     mainThread->getSystem()->initSystem(mainThread);

@@ -28,7 +28,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "estl.h"
 #include "pool.h"
 //#include "SMPNoCRouter.h"
-#include <assert.h>
+#include <cassert>
 #include <fstream>
 #include <sys/time.h>
 #include <vector>
@@ -67,8 +67,8 @@ private:
 
 			void destroy();
 
-			int GetFrom() { return _from; };
-			int GetTo() { return _to; };
+			int GetFrom() const { return _from; };
+			int GetTo() const { return _to; };
 
 			MemRequest* GetMemRequest() { return _mreq; };
 
@@ -133,7 +133,7 @@ protected:
     virtual void finalizeRead(MemRequest *mreq);
     virtual void finalizeWrite(MemRequest *mreq);
     void finalizeAccess(MemRequest *mreq);
-    virtual void goToMem(MemRequest *mreq);
+    void goToMem(MemRequest *mreq) override;
     virtual unsigned getNumSnoopCaches(SMPMemRequest *sreq) {
         return upperLevel.size() - 1;
     }
@@ -143,7 +143,7 @@ protected:
 
 public:
     SMPNOC(SMemorySystem *gms, const char *section, const char *name);
-    ~SMPNOC();
+    ~SMPNOC() override;
 	
 	static void doAdvanceNOCCycle();
 	static std::deque<std::pair<void *, std::pair<int, int> > > returnPackets;
@@ -154,20 +154,20 @@ public:
     // BEGIN MemObj interface
 
     // port usage accounting
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
     Time_t getNextFreeCycle(int32_t cycle);
 
     // interface with upper level
     bool canAcceptStore(PAddr addr) const;
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
 
     // interface with lower level
-    virtual void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
 
-    bool canAcceptStore(PAddr addr) {
+    bool canAcceptStore(PAddr addr) override {
         return true;
     }
 
@@ -176,4 +176,4 @@ public:
 
 };
 
-#endif // SMPSYSTEMBUS_H
+#endif // SMPNOC_H

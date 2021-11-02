@@ -37,17 +37,13 @@ long long ProcessId::nWPathInsts = 0;      // wrong path instructions
 
 void ProcessId::boot() {
     for (size_t i = 0; i <= MAXPROC; i++) {
-        pidTable.push_back(0);
+        pidTable.push_back(nullptr);
     }
 }
 
 // Returns the highest-priority process that can run on a given processor
 ProcessId *ProcessId::queueGet(const CPU_t cpu) {
-    for (ProcessQueue::iterator it = processQueue.begin();
-         it != processQueue.end();
-         it++) {
-
-        ProcessId *proc = *it;
+    for (auto proc : processQueue) {
 
         if ((proc->getState() == ReadyState) && ((!proc->pinned) || (proc->cpu == cpu))) {
             return proc;
@@ -57,16 +53,16 @@ ProcessId *ProcessId::queueGet(const CPU_t cpu) {
         I((proc->getState() == ReadyState && proc->pinned && proc->cpu != cpu) || (proc->getState() == RunningState));
     }
 
-    return 0; // no compatible process
+    return nullptr; // no compatible process
 }
 
-ProcessId *ProcessId::queuePromote(void) {
+ProcessId *ProcessId::queuePromote() {
     // Should be in the queue
     I(queuePosition != processQueue.end());
 
-    ProcessId *retVal = 0;
+    ProcessId *retVal = nullptr;
 
-    ProcessQueue::iterator whereIt = queuePosition;
+    auto whereIt = queuePosition;
 
     while (whereIt != processQueue.begin()) {
         // Move toward the front of the queue
@@ -101,13 +97,13 @@ ProcessId *ProcessId::queuePromote(void) {
 }
 
 // Moves the process backward in the queue until it is at the end of its priority group
-ProcessId *ProcessId::queueDemote(void) {
+ProcessId *ProcessId::queueDemote() {
     // Should be in the queue
     I(queuePosition != processQueue.end());
     // Initially, no process to return
-    ProcessId *retVal = 0;
+    ProcessId *retVal = nullptr;
     // Start at current position in the queue
-    ProcessQueue::iterator whereIt = queuePosition;
+    auto whereIt = queuePosition;
     // Move one entry toward the end
     whereIt++;
     // Remove this process from its scurrent position
@@ -173,7 +169,7 @@ bool ProcessId::sysconf(int32_t flags) {
     return true;
 }
 
-int32_t ProcessId::getconf(void) {
+int32_t ProcessId::getconf() const {
     int32_t flags = 0;
     if (!migrable)
         flags |= SESC_FLAG_NOMIGRATE;
@@ -227,8 +223,7 @@ ProcessId *ProcessId::create(Pid_t ppid, Pid_t id, int32_t flags) {
 }
 
 void ProcessId::destroyAll() {
-    for (ProcessQueue::iterator queueIt = processQueue.begin(); queueIt != processQueue.end(); queueIt++) {
-        ProcessId *queueProc = *queueIt;
+    for (auto queueProc : processQueue) {
         if (queueProc->getState() == RunningState) {
             osSim->switchOut(queueProc->getCPU(), queueProc);
         }
@@ -255,7 +250,7 @@ void ProcessId::destroy() {
         if (pidTable[ppid])
             pidTable[ppid]->nChilds--;
 
-    pidTable[pid] = 0;
+    pidTable[pid] = nullptr;
 
     pidPool.in(this);
 }
@@ -284,10 +279,10 @@ uint32_t ProcessId::getNumThreads() {
 }
 
 void ProcessId::report(const char *str) {
-    for (size_t i = 0; i < pidTable.size(); i++) {
-        if (pidTable[i] == 0)
+    for (auto & i : pidTable) {
+        if (i == nullptr)
             continue;
-        pidTable[i]->reportId();
+        i->reportId();
     }
 
     // Dump global stats
@@ -297,7 +292,7 @@ void ProcessId::report(const char *str) {
 
 }
 
-void ProcessId::reportId() {
+void ProcessId::reportId() const {
     Report::field("ProcessId(%d):totalTime=%lld:waitTime=%lld:spawnTime=%lld:exitTime=%lld:Switchs=%ld", myId,
                   (long long) stats.totalTime, (long long) stats.waitTime, (long long) spawnTime,
                   (long long) globalClock, stats.nSwitchs
@@ -310,9 +305,7 @@ void ProcessId::reportId() {
 void ProcessId::printQueue(char *where) {
     printf("ProcessQueue %s Begin", where);
 
-    for (ProcessQueue::iterator queueIt = processQueue.begin(); queueIt != processQueue.end(); queueIt++) {
-        ProcessId *queueProc = *queueIt;
-
+    for (auto queueProc : processQueue) {
         I(queueProc->queuePosition == queueIt);
 
         printf(" %3d(%d)", queueProc->getPid(), queueProc->getPriority());

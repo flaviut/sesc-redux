@@ -35,9 +35,9 @@ class KNFly : public Network {
     int _k;
     int _n;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
     int _OutChannel(int stage, int addr, int port) const;
 
@@ -52,7 +52,7 @@ public:
 
     static void RegisterRoutingFunctions() {};
 
-    double Capacity() const;
+    double Capacity() const override;
 };
 
 #endif

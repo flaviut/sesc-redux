@@ -23,8 +23,8 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #ifndef GENERGYD_H
 #define GENERGYD_H
 
-#include <stdio.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cctype>
 
 #include "estl.h"
 #include "GStats.h"

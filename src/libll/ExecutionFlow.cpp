@@ -33,9 +33,9 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ExecutionFlow::ExecutionFlow(int32_t cId, int32_t i, GMemorySystem *gmem)
     : GFlow(i, cId, gmem)
 {
-    context=0;
+    context=nullptr;
 
-    pendingDInst = 0;
+    pendingDInst = nullptr;
 }
 
 void ExecutionFlow::exeInstFast()
@@ -62,7 +62,7 @@ void ExecutionFlow::switchIn(int32_t i)
     //I(!pendingDInst);
     if( pendingDInst ) {
         pendingDInst->scrap();
-        pendingDInst = 0;
+        pendingDInst = nullptr;
     }
 }
 
@@ -73,12 +73,12 @@ void ExecutionFlow::switchOut(int32_t i)
 #if (defined DEBUG_SIGNALS)
     MSG("ExecutionFlow[%d] switchOut pid(%d) 0x%x @%lld", fid, i, context->getNextInstDesc()->addr, globalClock);
 #endif
-    context=0;
+    context=nullptr;
 
     //  I(!pendingDInst);
     if( pendingDInst ) {
         pendingDInst->scrap();
-        pendingDInst = 0;
+        pendingDInst = nullptr;
     }
 }
 
@@ -95,7 +95,7 @@ DInst *ExecutionFlow::executePC()
 #endif
     iDesc=(*iDesc)(thread);
     if(!iDesc)
-        return 0;
+        return nullptr;
     VAddr vaddr=thread->getDAddr();
     thread->setDAddr(0);
     return DInst::createDInst(iDesc->getSescInst(),vaddr,fid,thread);
@@ -107,7 +107,7 @@ void ExecutionFlow::goRabbitMode(long long n2skip)
     if( ev == FastSimBeginEvent ) {
         // Can't train cache in those cases. Cache only be train if the
         // processor did not even started to execute instructions
-        trainCache = 0;
+        trainCache = nullptr;
         nFastSims++;
     } else {
         I(globalClock==0);

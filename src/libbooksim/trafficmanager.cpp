@@ -59,13 +59,13 @@ void TrafficManager::SESCPacket::Free() {
     _to = -1;
     _cls = -1;
     _msgSize = -1;
-    _pkt = NULL;
+    _pkt = nullptr;
     rPool.in(this);
 }
 
 TrafficManager *TrafficManager::New(Configuration const &config,
                                     vector<Network *> const &net) {
-    TrafficManager *result = NULL;
+    TrafficManager *result = nullptr;
     string sim_type = config.GetStr("sim_type");
     if ((sim_type == "latency") || (sim_type == "throughput")) {
         result = new TrafficManager(config, net);
@@ -76,7 +76,7 @@ TrafficManager *TrafficManager::New(Configuration const &config,
 }
 
 TrafficManager::TrafficManager(const Configuration &config, const vector<Network *> &net)
-        : Module(0, "traffic_manager"), _net(net), _empty_network(false), _deadlock_timer(0), _reset_time(0),
+        : Module(nullptr, "traffic_manager"), _net(net), _empty_network(false), _deadlock_timer(0), _reset_time(0),
           _drain_time(-1), _cur_id(0), _cur_pid(0), _time(0) {
 
     _nodes = _net[0]->NumNodes();
@@ -180,8 +180,8 @@ TrafficManager::TrafficManager(const Configuration &config, const vector<Network
         _packet_size.push_back(vector<int>(1, config.GetInt("packet_size")));
     } else {
         vector<string> packet_size_strings = tokenize_str(packet_size_str);
-        for (size_t i = 0; i < packet_size_strings.size(); ++i) {
-            _packet_size.push_back(tokenize_int(packet_size_strings[i]));
+        for (auto & packet_size_string : packet_size_strings) {
+            _packet_size.push_back(tokenize_int(packet_size_string));
         }
     }
     _packet_size.resize(_classes, _packet_size.back());
@@ -268,7 +268,7 @@ TrafficManager::TrafficManager(const Configuration &config, const vector<Network
         for (int subnet = 0; subnet < _subnets; ++subnet) {
             ostringstream tmp_name;
             tmp_name << "terminal_buf_state_" << source << "_" << subnet;
-            BufferState *bs = new BufferState(config, this, tmp_name.str());
+            auto *bs = new BufferState(config, this, tmp_name.str());
             int vc_alloc_delay = config.GetInt("vc_alloc_delay");
             int sw_alloc_delay = config.GetInt("sw_alloc_delay");
             int router_latency = config.GetInt("routing_delay") +
@@ -385,18 +385,18 @@ TrafficManager::TrafficManager(const Configuration &config, const vector<Network
     }
 
     vector<int> watch_flits = config.GetIntArray("watch_flits");
-    for (size_t i = 0; i < watch_flits.size(); ++i) {
-        _flits_to_watch.insert(watch_flits[i]);
+    for (int & watch_flit : watch_flits) {
+        _flits_to_watch.insert(watch_flit);
     }
 
     vector<int> watch_packets = config.GetIntArray("watch_packets");
-    for (size_t i = 0; i < watch_packets.size(); ++i) {
-        _packets_to_watch.insert(watch_packets[i]);
+    for (int & watch_packet : watch_packets) {
+        _packets_to_watch.insert(watch_packet);
     }
 
     string stats_out_file = config.GetStr("stats_out");
     if (stats_out_file == "") {
-        _stats_out = NULL;
+        _stats_out = nullptr;
     } else if (stats_out_file == "-") {
         _stats_out = &cout;
     } else {
@@ -638,7 +638,7 @@ TrafficManager::TrafficManager(const Configuration &config, const vector<Network
 
 
     // JJ
-    _returnPackets = NULL;
+    _returnPackets = nullptr;
     prev_latency.resize(_classes, 0.0);
     prev_accepted.resize(_classes, 0.0);
     int total_phases = 0;
@@ -742,7 +742,7 @@ void TrafficManager::_RetireFlit(Flit *f, int dest) {
         if (f->head) {
             head = f;
         } else {
-            map<BId_t, Flit *>::iterator iter = _retired_packets[f->cl].find(f->pid);
+            auto iter = _retired_packets[f->cl].find(f->pid);
             assert(iter != _retired_packets[f->cl].end());
             head = iter->second;
             _retired_packets[f->cl].erase(iter);
@@ -795,7 +795,7 @@ void TrafficManager::_RetireFlit(Flit *f, int dest) {
         }
         // JJ
         // Return to SESC
-        assert(_returnPackets != NULL);
+        assert(_returnPackets != nullptr);
         _returnPackets->push_back(make_pair(f->SESCPkt, make_pair(f->hops, f->atime - head->ctime)));
 
         if (f != head) {
@@ -820,7 +820,7 @@ void TrafficManager::_InjectPacket() {
                 // Generate Packet
                 while (!_packetBuffer[input][c].empty()) {
                     SESCPacket *p = _packetBuffer[input][c].front();
-                    assert(p != NULL);
+                    assert(p != nullptr);
                     _packetBuffer[input][c].pop_front();
 
                     _packet_seq_no[input]++;
@@ -1150,8 +1150,8 @@ bool TrafficManager::Checkpoint() {
         double accepted_change = fabs((cur_accepted - prev_accepted[c]) / cur_accepted);
         prev_accepted[c] = cur_accepted;
 
-        double latency = (double) _plat_stats[c]->Sum();
-        double count = (double) _plat_stats[c]->NumSamples();
+        auto latency = (double) _plat_stats[c]->Sum();
+        auto count = (double) _plat_stats[c]->NumSamples();
 
         map<BId_t, Flit *>::const_iterator iter;
         for (iter = _total_in_flight_flits[c].begin();
@@ -1312,7 +1312,7 @@ void TrafficManager::CallEveryCycle() {
 
         for (int n = 0; n < _nodes; ++n) {
 
-            Flit *f = NULL;
+            Flit *f = nullptr;
 
             BufferState *const dest_buf = _buf_states[n][subnet];
 
@@ -1359,7 +1359,7 @@ void TrafficManager::CallEveryCycle() {
                 {
 
                     OutputSet route_set;
-                    _rf(NULL, cf, -1, &route_set, true);
+                    _rf(nullptr, cf, -1, &route_set, true);
                     set<OutputSet::sSetElement> const &os = route_set.GetSet();
                     assert(os.size() == 1);
                     OutputSet::sSetElement const &se = *os.begin();
@@ -1603,7 +1603,7 @@ void TrafficManager::_UpdateOverallStats() {
         int count_min, count_sum, count_max;
         double rate_min, rate_sum, rate_max;
         double rate_avg;
-        double time_delta = (double) (_drain_time - _reset_time);
+        auto time_delta = (double) (_drain_time - _reset_time);
         _ComputeStats(_sent_flits[c], &count_sum, &count_min, &count_max);
         rate_min = (double) count_min / time_delta;
         rate_sum = (double) count_sum / time_delta;
@@ -1712,7 +1712,7 @@ void TrafficManager::WriteStats(ostream &os) const {
             }
         }
 
-        double time_delta = (double) (_drain_time - _reset_time);
+        auto time_delta = (double) (_drain_time - _reset_time);
 
         os << "];" << endl
            << "sent_packets(" << c + 1 << ",:) = [ ";
@@ -1895,7 +1895,7 @@ void TrafficManager::DisplayStats(ostream &os) const {
         double rate_avg;
         int sent_packets, sent_flits, accepted_packets, accepted_flits;
         int min_pos, max_pos;
-        double time_delta = (double) (_time - _reset_time);
+        auto time_delta = (double) (_time - _reset_time);
         _ComputeStats(_sent_packets[c], &count_sum, &count_min, &count_max, &min_pos, &max_pos);
         rate_sum = (double) count_sum / time_delta;
         rate_min = (double) count_min / time_delta;

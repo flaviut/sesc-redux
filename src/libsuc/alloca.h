@@ -39,7 +39,7 @@ extern void *_alloca (size_t __size);
 #else
 extern void *alloca (uint32_t __size);
 #define alloca  __builtin_alloca
-#endif /* __GNUC__ */
+#endif /* SUNSTUDIO */
 
 
 #endif /* _AC_ALLOCA_H */

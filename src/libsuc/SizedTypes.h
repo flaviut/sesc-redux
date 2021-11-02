@@ -2,7 +2,7 @@
 #define _SIZED_TYPES_H
 
 // Get sized integer types (int32_t, etc.)
-#include <stdint.h>
+#include <cstdint>
 
 // Sized types for floating point numbers
 typedef float  float32_t;

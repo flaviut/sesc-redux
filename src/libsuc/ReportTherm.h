@@ -55,4 +55,4 @@ public:
 
 // Report::field("bla bla bla:",a);
 
-#endif // REPORTGEN_H
+#endif // REPORTTHERM_H

@@ -45,7 +45,7 @@ class PipelineFIFO : public Module {
 public:
     PipelineFIFO(Module *parent, const string &name, int lanes, int depth);
 
-    ~PipelineFIFO();
+    ~PipelineFIFO() override;
 
     void Write(T *val, int lane = 0);
 

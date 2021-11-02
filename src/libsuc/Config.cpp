@@ -25,7 +25,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.
 */
 
-#include <string.h>
+#include <cstring>
 #include <strings.h>
 
 #include <climits>
@@ -40,7 +40,7 @@ bool readConfigFile(Config * ptr,
                     const char *fpname); /* Defined in conflex.y */
 
 
-Config::Record::~Record(void) {
+Config::Record::~Record() {
     if(type==RCCharPtr)
         free(v.CharPtr);
 }
@@ -170,12 +170,12 @@ Config::Config(const char *name,
     :envstart(strdup(envstr))
     ,errorReading(false)
 {
-    fpname     = 0;
+    fpname     = nullptr;
     errorFound = false;
     locked     = false;
 
     fp = fopen(name, "r");
-    if(fp == 0) {
+    if(fp == nullptr) {
         MSG("Config:: Impossible to open the file [%s]", name);
         exit(0);
     }
@@ -189,7 +189,7 @@ Config::Config(const char *name,
         exit(0);
 
     // clear references
-    hashRecord_t::iterator hiter = hashRecord.begin();
+    auto hiter = hashRecord.begin();
     for(; hiter != hashRecord.end(); hiter++)
         hiter->second->setUnUsed();
 
@@ -211,9 +211,9 @@ string Config::getConfDir()
 }
 #endif
 
-Config::~Config(void)
+Config::~Config()
 {
-    hashRecord_t::iterator hiter = hashRecord.begin();
+    auto hiter = hashRecord.begin();
 
     for(; hiter != hashRecord.end(); hiter++) {
         delete hiter->second;   // Record *
@@ -230,7 +230,7 @@ ssize_t Config::getRecordMin(const char *block, const char *name) const
     ssize_t min=LONG_MAX;
     typedef hashRecord_t::const_iterator I;
     std::pair<I,I> b = hashRecord.equal_range(key);
-    for(I pos = b.first ; pos != b.second ; ++pos ) {
+    for(auto pos = b.first ; pos != b.second ; ++pos ) {
         if( pos->second->getVectorFirst() < min )
             min = pos->second->getVectorFirst();
     }
@@ -247,7 +247,7 @@ ssize_t Config::getRecordMax(const char *block, const char *name) const
     ssize_t min=0;
     typedef hashRecord_t::const_iterator I;
     std::pair<I,I> b = hashRecord.equal_range(key);
-    for(I pos = b.first ; pos != b.second ; ++pos ) {
+    for(auto pos = b.first ; pos != b.second ; ++pos ) {
         if( pos->second->getVectorLast() > min )
             min = pos->second->getVectorLast();
     }
@@ -263,7 +263,7 @@ const Config::Record * Config::getRecord(const char *block,
 
     typedef hashRecord_t::const_iterator I;
     std::pair<I,I> b = hashRecord.equal_range(key);
-    for(I pos = b.first ; pos != b.second ; ++pos ) {
+    for(auto pos = b.first ; pos != b.second ; ++pos ) {
         if( ( pos->second->getVectorFirst() <= vectorPos
                 && pos->second->getVectorLast() >= vectorPos ) ) {
 
@@ -278,7 +278,7 @@ const Config::Record * Config::getRecord(const char *block,
     }
 
     // error Message
-    return 0 ;
+    return nullptr ;
 }
 
 void Config::addRecord(const char *block,
@@ -296,7 +296,7 @@ void Config::addRecord(const char *block,
 
     std::pair<I,I> b = hashRecord.equal_range(key);
 
-    for(I pos = b.first ; pos != b.second ; ++pos ) {
+    for(auto pos = b.first ; pos != b.second ; ++pos ) {
         if( (pos->second->getVectorFirst() <= rec->getVectorFirst()
                 && pos->second->getVectorLast() >= rec->getVectorFirst()  )
                 ||
@@ -335,7 +335,7 @@ void Config::copyVariable(const char *block,
     } else {
         const Record *recR = getRecord(block, val,0);
 
-        if(recR == 0)
+        if(recR == nullptr)
             recR = getRecord("", val,0);
         if(recR)
             rec = new Record(*recR);
@@ -481,7 +481,7 @@ void Config::addRecord(const char *block,
 
     if((env = getEnvVar(block, name))) {
         if(isdigit(env[0])) {
-            val = strtol(env, 0, 10);
+            val = strtol(env, nullptr, 10);
         } else {
             MSG("Config:: Environment variable [%s] is not a valid long", env);
             errorReading = true;
@@ -640,7 +640,7 @@ const char *Config::getEnvVar(const char *block,
                               const char *name)
 {
     size_t envLen = 0;
-    char  *envVar = 0;
+    char  *envVar = nullptr;
     // Determine the variable name prefix (incl. the '=' char)
     // Note: the variable name prefix MUST include the '=' character,
     // otherwise the match can be wrong, e.g. when looking for
@@ -658,8 +658,8 @@ const char *Config::getEnvVar(const char *block,
     else
         snprintf(envVar,envLen+1,"%s_%s_%s=", envstart, block, name);
     // Look for envVar in environ
-    const char *envVal = 0;
-    for(int32_t i=0; environ[i]!=0; i++) {
+    const char *envVal = nullptr;
+    for(int32_t i=0; environ[i]!=nullptr; i++) {
         if(strncasecmp(envVar,environ[i],envLen)==0) {
             envVal = &environ[i][envLen];
             break;
@@ -679,7 +679,7 @@ void Config::dump(bool showAll)
         hiter->second->setUnPrinted();
 
     do {
-        block = 0;
+        block = nullptr;
         hiter = hashRecord.begin();
 
         // First print the records with empty section
@@ -703,7 +703,7 @@ void Config::dump(bool showAll)
         }
 
         // Print the other sections
-        block = 0;
+        block = nullptr;
         hiter = hashRecord.begin();
         for(; hiter != hashRecord.end(); hiter++) {
             if((!showAll) && (!hiter->second->isUsed()))
@@ -711,7 +711,7 @@ void Config::dump(bool showAll)
             if(hiter->second->isPrinted())  // Already printed
                 continue;
 
-            if(block == 0) {
+            if(block == nullptr) {
                 block = hiter->first.s1.c_str();
                 Report::field("[%s]", block);
             }
@@ -758,7 +758,7 @@ bool Config::isPower2(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isPower2 for %s in %s[%d] not found in config file.",
             name, block, vectorPos);
         notCorrect();
@@ -778,7 +778,7 @@ bool Config::isPower2(const char *block,
         return false;
     }
 
-    uint32_t v = (uint32_t)val;
+    auto v = (uint32_t)val;
 
     if(v != val) {
         MSG("Config::isPower2 for %s[%d] [%s] not satisfied(1)"
@@ -805,7 +805,7 @@ bool Config::isBetween(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isBetween for %s in %s[%d] not found in config file.",
             name, block, vectorPos);
         notCorrect();
@@ -842,7 +842,7 @@ bool Config::isGT(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isGT for %s in %s[%d] not found in config file.",
             name,block,vectorPos);
         notCorrect();
@@ -880,7 +880,7 @@ bool Config::isLT(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isLT for %s in %s[%d] not found in config file.",
             name, block, vectorPos);
         notCorrect();
@@ -916,7 +916,7 @@ bool Config::isBool(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isBool for %s in %s[%d] not found in config file.",
             name,block,vectorPos);
         notCorrect();
@@ -939,7 +939,7 @@ bool Config::isInt(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isInt for %s in %s[%d] not found in config file.",
             name,block,vectorPos);
         notCorrect();
@@ -962,7 +962,7 @@ bool Config::isDouble(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isDouble for %s in %s[%d] not found in config file.",
             name, block, vectorPos);
         notCorrect();
@@ -985,7 +985,7 @@ bool Config::isCharPtr(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isCharPtr for %s in %s[%d] not found in config file.",
             name, block, vectorPos);
         notCorrect();
@@ -1015,7 +1015,7 @@ bool Config::isInList(const char *block,
 {
     const Record *rec = getRecord(block, name, vectorPos);
 
-    if(rec == 0) {
+    if(rec == nullptr) {
         MSG("Config::isInList for %s in %s[%d] not found in config file.",
             name, block, vectorPos);
         notCorrect();
@@ -1062,11 +1062,11 @@ void Config::updateRecord(const char *block, const char *name, double v,int32_t 
 {
     KeyIndex key(block,name);
 
-    Record *rec = NULL ;
+    Record *rec = nullptr ;
 
     typedef hashRecord_t::const_iterator I;
     std::pair<I,I> b = hashRecord.equal_range(key);
-    for(I pos = b.first ; pos != b.second ; ++pos ) {
+    for(auto pos = b.first ; pos != b.second ; ++pos ) {
         if( ( pos->second->getVectorFirst() <= vectorPos
                 && pos->second->getVectorLast() >= vectorPos ) ) {
             rec = pos->second;
@@ -1085,11 +1085,11 @@ void Config::updateRecord(const char *block, const char *name, const char *val, 
 {
     KeyIndex key(block,name);
 
-    Record *rec = NULL ;
+    Record *rec = nullptr ;
 
     typedef hashRecord_t::const_iterator I;
     std::pair<I,I> b = hashRecord.equal_range(key);
-    for(I pos = b.first ; pos != b.second ; ++pos ) {
+    for(auto pos = b.first ; pos != b.second ; ++pos ) {
         if( ( pos->second->getVectorFirst() <= vectorPos
                 && pos->second->getVectorLast() >= vectorPos ) ) {
             rec = pos->second;
@@ -1118,7 +1118,7 @@ void Config::getAllSections(std::vector<char *>& sections)
         // check if it is there
         bool exists = false;
 
-        std::vector<char *>::iterator it = sections.begin();
+        auto it = sections.begin();
         while(it != sections.end()) {
             char* v = *it;
             if(strcmp(v,block) == 0) {

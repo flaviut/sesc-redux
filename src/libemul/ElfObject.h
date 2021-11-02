@@ -6,7 +6,7 @@
 // To get VAddr
 #include "Addressing.h"
 // To get size_t
-#include <stddef.h>
+#include <cstddef>
 // To get off_t
 #include <unistd.h>
 

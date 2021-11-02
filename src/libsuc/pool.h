@@ -79,7 +79,7 @@ protected:
         I(first==0);
 
         for(int32_t i = 0; i < Size; i++) {
-            Holder *h = ::new Holder(p1);
+            auto *h = ::new Holder(p1);
             h->holderNext = first;
             IS(h->inPool = true);
 #ifdef POOL_TIMEOUT
@@ -141,7 +141,7 @@ public:
 
     void in(Ttype *data) {
         I(!deleted);
-        Holder *h = static_cast<Holder *>(data);
+        auto *h = static_cast<Holder *>(data);
 
         I(!h->inPool);
         IS(h->inPool=true);
@@ -176,7 +176,7 @@ public:
         }
 #endif
 
-        Ttype *h = static_cast<Ttype *>(first);
+        auto *h = static_cast<Ttype *>(first);
         first = first->holderNext;
         if( first == 0 )
             reproduce();
@@ -221,7 +221,7 @@ protected:
         I(first==0);
 
         for(int32_t i = 0; i < Size; i++) {
-            Holder *h = ::new Holder;
+            auto *h = ::new Holder;
             h->holderNext = first;
             IS(h->inPool = true);
 #ifdef POOL_TIMEOUT
@@ -284,7 +284,7 @@ public:
 
     void in(Ttype *data) {
         I(!deleted);
-        Holder *h = static_cast<Holder *>(data);
+        auto *h = static_cast<Holder *>(data);
 
         I(!h->inPool);
         IS(h->inPool=true);
@@ -319,7 +319,7 @@ public:
         }
 #endif
 
-        Ttype *h = static_cast<Ttype *>(first);
+        auto *h = static_cast<Ttype *>(first);
         first = first->holderNext;
         if( first == 0 )
             reproduce();
@@ -365,7 +365,7 @@ protected:
         I(first==0);
 
         for(int32_t i = 0; i < Size; i++) {
-            Holder *h = ::new Holder;
+            auto *h = ::new Holder;
             h->holderNext = first;
             IS(h->inPool = true);
 #ifdef POOL_TIMEOUT
@@ -428,7 +428,7 @@ public:
 
     void in(Ttype *data) {
         I(!deleted);
-        Holder *h = static_cast<Holder *>(data);
+        auto *h = static_cast<Holder *>(data);
 
         I(!h->inPool);
         IS(h->inPool=true);
@@ -463,7 +463,7 @@ public:
         }
 #endif
 
-        Ttype *h = static_cast<Ttype *>(first);
+        auto *h = static_cast<Ttype *>(first);
         first = first->holderNext;
         if( first == 0 )
             reproduce();

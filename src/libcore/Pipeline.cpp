@@ -58,7 +58,7 @@ Pipeline::Pipeline(size_t s, size_t fetch, int32_t maxReqs)
     I(bucketPool.empty());
 
     for (size_t i = 0; i < bucketPoolMaxSize; i++) {
-        IBucket *ib = new IBucket(fetch + 1, this); // +1 fake instructions
+        auto *ib = new IBucket(fetch + 1, this); // +1 fake instructions
         bucketPool.push_back(ib);
 
         ib = new IBucket(4, this, true);
@@ -150,11 +150,11 @@ IBucket *Pipeline::nextItem() {
             clearItems();
             I(buffer.empty());
 #endif
-            return 0;
+            return nullptr;
         }
 
         if (((buffer.top())->getClock() + PipeLength) > globalClock)
-            return 0;
+            return nullptr;
 
         IBucket *b = buffer.top();
         buffer.pop();

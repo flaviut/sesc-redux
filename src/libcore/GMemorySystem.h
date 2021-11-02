@@ -154,7 +154,7 @@ protected:
 public:
     DummyMemorySystem(int32_t id);
 
-    ~DummyMemorySystem();
+    ~DummyMemorySystem() override;
 
 };
 

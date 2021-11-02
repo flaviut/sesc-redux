@@ -1,7 +1,7 @@
 #if !(defined INST_DESC_H)
 #define INST_DESC_H
 
-#include <stdlib.h>
+#include <cstdlib>
 //#include "common.h"
 #include "nanassert.h"
 #include "Addressing.h"
@@ -102,7 +102,7 @@ public:
         InstDesc *i;
     };
 
-    InstImm(void) {}
+    InstImm() {}
 
     InstImm(int64_t s) : s(s) {}
 
@@ -184,7 +184,7 @@ public:
     const char  *name;
 #endif
 public:
-    InstDesc(void) : sescInst(0) {
+    InstDesc() : sescInst(nullptr) {
 #if (defined DEBUG)
         //    emul=0;
         //    regDst=RegNone;
@@ -199,7 +199,7 @@ public:
 #endif
     }
 
-    ~InstDesc(void);
+    ~InstDesc();
 
     InstDesc *operator()(ThreadContext *context) {
         // Use this as a breakpoint
@@ -207,7 +207,7 @@ public:
         return emul(this, context);
     }
 
-    Instruction *getSescInst(void) const {
+    Instruction *getSescInst() const {
         I(sescInst);
         return sescInst;
     }

@@ -26,7 +26,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <typeinfo>
 
 int32_t bitSelect(int64_t val, int start, int len) {
-	int32_t r = (int32_t)((val>>start) & ((1<<len)-1));
+	auto r = (int32_t)((val>>start) & ((1<<len)-1));
 	return r;
 }
 

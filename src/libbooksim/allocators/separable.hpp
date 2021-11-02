@@ -54,7 +54,7 @@ public:
 
     virtual ~SeparableAllocator();
 
-    virtual void Clear();
+    void Clear() override;
 
 };
 

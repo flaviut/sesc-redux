@@ -149,14 +149,14 @@ void QTree::_BuildNet(const Configuration &config) {
     }
 }
 
-int QTree::_RouterIndex(int height, int pos) {
+int QTree::_RouterIndex(int height, int pos) const {
     int r = 0;
     for (int h = 0; h < height; h++)
         r += powi(_k, h);
     return (r + pos);
 }
 
-int QTree::_InputIndex(int height, int pos, int port) {
+int QTree::_InputIndex(int height, int pos, int port) const {
     assert(height >= 0 && height < powi(_k, _n - 1));
     int c = 0;
     for (int h = 0; h < height; h++)

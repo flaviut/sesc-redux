@@ -21,7 +21,7 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <string.h>
+#include <cstring>
 #include <set>
 
 #include "GMemorySystem.h"
@@ -64,16 +64,16 @@ MemObj::~MemObj() {
 void MemObj::computenUpperCaches() {
     nUpperCaches = 0;
 
-    for (uint32_t j = 0; j < upperLevel.size(); j++) {
-        if (upperLevel[j]->isCache())
+    for (auto & j : upperLevel) {
+        if (j->isCache())
             nUpperCaches++;
         else
-            nUpperCaches += upperLevel[j]->getNumCachesInUpperLevels();
+            nUpperCaches += j->getNumCachesInUpperLevels();
     }
 
     // top-down traversal of the memory objects
-    for (uint32_t i = 0; i < lowerLevel.size(); i++) {
-        lowerLevel[i]->computenUpperCaches();
+    for (auto & i : lowerLevel) {
+        i->computenUpperCaches();
     }
 }
 

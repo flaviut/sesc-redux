@@ -59,7 +59,7 @@ ChaosRouter::ChaosRouter(const Configuration &config,
     // Routing
 
     string rf = config.GetStr("routing_function") + "_" + config.GetStr("topology");
-    map<string, tRoutingFunction>::iterator rf_iter = gRoutingFunctionMap.find(rf);
+    auto rf_iter = gRoutingFunctionMap.find(rf);
     if (rf_iter == gRoutingFunctionMap.end()) {
         Error("Invalid routing function: " + rf);
     }
@@ -469,9 +469,9 @@ void ChaosRouter::_OutputAdvance() {
     bool advanced;
     int mq;
 
-    f = NULL;
+    f = nullptr;
 
-    _crossbar_pipe->WriteAll(0);
+    _crossbar_pipe->WriteAll(nullptr);
 
     for (int i = 0; i < _inputs; ++i) {
         if (((_input_output_match[i] != -1) ||

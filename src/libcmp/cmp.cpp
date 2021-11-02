@@ -19,7 +19,7 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <vector>
 
@@ -149,12 +149,12 @@ int32_t main(int32_t argc, char**argv, char **envp)
         GMemorySystem *gms = new SMemorySystem(i);
         gms->buildMemorySystem();
         ms[i] = gms;
-        pr[i] = 0;
+        pr[i] = nullptr;
         if(SescConf->checkInt("cpucore","smtContexts",i)) {
             if( SescConf->getInt("cpucore","smtContexts",i) > 1 )
                 pr[i] =new SMTProcessor(ms[i], i);
         }
-        if (pr[i] == 0) {
+        if (pr[i] == nullptr) {
             pr[i] =new Processor(ms[i], i);
         }
     }

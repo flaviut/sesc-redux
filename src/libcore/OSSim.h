@@ -109,16 +109,16 @@ public:
 
     virtual ~OSSim();
 
-    void report(const char *str);
+    void report(const char *str) const;
 
-    GProcessor *pid2GProcessor(Pid_t pid);
+    GProcessor *pid2GProcessor(Pid_t pid) const;
 
     ProcessIdState getState(Pid_t pid);
 
-    GProcessor *id2GProcessor(CPU_t cpu);
+    GProcessor *id2GProcessor(CPU_t cpu) const;
 
     bool trace() const {
-        return (traceFile != 0);
+        return (traceFile != nullptr);
     }
 
 
@@ -215,32 +215,32 @@ public:
     }
 
     uint32_t getSimulationMark(int32_t id) const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        auto it = idSimMarks.find(id);
         return (*it).second.total;
     }
 
     uint32_t getSimulationMark1(int32_t id) const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        auto it = idSimMarks.find(id);
         return (*it).second.begin;
     }
 
     uint32_t getSimulationMark2(int32_t id) const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        auto it = idSimMarks.find(id);
         return (*it).second.end;
     }
 
     bool enoughMarks1(int32_t id) const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        auto it = idSimMarks.find(id);
         return (*it).second.total > (*it).second.begin;
     }
 
     bool enoughMarks2(int32_t id) const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.find(id);
+        auto it = idSimMarks.find(id);
         return (*it).second.total > (*it).second.end;
     }
 
     bool enoughMTMarks1() const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.begin();
+        auto it = idSimMarks.begin();
 
         bool ret = true;
         for (it = idSimMarks.begin(); it != idSimMarks.end(); it++) {
@@ -251,7 +251,7 @@ public:
     }
 
     bool enoughMTMarks1(int32_t pid, bool justMe) const {
-        std::map<int32_t, SimulationMark_t>::const_iterator it = idSimMarks.begin();
+        auto it = idSimMarks.begin();
         bool me = false;
         bool ret = true;
         for (it = idSimMarks.begin(); it != idSimMarks.end(); it++) {
@@ -329,7 +329,7 @@ public:
             postBoot();
     }
 
-    void reportOnTheFly(const char *file = 0);
+    void reportOnTheFly(const char *file = nullptr);
 
     double getFrequency() const {
         return frequency;
@@ -375,4 +375,4 @@ extern OSSim *osSim;
 
 extern double etop(double energy);
 
-#endif   // OSSim_H
+#endif   // _OSSim_H_

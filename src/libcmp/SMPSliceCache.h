@@ -99,7 +99,7 @@ protected:
         CallbackBase *cb;
         Entry() {
             outsResps = 0;
-            cb = 0;
+            cb = nullptr;
         }
     };
 
@@ -250,47 +250,47 @@ protected:
 
 public:
     SMPSliceCache(SMemorySystem *gms, const char *descr_section,
-                  const char *name = NULL);
-    virtual ~SMPSliceCache();
+                  const char *name = nullptr);
+    ~SMPSliceCache() override;
 
     // JJO
     int32_t maxNodeID;
-    int32_t getMaxNodeID() {
+    int32_t getMaxNodeID() override {
         return maxNodeID;
     }
-    int32_t getNodeID() {
+    int32_t getNodeID() override {
         return nodeID;
     }
 
     static Directory **globalDirMap;
 
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
     virtual void read(MemRequest *mreq);
     virtual void write(MemRequest *mreq);
     virtual void pushLine(MemRequest *mreq) = 0;
     virtual void specialOp(MemRequest *mreq);
-    virtual void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    virtual bool canAcceptStore(PAddr addr);
-    virtual bool canAcceptLoad(PAddr addr);
+    bool canAcceptStore(PAddr addr) override;
+    bool canAcceptLoad(PAddr addr) override;
 
     bool isInCache(PAddr addr) const;
 
     // same as above plus schedule callback to doInvalidate
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
 
-    virtual bool isCache() const {
+    bool isCache() const override {
         return true;
     }
 
-    void dump() const;
+    void dump() const override;
 
     PAddr calcTag(PAddr addr) const {
         return cacheBanks[0]->calcTag(addr);
     }
 
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
 
     //used by SVCache
@@ -300,19 +300,19 @@ public:
 
 class WBSMPSliceCache : public SMPSliceCache {
 protected:
-    void sendMiss(MemRequest *mreq);
-    void doWriteBack(PAddr addr);
-    void doReturnAccess(MemRequest *mreq);
+    void sendMiss(MemRequest *mreq) override;
+    void doWriteBack(PAddr addr) override;
+    void doReturnAccess(MemRequest *mreq) override;
 
     typedef CallbackMember1<WBSMPSliceCache, MemRequest *, &WBSMPSliceCache::doReturnAccess>
     doReturnAccessCB;
 
 public:
     WBSMPSliceCache(SMemorySystem *gms, const char *descr_section,
-                    const char *name = NULL);
-    ~WBSMPSliceCache();
+                    const char *name = nullptr);
+    ~WBSMPSliceCache() override;
 
-    void pushLine(MemRequest *mreq);
+    void pushLine(MemRequest *mreq) override;
 };
 
 #endif

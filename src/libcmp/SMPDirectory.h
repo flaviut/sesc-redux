@@ -33,7 +33,7 @@ public:
     void unsetBusy() {
         busy = false;
     }
-    bool isBusy() {
+    bool isBusy() const {
         return busy;
     }
 
@@ -212,7 +212,7 @@ public:
 #endif
         std::map<PAddr, DirectoryEntry*>::iterator it = dirMap.find(addr);
         if(it==dirMap.end()) {
-            DirectoryEntry *de = new DirectoryEntry();
+            auto *de = new DirectoryEntry();
             dirMap[addr] = de;
 #if (defined DEBUG_LEAK)
             totCnt++;

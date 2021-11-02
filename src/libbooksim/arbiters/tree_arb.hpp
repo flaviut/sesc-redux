@@ -50,21 +50,21 @@ public:
     // Constructors
     TreeArbiter(Module *parent, const string &name, int size, int groups, const string &arb_type);
 
-    ~TreeArbiter();
+    ~TreeArbiter() override;
 
     // Print priority matrix to standard output
-    virtual void PrintState() const;
+    void PrintState() const override;
 
     // Update priority matrix based on last aribtration result
-    virtual void UpdateState();
+    void UpdateState() override;
 
     // Arbitrate amongst requests. Returns winning input and
     // updates pointers to metadata when valid pointers are passed
-    virtual int Arbitrate(int *id = 0, BPri_t *pri = 0);
+    int Arbitrate(int *id = nullptr, BPri_t *pri = nullptr) override;
 
-    virtual void AddRequest(int input, int id, BPri_t pri);
+    void AddRequest(int input, int id, BPri_t pri) override;
 
-    virtual void Clear();
+    void Clear() override;
 
 };
 

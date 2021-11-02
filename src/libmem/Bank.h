@@ -84,25 +84,25 @@ private:
 
 public:
     Bank(MemorySystem* current, const char *device_descr_section,
-         const char *device_name=NULL);
+         const char *device_name=nullptr);
 
     //BBF : dummybank ist jetzt kaputt Bank() {};	for dummy bank
-    ~Bank() {}
+    ~Bank() override {}
 
     void DisableBankTill(Time_t);
 
-    void returnAccess(MemRequest *mreq) {};
+    void returnAccess(MemRequest *mreq) override {};
 
     void read(MemRequest *mreq);
     void write(MemRequest *mreq);
 
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
 
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
-    bool canAcceptStore(PAddr addr);
+    bool canAcceptStore(PAddr addr) override;
 
-    virtual void invalidate(PAddr addr,ushort size,MemObj *oc);
+    void invalidate(PAddr addr,ushort size,MemObj *oc) override;
 };
 
 #endif

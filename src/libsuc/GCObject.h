@@ -6,21 +6,21 @@ class GCObject {
 private:
     size_t refCount;
 protected:
-    GCObject(void) : refCount(0) {
+    GCObject() : refCount(0) {
     }
-    virtual ~GCObject(void) {
+    virtual ~GCObject() {
     }
 public:
-    void addRef(void) {
+    void addRef() {
         refCount++;
     }
-    void delRef(void) {
+    void delRef() {
         I(refCount);
         refCount--;
         if(!refCount)
             delete this;
     }
-    size_t getRefCount(void) const {
+    size_t getRefCount() const {
         return refCount;
     }
 };
@@ -30,7 +30,7 @@ class SmartPtr {
 private:
     T *ref;
 public:
-    SmartPtr(void) : ref(0) {
+    SmartPtr() : ref(0) {
     }
     SmartPtr(const SmartPtr &src) : ref(src.ref) {
         if(ref)
@@ -40,7 +40,7 @@ public:
         if(ref)
             ref->addRef();
     }
-    ~SmartPtr(void) {
+    ~SmartPtr() {
         if(ref)
             ref->delRef();
     }

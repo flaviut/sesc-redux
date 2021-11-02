@@ -74,7 +74,7 @@ public:
         return _hist[b];
     }
 
-    void Display(ostream &os = cout) const;
+    void Display(ostream &os = cout) const override;
 
     friend ostream &operator<<(ostream &os, const Stats &s);
 

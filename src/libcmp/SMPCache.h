@@ -71,7 +71,7 @@ protected:
         CallbackBase *cb;
         Entry() {
             outsResps = 0;
-            cb = 0;
+            cb = nullptr;
             invalidate = false;
             writeback = false;
         }
@@ -162,7 +162,7 @@ public:
             &SMPCache::sendWrite> doWriteAgainCB;
 
     SMPCache(SMemorySystem *gms, const char *section, const char *name);
-    ~SMPCache();
+    ~SMPCache() override;
 
 	static void PrintStat();
 
@@ -187,9 +187,9 @@ public:
     int32_t maxNodeID;
 	int32_t maxNodeID_bit;
 	int32_t nodeSelSht;
-    inline int32_t getMaxNodeID() { return maxNodeID; }
-	inline int32_t getMaxNodeID_bit() { return maxNodeID_bit; }
-    inline int32_t getNodeID() { return nodeID; }
+    inline int32_t getMaxNodeID() override { return maxNodeID; }
+	inline int32_t getMaxNodeID_bit() const { return maxNodeID_bit; }
+    inline int32_t getNodeID() override { return nodeID; }
     int32_t getHomeNodeID(PAddr addr);
     int32_t getL2NodeID(PAddr addr);
 
@@ -211,27 +211,27 @@ public:
 
     // BEGIN MemObj interface
 
-    bool isCache() const {
+    bool isCache() const override {
         return true;
     }
     //const bool isCache() const { return true; }
 
     // port availability
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
     // interface with upper level
-    bool canAcceptStore(PAddr addr);
-    void access(MemRequest *mreq);
+    bool canAcceptStore(PAddr addr) override;
+    void access(MemRequest *mreq) override;
     // JJO
     void remoteAccess(MemRequest *mreq);
     void sendInvDirUpdate(PAddr addr, PAddr new_addr, CallbackBase *cb, bool wb, bool data);
     void processInvDirAck(SMPMemRequest *sreq);
 
     // interface with lower level
-    void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
     void realInvalidate(PAddr addr, ushort size, bool writeBack);
 
     // END MemObj interface

@@ -60,7 +60,7 @@ void OutputSet::AddRange(int output_port, int vc_start, int vc_end, BPri_t pri) 
 //legacy support, for performance, just use GetSet()
 int OutputSet::NumVCs(int output_port) const {
     int total = 0;
-    set<sSetElement>::const_iterator i = _outputs.begin();
+    auto i = _outputs.begin();
     while (i != _outputs.end()) {
         if (i->output_port == output_port) {
             total += (i->vc_end - i->vc_start + 1);
@@ -71,7 +71,7 @@ int OutputSet::NumVCs(int output_port) const {
 }
 
 bool OutputSet::OutputEmpty(int output_port) const {
-    set<sSetElement>::const_iterator i = _outputs.begin();
+    auto i = _outputs.begin();
     while (i != _outputs.end()) {
         if (i->output_port == output_port) {
             return false;
@@ -97,7 +97,7 @@ int OutputSet::GetVC(int output_port, int vc_index, BPri_t *pri) const {
         *pri = -1;
     }
 
-    set<sSetElement>::const_iterator i = _outputs.begin();
+    auto i = _outputs.begin();
     while (i != _outputs.end()) {
         if (i->output_port == output_port) {
             range = i->vc_end - i->vc_start + 1;
@@ -123,7 +123,7 @@ bool OutputSet::GetPortVC(int *out_port, int *out_vc) const {
     bool single_output = false;
     int used_outputs = 0;
 
-    set<sSetElement>::const_iterator i = _outputs.begin();
+    auto i = _outputs.begin();
     if (i != _outputs.end()) {
         used_outputs = i->output_port;
     }

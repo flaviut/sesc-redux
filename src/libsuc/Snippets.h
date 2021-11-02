@@ -22,7 +22,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #ifndef SNIPPETS_H
 #define SNIPPETS_H
 
-#include <stdint.h>
+#include <cstdint>
 
 //**************************************************
 // Generic typedefs

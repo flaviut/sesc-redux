@@ -139,11 +139,11 @@ protected:
 public:
     FUMemory(Cluster *cls, GMemorySystem *ms, int32_t id);
 
-    StallCause canIssue(DInst *dinst);
+    StallCause canIssue(DInst *dinst) override;
 
-    void simTime(DInst *dinst);
+    void simTime(DInst *dinst) override;
 
-    RetOutcome retire(DInst *dinst);
+    RetOutcome retire(DInst *dinst) override;
 
 };
 
@@ -166,13 +166,13 @@ public:
     FULoad(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, TimeDelta_t lsdelay, GMemorySystem *ms, size_t maxLoads,
            int32_t id);
 
-    StallCause canIssue(DInst *dinst);
+    StallCause canIssue(DInst *dinst) override;
 
-    void simTime(DInst *dinst);
+    void simTime(DInst *dinst) override;
 
-    RetOutcome retire(DInst *dinst);
+    RetOutcome retire(DInst *dinst) override;
 
-    void executed(DInst *dinst);
+    void executed(DInst *dinst) override;
 
     int32_t freeEntries() const {
         return freeLoads;
@@ -206,13 +206,13 @@ protected:
 public:
     FUStore(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, GMemorySystem *ms, size_t maxLoads, int32_t id);
 
-    StallCause canIssue(DInst *dinst);
+    StallCause canIssue(DInst *dinst) override;
 
-    void simTime(DInst *dinst);
+    void simTime(DInst *dinst) override;
 
-    void executed(DInst *dinst);
+    void executed(DInst *dinst) override;
 
-    RetOutcome retire(DInst *dinst);
+    RetOutcome retire(DInst *dinst) override;
 
     int32_t freeEntries() const {
         return freeStores;
@@ -248,11 +248,11 @@ public:
 
     FUGeneric(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, GStatsEnergyCG *eb);
 
-    StallCause canIssue(DInst *dinst);
+    StallCause canIssue(DInst *dinst) override;
 
-    void simTime(DInst *dinst);
+    void simTime(DInst *dinst) override;
 
-    void executed(DInst *dinst);
+    void executed(DInst *dinst) override;
 
 
 };
@@ -268,11 +268,11 @@ protected:
 public:
     FUBranch(Cluster *cls, PortGeneric *aGen, TimeDelta_t l, int32_t mb);
 
-    StallCause canIssue(DInst *dinst);
+    StallCause canIssue(DInst *dinst) override;
 
-    void simTime(DInst *dinst);
+    void simTime(DInst *dinst) override;
 
-    void executed(DInst *dinst);
+    void executed(DInst *dinst) override;
 
 #ifdef SESC_BRANCH_AT_RETIRE
     RetOutcome retire(DInst *dinst);
@@ -285,9 +285,9 @@ protected:
 public:
     FUEvent(Cluster *cls);
 
-    StallCause canIssue(DInst *dinst);
+    StallCause canIssue(DInst *dinst) override;
 
-    void simTime(DInst *dinst);
+    void simTime(DInst *dinst) override;
 
 
 };

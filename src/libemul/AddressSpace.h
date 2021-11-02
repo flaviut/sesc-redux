@@ -36,13 +36,13 @@ namespace MemSys {
         static PAddr nextPAddr;
         static PAddrSet freePAddrs;
 
-        static inline PAddr newPAddr(void) {
+        static inline PAddr newPAddr() {
             PAddr retVal;
             if (nextPAddr) {
                 retVal = nextPAddr;
                 nextPAddr += AddrSpacPageSize;
             } else {
-                PAddrSet::iterator it = freePAddrs.begin();
+                auto it = freePAddrs.begin();
                 if (it == freePAddrs.end())
                     fail("FrameDesc::newPAddr ran out of physical address space\n");
                 retVal = *it;
@@ -97,7 +97,7 @@ namespace MemSys {
             *(reinterpret_cast<T *>(&(reinterpret_cast<int8_t *>(data)[offs]))) = val;
         }
 
-        inline bool isShared(void) const {
+        inline bool isShared() const {
             return shared;
         }
 
@@ -105,7 +105,7 @@ namespace MemSys {
 
         FrameDesc(FrameDesc &src);
 
-        ~FrameDesc();
+        ~FrameDesc() override;
 
         int8_t *getData(VAddr addr) {
             return reinterpret_cast<int8_t *>(data) + (addr & AddrSpacPageOffsMask);
@@ -135,7 +135,7 @@ namespace MemSys {
         // Returns a frame that has a shared mapping to the given file and offset
         static FrameDesc *create(FileSys::SeekableDescription *fdesc, off_t offs);
 
-        void sync(void);
+        void sync();
     };
 
 
@@ -179,12 +179,12 @@ private:
         }
 
         // Page number (not address) of the first page that overlaps with this segment
-        size_t pageNumLb(void) {
+        size_t pageNumLb() const {
             return (addr >> AddrSpacPageOffsBits);
         }
 
         // Page number (not address) of the first page after this segment with no overlap with it
-        size_t pageNumUb(void) {
+        size_t pageNumUb() const {
             I(len);
             return ((addr + len + AddrSpacPageSize - 1) >> AddrSpacPageOffsBits);
         }
@@ -213,9 +213,9 @@ private:
         } Flags;
         Flags flags;
 
-        void copyFrame(void);
+        void copyFrame();
 
-        void doWrCopy(void);
+        void doWrCopy();
 
     public:
         MemSys::FrameDesc::pointer frame;
@@ -257,19 +257,19 @@ private:
                                        (flags & ~(CanRead | CanWrite | CanExec)));
         }
 
-        bool canRead(void) const {
+        bool canRead() const {
             return (flags & CanRead);
         }
 
-        bool canWrite(void) const {
+        bool canWrite() const {
             return (flags & CanWrite);
         }
 
-        bool canExec(void) const {
+        bool canExec() const {
             return (flags & CanExec);
         }
 
-        PageDesc(void);
+        PageDesc();
 
         PageDesc(PageDesc &src);
 
@@ -277,9 +277,9 @@ private:
 
         PageDesc &operator=(PageDesc &src);
 
-        ~PageDesc(void);
+        ~PageDesc();
 
-        MemSys::FrameDesc *getFrame(void) const {
+        MemSys::FrameDesc *getFrame() const {
             return frame;
         }
 
@@ -298,7 +298,7 @@ private:
                 PageNum pageNum;
                 PageDesc *pageDesc;
 
-                Entry(void) : pageNum(0), pageDesc(0) {
+                Entry() : pageNum(0), pageDesc(nullptr) {
                 }
             };
 
@@ -306,7 +306,7 @@ private:
             static const PageNum AddrSpaceCacheSize = (1 << 16);
             Entry cache[AddrSpaceCacheSize];
         public:
-            Cache(void);
+            Cache();
 
             inline Entry &operator[](PageNum pageNum) {
                 return cache[pageNum % AddrSpaceCacheSize];
@@ -317,7 +317,7 @@ private:
 
         Cache cache;
     public:
-        PageTable(void);
+        PageTable();
 
         PageTable(PageTable &src);
 
@@ -337,7 +337,7 @@ private:
 
         inline const PageDesc &operator[](PageNum pageNum) const {
             I(isMapped(pageNum));
-            PageMap::const_iterator it = pageMap.find(pageNum);
+            auto it = pageMap.find(pageNum);
             return it->second;
         }
 
@@ -388,7 +388,7 @@ private:
 
     VAddr brkBase;
 public:
-    static inline size_t getPageSize(void) {
+    static inline size_t getPageSize() {
         return AddrSpacPageSize;
     }
 
@@ -406,7 +406,7 @@ public:
         I(addr > 0);
         if (addr + len < addr)
             return false;
-        SegmentMap::const_iterator segIt = segmentMap.upper_bound(addr + len);
+        auto segIt = segmentMap.upper_bound(addr + len);
         if (segIt == segmentMap.end())
             return true;
         const SegmentDesc &segDesc = segIt->second;
@@ -415,13 +415,13 @@ public:
 
     // Returns true iff the specified block is entirely within the same allocated segment
     bool isInSegment(VAddr addr, size_t len) const {
-        SegmentMap::const_iterator segIt = segmentMap.lower_bound(addr);
+        auto segIt = segmentMap.lower_bound(addr);
         return (segIt != segmentMap.end()) && (segIt->second.addr + segIt->second.len >= addr + len);
     }
 
     // Returns true iff the specified block exactly matches an allocated segment
     bool isSegment(VAddr addr, size_t len) const {
-        SegmentMap::const_iterator segIt = segmentMap.find(addr);
+        auto segIt = segmentMap.find(addr);
         return (segIt != segmentMap.end()) && (segIt->second.len == len);
     }
 
@@ -429,7 +429,7 @@ public:
         brkBase = addr;
     }
 
-    VAddr getBrkBase(void) const {
+    VAddr getBrkBase() const {
         I(brkBase);
         return brkBase;
     }
@@ -449,7 +449,7 @@ public:
     void splitSegment(VAddr pivot);
 
     void newSegment(VAddr addr, size_t len, bool canRead, bool canWrite, bool canExec, bool shared = false,
-                    FileSys::SeekableDescription *fdesc = 0, off_t offs = 0);
+                    FileSys::SeekableDescription *fdesc = nullptr, off_t offs = 0);
 
     void protectSegment(VAddr addr, size_t len, bool canRead, bool canWrite, bool canExec);
 
@@ -464,14 +464,14 @@ public:
     void moveSegment(VAddr oldaddr, VAddr newaddr);
 
     VAddr getSegmentAddr(VAddr addr) const {
-        SegmentMap::const_iterator segIt = segmentMap.lower_bound(addr);
+        auto segIt = segmentMap.lower_bound(addr);
         I(segIt != segmentMap.end());
         I(segIt->second.addr + segIt->second.len > addr);
         return segIt->second.addr;
     }
 
     size_t getSegmentSize(VAddr addr) const {
-        SegmentMap::const_iterator segIt = segmentMap.find(addr);
+        auto segIt = segmentMap.find(addr);
         I(segIt != segmentMap.end());
         return segIt->second.len;
     }
@@ -531,7 +531,7 @@ private:
                 VAddr instAddr;
                 InstDesc *instDesc;
 
-                Entry(void) : instAddr(0), instDesc(0) {
+                Entry() : instAddr(0), instDesc(nullptr) {
                 }
             };
 
@@ -539,7 +539,7 @@ private:
             static const size_t AddrSpaceCacheSize = (1 << 16);
             Entry cache[AddrSpaceCacheSize];
         public:
-            Cache(void);
+            Cache();
 
             inline Entry &operator[](VAddr instAddr) {
                 return cache[instAddr % AddrSpaceCacheSize];
@@ -550,15 +550,15 @@ private:
 
         Cache cache;
     public:
-        InstTable(void);
+        InstTable();
 
         inline InstDesc *operator[](VAddr instAddr) {
             Cache::Entry &centry = cache[instAddr];
             if (centry.instAddr == instAddr)
                 return centry.instDesc;
-            InstMap::iterator it = instMap.find(instAddr);
+            auto it = instMap.find(instAddr);
             if (it == instMap.end())
-                return 0;
+                return nullptr;
             centry.instAddr = instAddr;
             centry.instDesc = it->second;
             return it->second;
@@ -577,7 +577,7 @@ private:
     typedef std::map<VAddr, InstDesc *> InstMap;
     InstMap instMap;
 public:
-    void createTrace(ThreadContext *context, VAddr addr);
+    void createTrace(ThreadContext *context, VAddr addr) const;
 
     void mapTrace(InstDesc *binst, InstDesc *einst, VAddr baddr, VAddr eaddr);
 
@@ -592,11 +592,11 @@ public:
     }
 
 public:
-    AddressSpace(void);
+    AddressSpace();
 
     AddressSpace(AddressSpace &src);
 
-    ~AddressSpace(void);
+    ~AddressSpace() override;
 
     // Saves this address space to a stream
     void save(ChkWriter &out) const;

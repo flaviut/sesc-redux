@@ -1,8 +1,8 @@
 #if !(defined REGS_H)
 #define REGS_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 enum RegNameEnum {
     RegNumMask = 0x0FF, // Mask for register number

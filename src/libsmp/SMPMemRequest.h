@@ -51,7 +51,7 @@ protected:
 
 public:
     SMPMemRequest();
-    ~SMPMemRequest() {
+    ~SMPMemRequest() override {
     }
 
     // BEGIN: MemRequest interface
@@ -67,11 +67,11 @@ public:
                                  CallbackBase *cb);
 
     void incUses();
-    void destroy();
+    void destroy() override;
 
-    VAddr getVaddr() const;
+    VAddr getVaddr() const override;
     PAddr getPAddr() const;
-    void  ack(TimeDelta_t lat);
+    void  ack(TimeDelta_t lat) override;
 
     // END: MemRequest interface
 
@@ -86,24 +86,24 @@ public:
     MemObj      *getRequestor();
     MemObj      *getSupplier();
 
-    bool         needsData()  {
+    bool         needsData() const  {
         return needData;
     }
-    bool         needsSnoop() {
+    bool         needsSnoop() const {
         return needSnoop;
     }
     void         noSnoop()    {
         needSnoop = false;
     }
 
-    bool         isFound()  {
+    bool         isFound() const  {
         return found;
     }
     void         setFound() {
         found = true;
     }
 
-    bool         needsWriteDown() {
+    bool         needsWriteDown() const {
         return writeDown;
     }
     void         setWriteDown()   {

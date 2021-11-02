@@ -57,7 +57,7 @@ public:
         nReadAccesses = 0;
         clearTag();
     }
-    bool isLocked() const {
+    bool isLocked() const override {
         return (locked == true);
     }
     void lock() {
@@ -73,7 +73,7 @@ public:
     void makeClean() {
         dirty = false;
     }
-    bool isValid() const {
+    bool isValid() const override {
         return valid;
     }
     void validate() {
@@ -83,7 +83,7 @@ public:
         nReadMisses = 0;
         nReadAccesses = 0;
     }
-    void invalidate() {
+    void invalidate() override {
         valid = false;
         dirty = false;
         locked = false;
@@ -94,28 +94,28 @@ public:
     void setSpec(bool s) {
         spec = s;
     }
-    bool isSpec() {
+    bool isSpec() const {
         return spec;
     }
 
     void incReadAccesses() {
         nReadAccesses++;
     }
-    int32_t getReadAccesses() {
+    int32_t getReadAccesses() const {
         return nReadAccesses;
     }
 
     void setReadMisses(int32_t n) {
         nReadMisses = n;
     }
-    int32_t getReadMisses() {
+    int32_t getReadMisses() const {
         return nReadMisses;
     }
 
     void setCkpId(unsigned ci) {
         ckpId = ci;
     }
-    uint32_t getCkpId() {
+    uint32_t getCkpId() const {
         return ckpId;
     }
 };
@@ -146,7 +146,7 @@ protected:
         CallbackBase *cb;
         Entry() {
             outsResps = 0;
-            cb = 0;
+            cb = nullptr;
         }
     };
 
@@ -282,37 +282,37 @@ protected:
 
 public:
     Cache(MemorySystem *gms, const char *descr_section,
-          const char *name = NULL);
-    virtual ~Cache();
+          const char *name = nullptr);
+    ~Cache() override;
 
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
     virtual void read(MemRequest *mreq);
     virtual void write(MemRequest *mreq);
     virtual void pushLine(MemRequest *mreq) = 0;
     virtual void specialOp(MemRequest *mreq);
-    virtual void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    virtual bool canAcceptStore(PAddr addr);
-    virtual bool canAcceptLoad(PAddr addr);
+    bool canAcceptStore(PAddr addr) override;
+    bool canAcceptLoad(PAddr addr) override;
 
     bool isInCache(PAddr addr) const;
 
     // same as above plus schedule callback to doInvalidate
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
 
-    virtual bool isCache() const {
+    bool isCache() const override {
         return true;
     }
     //virtual const bool isCache() const { return true; }
 
-    void dump() const;
+    void dump() const override;
 
     PAddr calcTag(PAddr addr) const {
         return cacheBanks[0]->calcTag(addr);
     }
 
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
 
     //used by SVCache
@@ -322,30 +322,30 @@ public:
 
 class WBCache : public Cache {
 protected:
-    void sendMiss(MemRequest *mreq);
-    void doWriteBack(PAddr addr);
-    void doReturnAccess(MemRequest *mreq);
+    void sendMiss(MemRequest *mreq) override;
+    void doWriteBack(PAddr addr) override;
+    void doReturnAccess(MemRequest *mreq) override;
 
     typedef CallbackMember1<WBCache, MemRequest *, &WBCache::doReturnAccess>
     doReturnAccessCB;
 
 public:
     WBCache(MemorySystem *gms, const char *descr_section,
-            const char *name = NULL);
-    ~WBCache();
+            const char *name = nullptr);
+    ~WBCache() override;
 
-    void pushLine(MemRequest *mreq);
+    void pushLine(MemRequest *mreq) override;
 };
 
 class WTCache : public Cache {
 protected:
-    void doWrite(MemRequest *mreq);
-    void sendMiss(MemRequest *mreq);
-    void doWriteBack(PAddr addr);
+    void doWrite(MemRequest *mreq) override;
+    void sendMiss(MemRequest *mreq) override;
+    void doWriteBack(PAddr addr) override;
     void writePropagateHandler(MemRequest *mreq);
     void propagateDown(MemRequest *mreq);
     void reexecuteDoWrite(MemRequest *mreq);
-    void doReturnAccess(MemRequest *mreq);
+    void doReturnAccess(MemRequest *mreq) override;
 
     typedef CallbackMember1<WTCache, MemRequest *, &WTCache::reexecuteDoWrite>
     reexecuteDoWriteCB;
@@ -353,14 +353,14 @@ protected:
     typedef CallbackMember1<WTCache, MemRequest *, &WTCache::doReturnAccess>
     doReturnAccessCB;
 
-    void inclusionCheck(PAddr addr);
+    void inclusionCheck(PAddr addr) override;
 
 public:
     WTCache(MemorySystem *gms, const char *descr_section,
-            const char *name = NULL);
-    ~WTCache();
+            const char *name = nullptr);
+    ~WTCache() override;
 
-    void pushLine(MemRequest *mreq);
+    void pushLine(MemRequest *mreq) override;
 };
 
 class SVCache : public WBCache {
@@ -374,32 +374,32 @@ protected:
 public:
 
     SVCache(MemorySystem *gms, const char *descr_section,
-            const char *name = NULL);
-    ~SVCache();
+            const char *name = nullptr);
+    ~SVCache() override;
 
-    virtual void doWrite(MemRequest *mreq);
-    virtual void preReturnAccess(MemRequest *mreq);
-    virtual void doReturnAccess(MemRequest *mreq);
-    virtual void ckpRestart(uint32_t ckpId);
-    virtual void ckpCommit(uint32_t ckpId);
+    void doWrite(MemRequest *mreq) override;
+    void preReturnAccess(MemRequest *mreq) override;
+    void doReturnAccess(MemRequest *mreq) override;
+    void ckpRestart(uint32_t ckpId) override;
+    void ckpCommit(uint32_t ckpId) override;
 };
 
 class NICECache : public Cache
 {
 // a 100% hit cache, used for debugging or as main memory
 protected:
-    void sendMiss(MemRequest *mreq);
-    void doWriteBack(PAddr addr);
+    void sendMiss(MemRequest *mreq) override;
+    void doWriteBack(PAddr addr) override;
 
 public:
-    NICECache(MemorySystem *gms, const char *section, const char *name = NULL);
-    ~NICECache();
+    NICECache(MemorySystem *gms, const char *section, const char *name = nullptr);
+    ~NICECache() override;
 
-    void read(MemRequest *mreq);
-    void write(MemRequest *mreq);
-    void pushLine(MemRequest *mreq);
-    void returnAccess(MemRequest *mreq);
-    void specialOp(MemRequest *mreq);
+    void read(MemRequest *mreq) override;
+    void write(MemRequest *mreq) override;
+    void pushLine(MemRequest *mreq) override;
+    void returnAccess(MemRequest *mreq) override;
+    void specialOp(MemRequest *mreq) override;
 };
 
 

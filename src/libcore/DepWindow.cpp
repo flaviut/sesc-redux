@@ -196,7 +196,7 @@ void DepWindow::executed(DInst *dinst) {
     // should be added again to the dependence chain so that MemRequest::ack can
     // awake them (other processor instructions)
 
-    const DInst *stopAtDst = 0;
+    const DInst *stopAtDst = nullptr;
 
     bool replayDetected = false;
 
@@ -242,7 +242,7 @@ void DepWindow::executed(DInst *dinst) {
 
             dinst->addFakeSrc(dstReady, true); // Requeue the instruction at the end
 
-            if (stopAtDst == 0)
+            if (stopAtDst == nullptr)
                 stopAtDst = dstReady;
             continue;
         }

@@ -52,7 +52,7 @@ extern char* MemOperationStr[];
 
 SMPMemRequest::MESHSTRMAP SMPMemRequest::SMPMemReqStrMap;
 
-const char* SMPCache::cohOutfile = NULL;
+const char* SMPCache::cohOutfile = nullptr;
 	
 // This cache works under the assumption that caches above it in the memory
 // hierarchy are write-through caches
@@ -96,25 +96,25 @@ SMPCache::SMPCache(SMemorySystem *dms, const char *section, const char *name)
     , invalDirty("%s:invalDirty", name)
     , allocDirty("%s:allocDirty", name)
 {
-    MemObj *lowerLevel = NULL;
+    MemObj *lowerLevel = nullptr;
     //printf("%d\n", dms->getPID());
 
     I(dms);
     lowerLevel = dms->declareMemoryObj(section, "lowerLevel");
 
-    MemObj *sideLowerLevel = NULL;
+    MemObj *sideLowerLevel = nullptr;
     const char *sLL = SescConf->getCharPtr(section, "sideLowerLevel");
     bool bLL = (strlen(sLL) > 0);
     //printf("bool : %d\n", bLL);
     dataCache = bLL;
     if(bLL) {
         sideLowerLevel = dms->declareMemoryObj(section, "sideLowerLevel");
-        if(sideLowerLevel != NULL) {
+        if(sideLowerLevel != nullptr) {
             addSideLowerLevel(sideLowerLevel);
         }
     }
 
-    if (lowerLevel != NULL) {
+    if (lowerLevel != nullptr) {
         addLowerLevel(lowerLevel);
         // JJO
 #if 0
@@ -166,7 +166,7 @@ SMPCache::SMPCache(SMemorySystem *dms, const char *section, const char *name)
 	if(SescConf->checkCharPtr(section, "cohOutput")) {
 		const char *coh_out = SescConf->getCharPtr(section, "cohOutput");
 		//printf("coh %s\n", SMPCache::cohOutfile);
-		if(SMPCache::cohOutfile == NULL) {
+		if(SMPCache::cohOutfile == nullptr) {
 			SMPCache::cohOutfile = coh_out;
 		}
 	}
@@ -262,7 +262,7 @@ void SMPCache::PrintStat()
 {
 	std::ostream* out = &cout;
 	std::ofstream cohOut;
-	if(cohOutfile!=NULL) {
+	if(cohOutfile!=nullptr) {
 		cohOut.open(cohOutfile, ios::out|ios::trunc);
 		out = &cohOut;
 	}
@@ -272,9 +272,8 @@ void SMPCache::PrintStat()
 	(*out)<<"======================= Coherence message stat ======================";
 	(*out)<<std::endl;
 	(*out)<<std::endl;
-	for(SMPMemRequest::MESHSTRMAP::iterator it = SMPMemRequest::SMPMemReqStrMap.begin();
-			it!=SMPMemRequest::SMPMemReqStrMap.end(); it++) {
-		(*out)<<"\t"<<std::left<<std::setw(30)<<(*it).second<<"\t"<<std::right<<SMPMemRequest::nSMPMsg[(*it).first];
+	for(auto & it : SMPMemRequest::SMPMemReqStrMap) {
+		(*out)<<"\t"<<std::left<<std::setw(30)<<it.second<<"\t"<<std::right<<SMPMemRequest::nSMPMsg[it.first];
 		(*out)<<std::endl;
 	}
 
@@ -289,9 +288,8 @@ void SMPCache::PrintStat()
 	(*out)<<std::endl;
 	(*out)<<std::endl;
 	(*out)<<"======================= Message per Network selection stat ======================\n\n";
-	for(SMPMemRequest::MESHSTRMAP::iterator it = SMPMemRequest::SMPMemReqStrMap.begin();
-			it!=SMPMemRequest::SMPMemReqStrMap.end(); it++) {
-		(*out)<<"\t"<<std::left<<std::setw(30)<<(*it).second<<std::right<<"\t"<<SMPRouter::msgStat[(*it).first];
+	for(auto & it : SMPMemRequest::SMPMemReqStrMap) {
+		(*out)<<"\t"<<std::left<<std::setw(30)<<it.second<<std::right<<"\t"<<SMPRouter::msgStat[it.first];
 		(*out)<<std::endl;
 	}
 	(*out)<<std::endl;
@@ -303,7 +301,7 @@ void SMPCache::PrintStat()
 	(*out)<<std::endl;
 	(*out)<<std::endl;
 
-	if(cohOutfile!=NULL) {
+	if(cohOutfile!=nullptr) {
 		cohOut.close();
 	}
 }
@@ -645,11 +643,11 @@ void SMPCache::invalidate(PAddr addr, ushort size, MemObj *oc)
 void SMPCache::doInvalidate(PAddr addr, ushort size)
 {
     IJ(pendInvTable.find(addr) != pendInvTable.end());
-    CallbackBase *cb = 0;
+    CallbackBase *cb = nullptr;
     bool invalidate = false;
     bool writeBack = false;
 
-    PendInvTable::iterator it = pendInvTable.find(addr);
+    auto it = pendInvTable.find(addr);
     Entry *record = &(it->second);
 #if 0
     if(--(record->outsResps) <= 0) {
@@ -855,7 +853,7 @@ void SMPCache::resolveSituation(SMPMemRequest *sreq) {
 
 void SMPCache::doReadRemote(MemRequest *mreq) {
     PAddr addr = mreq->getPAddr();
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     MeshOperation meshOp = sreq->getMeshOperation();
     Line *l = cache->readLine(addr);
 
@@ -1044,7 +1042,7 @@ void SMPCache::doReadRemote(MemRequest *mreq) {
 
             DEBUGPRINT("   [%s] Invalidate %x for IntervExRequest at %lld\n",
                        getSymbolicName(), sreq->getPAddr(), globalClock);
-            invalidateLine(addr, NULL, false);
+            invalidateLine(addr, nullptr, false);
 
         } else if(l && l->getState()==DMESI_SHARED) {
             {
@@ -1069,7 +1067,7 @@ void SMPCache::doReadRemote(MemRequest *mreq) {
 
             DEBUGPRINT("   [%s] Invalidate %x for IntervExRequest at %lld\n",
                        getSymbolicName(), sreq->getPAddr(), globalClock);
-            invalidateLine(addr, NULL, false);
+            invalidateLine(addr, nullptr, false);
 
         } else if((l && l->getState()==DMESI_EXCLUSIVE) || !l) {
             {
@@ -1099,7 +1097,7 @@ void SMPCache::doReadRemote(MemRequest *mreq) {
                 nsreq->goDown(hitDelay, lowerLevel[0]);
             }
             if(l && l->canBeRead()) {
-                invalidateLine(addr, NULL, false);
+                invalidateLine(addr, nullptr, false);
             }
         } else {
             IJ(0);
@@ -1146,7 +1144,7 @@ void SMPCache::doReadRemote(MemRequest *mreq) {
 }
 
 void SMPCache::processReply(MemRequest *mreq) {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     PAddr addr = mreq->getPAddr();
 
     DEBUGPRINT("   [%s] Processing Reply from %s for %x at %lld\n",
@@ -1178,7 +1176,7 @@ void SMPCache::processReply(MemRequest *mreq) {
 
 void SMPCache::returnAccess(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
     //MemOperation memOp = mreq->getMemOperation();
     MeshOperation meshOp = sreq->getMeshOperation();
     PAddr addr = mreq->getPAddr();
@@ -1584,7 +1582,7 @@ void SMPCache::sendInvDirUpdate(PAddr rpl_addr, PAddr new_addr, CallbackBase *cb
     if(wb||tk) {
         SMPMemRequest *sreq;
         //if(wb) {
-        sreq = SMPMemRequest::create(this, rpl_addr, MemPush, false, 0, WriteBackRequest);
+        sreq = SMPMemRequest::create(this, rpl_addr, MemPush, false, nullptr, WriteBackRequest);
         //} else {
         //    sreq = SMPMemRequest::create(this, rpl_addr, MemPush, false, 0, TokenBackRequest);
         //}
@@ -1636,7 +1634,7 @@ void SMPCache::processInvDirAck(SMPMemRequest *sreq) {
     PAddr rpl_addr = sreq->getPAddr();
     PAddr addr = sreq->newAddr;
     CallbackBase *cb = sreq->invCB;
-    sreq->invCB = NULL;
+    sreq->invCB = nullptr;
 
     Line *l = cache->findLine(rpl_addr);
     IJ(l);
@@ -1669,7 +1667,7 @@ SMPCache::Line *SMPCache::allocateLine(PAddr addr, CallbackBase *cb,
     if(!l) {
         // need to schedule allocate line for next cycle
         doAllocateLineCB::scheduleAbs(globalClock+1, this, addr, 0, cb);
-        return 0;
+        return nullptr;
     }
 
     rpl_addr = cache->calcAddr4Tag(l->getTag());
@@ -1744,11 +1742,11 @@ SMPCache::Line *SMPCache::allocateLine(PAddr addr, CallbackBase *cb,
                    getSymbolicName(), cache->calcAddr4Tag(l->getTag()), l->getState(), globalClock, addr);
 
         sendInvDirUpdate(rpl_addr, addr, cb, wb, tk);
-        return 0; // We need to send message back and forth
+        return nullptr; // We need to send message back and forth
     }
 
     IJ(0);
-    return 0;
+    return nullptr;
 #if 0
     I(pendInvTable.find(rpl_addr) == pendInvTable.end());
     pendInvTable[rpl_addr].outsResps = getNumCachesInUpperLevels();

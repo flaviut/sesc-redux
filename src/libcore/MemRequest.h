@@ -153,7 +153,7 @@ protected:
             if (d->getResource())
                 gproc = d->getResource()->getCluster()->getGProcessor();
         } else {
-            gproc = 0;
+            gproc = nullptr;
         }
         memOp = mop;
         currentMemObj = mo;
@@ -199,7 +199,7 @@ public:
         l2MissDetection = time;
     }
 
-    Time_t getL2MissDetection() {
+    Time_t getL2MissDetection() const {
         return l2MissDetection;
     }
 
@@ -220,7 +220,7 @@ public:
         priority = p;
     }
 
-    int32_t getPriority() {
+    int32_t getPriority() const {
         return priority;
     }
 
@@ -283,7 +283,7 @@ public:
 
     MemObj *getMemStackTop() {
         if (memStack.empty()) {
-            return NULL;
+            return nullptr;
         }
         return memStack.top();
     }
@@ -445,7 +445,7 @@ private:
 
     friend class pool<DMemRequest, true>;
 
-    void destroy();
+    void destroy() override;
 
     static void dinstAck(DInst *dinst, MemOperation memOp, TimeDelta_t lat);
 
@@ -453,9 +453,9 @@ protected:
 public:
     static void create(DInst *dinst, GMemorySystem *gmem, MemOperation mop);
 
-    VAddr getVaddr() const;
+    VAddr getVaddr() const override;
 
-    void ack(TimeDelta_t lat);
+    void ack(TimeDelta_t lat) override;
 };
 
 class IMemRequest : public MemRequest {
@@ -467,15 +467,15 @@ private:
 
     IBucket *buffer;
 
-    void destroy();
+    void destroy() override;
 
 protected:
 public:
     static void create(DInst *dinst, GMemorySystem *gmem, IBucket *buffer);
 
-    VAddr getVaddr() const;
+    VAddr getVaddr() const override;
 
-    void ack(TimeDelta_t lat);
+    void ack(TimeDelta_t lat) override;
 };
 
 class CBMemRequest : public MemRequest {
@@ -487,21 +487,21 @@ private:
 
     CallbackBase *cb;
 
-    void destroy();
+    void destroy() override;
 
 protected:
 public:
     static CBMemRequest *create(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr, CallbackBase *cb);
 
-    VAddr getVaddr() const;
+    VAddr getVaddr() const override;
 
-    void ack(TimeDelta_t lat);
+    void ack(TimeDelta_t lat) override;
 };
 
 class StaticCBMemRequest : public MemRequest {
     // Callback MemRequest. Ideal for internal memory requests
 private:
-    void destroy();
+    void destroy() override;
 
     StaticCallbackBase *cb;
     bool ackDone;
@@ -512,15 +512,15 @@ public:
 
     void launch(TimeDelta_t lat, MemObj *m, MemOperation mop, PAddr addr);
 
-    VAddr getVaddr() const;
+    VAddr getVaddr() const override;
 
-    void ack(TimeDelta_t lat);
+    void ack(TimeDelta_t lat) override;
 };
 
 class MemRequestHashFunc {
 public:
     size_t operator()(const MemRequest *mreq) const {
-        size_t val = (size_t) mreq;
+        auto val = (size_t) mreq;
         return val >> 2;
     }
 };

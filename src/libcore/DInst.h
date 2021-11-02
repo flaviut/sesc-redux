@@ -51,7 +51,7 @@ private:
 #endif
 public:
     DInstNext() {
-        dinst = 0;
+        dinst = nullptr;
     }
 
     DInstNext *nextDep;
@@ -305,7 +305,7 @@ public:
         n->nDeps--;
 
         first->isUsed = false;
-        first->setParentDInst(0);
+        first->setParentDInst(nullptr);
         first = first->getNext();
 
         return n;
@@ -324,12 +324,12 @@ public:
         n->setParentDInst(this);
 
         I(n->getDInst() == d);
-        if (first == 0) {
+        if (first == nullptr) {
             first = n;
         } else {
             last->nextDep = n;
         }
-        n->nextDep = 0;
+        n->nextDep = nullptr;
         last = n;
     }
 
@@ -346,12 +346,12 @@ public:
         n->setParentDInst(this);
 
         I(n->getDInst() == d);
-        if (first == 0) {
+        if (first == nullptr) {
             first = n;
         } else {
             last->nextDep = n;
         }
-        n->nextDep = 0;
+        n->nextDep = nullptr;
         last = n;
     }
 
@@ -369,12 +369,12 @@ public:
         n->setParentDInst(this);
 
         I(n->getDInst() == d);
-        if (first == 0) {
+        if (first == nullptr) {
             first = n;
         } else {
             last->nextDep = n;
         }
-        n->nextDep = 0;
+        n->nextDep = nullptr;
         last = n;
     }
 
@@ -404,7 +404,7 @@ public:
     }
 
     bool hasPending() const {
-        return first != 0;
+        return first != nullptr;
     }
 
     const DInst *getFirstPending() const {
@@ -473,7 +473,7 @@ public:
         deadInst = true;
     }
 
-    bool isDeadInst() {
+    bool isDeadInst() const {
         return deadInst;
     }
 

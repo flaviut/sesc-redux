@@ -187,7 +187,7 @@ void DInst::doAtSelect() {
 void DInst::doAtExecuted() {
     I(RATEntry);
     if ((*RATEntry) == this)
-        *RATEntry = 0;
+        *RATEntry = nullptr;
 
     I(resource);
     resource->executed(this);
@@ -219,14 +219,14 @@ DInst *DInst::createDInst(const Instruction *inst, VAddr va, int32_t cId, Thread
     i->cId = cId;
     i->wakeUpTime = 0;
     i->vaddr = va;
-    i->first = 0;
+    i->first = nullptr;
 #ifdef DEBUG
     i->ID = currentID++;
 #endif
-    i->resource = 0;
-    i->RATEntry = 0;
-    i->pendEvent = 0;
-    i->fetch = 0;
+    i->resource = nullptr;
+    i->RATEntry = nullptr;
+    i->pendEvent = nullptr;
+    i->fetch = nullptr;
     i->loadForwarded = false;
     i->issued = false;
     i->executed = false;
@@ -341,7 +341,7 @@ void DInst::killSilently() {
 
     I(!getFetch());
     context->delDInst();
-    context = 0;
+    context = nullptr;
     dInstPool.in(this);
 }
 
@@ -362,7 +362,7 @@ void DInst::scrap() {
 
     I(!getFetch());
     context->delDInst();
-    context = 0;
+    context = nullptr;
 
     dInstPool.in(this);
 }

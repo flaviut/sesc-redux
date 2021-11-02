@@ -22,11 +22,11 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 #include <alloca.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
+#include <cstring>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdarg>
+#include <cctype>
 #include <unistd.h>
 
 #include "nanassert.h"
@@ -57,7 +57,7 @@ void Report::openFile(char *name)
         ffd = fopen(name, "a");
     }
 
-    if(ffd == 0) {
+    if(ffd == nullptr) {
         fprintf(stderr, "NANASSERT::REPORT could not open temporal file [%s]\n", name);
         exit(-3);
     }

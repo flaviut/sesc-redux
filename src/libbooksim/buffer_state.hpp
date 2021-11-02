@@ -70,13 +70,13 @@ class BufferState : public Module {
         PrivateBufferPolicy(Configuration const &config, BufferState *parent,
                             const string &name);
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
 
-        virtual bool IsFullFor(int vc = 0) const;
+        bool IsFullFor(int vc = 0) const override;
 
-        virtual int AvailableFor(int vc = 0) const;
+        int AvailableFor(int vc = 0) const override;
 
-        virtual int LimitFor(int vc = 0) const;
+        int LimitFor(int vc = 0) const override;
     };
 
     class SharedBufferPolicy : public BufferPolicy {
@@ -95,15 +95,15 @@ class BufferState : public Module {
         SharedBufferPolicy(Configuration const &config, BufferState *parent,
                            const string &name);
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
 
-        virtual void FreeSlotFor(int vc = 0);
+        void FreeSlotFor(int vc = 0) override;
 
-        virtual bool IsFullFor(int vc = 0) const;
+        bool IsFullFor(int vc = 0) const override;
 
-        virtual int AvailableFor(int vc = 0) const;
+        int AvailableFor(int vc = 0) const override;
 
-        virtual int LimitFor(int vc = 0) const;
+        int LimitFor(int vc = 0) const override;
     };
 
     class LimitedSharedBufferPolicy : public SharedBufferPolicy {
@@ -116,15 +116,15 @@ class BufferState : public Module {
                                   BufferState *parent,
                                   const string &name);
 
-        virtual void TakeBuffer(int vc = 0);
+        void TakeBuffer(int vc = 0) override;
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
 
-        virtual bool IsFullFor(int vc = 0) const;
+        bool IsFullFor(int vc = 0) const override;
 
-        virtual int AvailableFor(int vc = 0) const;
+        int AvailableFor(int vc = 0) const override;
 
-        virtual int LimitFor(int vc = 0) const;
+        int LimitFor(int vc = 0) const override;
     };
 
     class DynamicLimitedSharedBufferPolicy : public LimitedSharedBufferPolicy {
@@ -133,9 +133,9 @@ class BufferState : public Module {
                                          BufferState *parent,
                                          const string &name);
 
-        virtual void TakeBuffer(int vc = 0);
+        void TakeBuffer(int vc = 0) override;
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
     };
 
     class ShiftingDynamicLimitedSharedBufferPolicy : public DynamicLimitedSharedBufferPolicy {
@@ -144,9 +144,9 @@ class BufferState : public Module {
                                                  BufferState *parent,
                                                  const string &name);
 
-        virtual void TakeBuffer(int vc = 0);
+        void TakeBuffer(int vc = 0) override;
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
     };
 
     class FeedbackSharedBufferPolicy : public SharedBufferPolicy {
@@ -169,17 +169,17 @@ class BufferState : public Module {
         FeedbackSharedBufferPolicy(Configuration const &config,
                                    BufferState *parent, const string &name);
 
-        virtual void SetMinLatency(int min_latency);
+        void SetMinLatency(int min_latency) override;
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
 
-        virtual void FreeSlotFor(int vc = 0);
+        void FreeSlotFor(int vc = 0) override;
 
-        virtual bool IsFullFor(int vc = 0) const;
+        bool IsFullFor(int vc = 0) const override;
 
-        virtual int AvailableFor(int vc = 0) const;
+        int AvailableFor(int vc = 0) const override;
 
-        virtual int LimitFor(int vc = 0) const;
+        int LimitFor(int vc = 0) const override;
     };
 
     class SimpleFeedbackSharedBufferPolicy : public FeedbackSharedBufferPolicy {
@@ -189,9 +189,9 @@ class BufferState : public Module {
         SimpleFeedbackSharedBufferPolicy(Configuration const &config,
                                          BufferState *parent, const string &name);
 
-        virtual void SendingFlit(Flit const *const f);
+        void SendingFlit(Flit const *const f) override;
 
-        virtual void FreeSlotFor(int vc = 0);
+        void FreeSlotFor(int vc = 0) override;
     };
 
     bool _wait_for_tail_credit;
@@ -218,7 +218,7 @@ public:
     BufferState(const Configuration &config,
                 Module *parent, const string &name);
 
-    ~BufferState();
+    ~BufferState() override;
 
     inline void SetMinLatency(int min_latency) {
         _buffer_policy->SetMinLatency(min_latency);
@@ -280,7 +280,7 @@ public:
     }
 #endif
 
-    void Display(ostream &os = cout) const;
+    void Display(ostream &os = cout) const override;
 };
 
 #endif

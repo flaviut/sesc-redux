@@ -43,7 +43,7 @@ public:
     SeparableOutputFirstAllocator(Module *parent, const string &name, int inputs,
                                   int outputs, const string &arb_type);
 
-    virtual void Allocate();
+    void Allocate() override;
 
 };
 

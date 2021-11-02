@@ -31,7 +31,7 @@ int32_t TLB::translate(VAddr vAddr)
     TLBCache::CacheLine *cl = cache->readLine(GMemorySystem::calcPageAddr(vAddr));
 
     //GMSG(cl==0 && id==0, "[%llu] TLB MISS %lx", globalClock, vAddr>>Log2PageSize);
-    if (cl == 0)
+    if (cl == nullptr)
         return -1;
 
     return cl->physicalPage;

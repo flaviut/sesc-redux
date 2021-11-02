@@ -44,11 +44,11 @@ public:
     SelAlloc(Module *parent, const string &name,
              int inputs, int outputs, int iters);
 
-    void Allocate();
+    void Allocate() override;
 
     void MaskOutput(int out, int mask = 1);
 
-    virtual void PrintRequests(ostream *os = NULL) const;
+    void PrintRequests(ostream *os = nullptr) const override;
 
 };
 

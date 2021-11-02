@@ -54,12 +54,12 @@ private:
 
 protected:
 public:
-    InstID getNextID() const {
+    InstID getNextID() const override {
         I(context);
         return context->getIAddr();
     }
 
-    void addEvent(EventType e, CallbackBase *cb, int32_t addr) {
+    void addEvent(EventType e, CallbackBase *cb, int32_t addr) override {
         ev     = e;
         evCB   = cb;
         evAddr = addr;
@@ -67,18 +67,18 @@ public:
 
     ExecutionFlow(int32_t cId, int32_t i, GMemorySystem *gms);
 
-    void switchIn(int32_t i);
-    void switchOut(int32_t i);
+    void switchIn(int32_t i) override;
+    void switchOut(int32_t i) override;
 
-    int32_t currentPid(void) {
+    int32_t currentPid() override {
         if(!context)
             return -1;
         return context->getPid();
     }
     DInst *executePC();
 
-    void goRabbitMode(long long n2skip=0);
-    void dump(const char *str) const;
+    void goRabbitMode(long long n2skip=0) override;
+    void dump(const char *str) const override;
 };
 
 #endif   // EXECUTIONFLOW_H

@@ -21,8 +21,8 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 #include "BloomFilter.h"
-#include <stdarg.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstring>
 
 int32_t BloomFilter::numDumps = 0;
 
@@ -58,7 +58,7 @@ BloomFilter::BloomFilter(int32_t nv, ...)
     for(int32_t i = 0; i < nVectors; i++)
         sprintf(desc + strlen(desc), "[%d, %d]", vBits[i], vSize[i]);
 
-    timingHistVec = 0;
+    timingHistVec = nullptr;
     initMasks();
 
     nElements = 0;
@@ -80,7 +80,7 @@ BloomFilter::~BloomFilter()
     for(int32_t i = 0; i < nVectors; i++) {
         delete [] countVec[i];
 
-        if(timingHistVec != 0)
+        if(timingHistVec != nullptr)
             delete timingHistVec[i];
     }
 
@@ -111,7 +111,7 @@ BloomFilter::BloomFilter(const BloomFilter& bf)
     desc = strdup(bf.desc);
     nElements = bf.nElements;
 
-    timingHistVec = 0;
+    timingHistVec = nullptr;
 
     for(int32_t i = 0; i < nVectors; i++) {
         vSize[i] = bf.vSize[i];
@@ -206,7 +206,7 @@ void BloomFilter::init(bool build, int32_t nv, ...)
 
     nElements = 0;
 
-    timingHistVec = 0;
+    timingHistVec = nullptr;
     initMasks();
 
     desc = new char[128];
@@ -325,7 +325,7 @@ void BloomFilter::initHistogram(char *name)
     if( !BFBuild )
         return;
 
-    if(timingHistVec != 0) {
+    if(timingHistVec != nullptr) {
         MSG("BloomFilter::calling initHistogram again:%s", name);
         return;
     }
@@ -341,7 +341,7 @@ void BloomFilter::updateHistogram(int32_t vec)
     if( !BFBuild )
         return;
 
-    if(timingHistVec == 0) {
+    if(timingHistVec == nullptr) {
         return;
     }
 
@@ -534,7 +534,7 @@ void BloomFilter::end_dump_pychart()
            );
 
     fclose(dumpPtr);
-    dumpPtr = NULL;
+    dumpPtr = nullptr;
 
     if(numDumps > 200) {
         exit(-1);

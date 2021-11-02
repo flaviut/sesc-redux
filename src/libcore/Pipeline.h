@@ -121,7 +121,7 @@ public:
 
     IBucket *newItem() {
         if (nIRequests == 0 || bucketPool.empty())
-            return 0;
+            return nullptr;
 
         nIRequests--;
 

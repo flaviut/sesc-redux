@@ -25,7 +25,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include <algorithm>
 #include <vector>
 
-#include <string.h>
+#include <cstring>
 #include <strings.h>
 
 #include "nanassert.h"

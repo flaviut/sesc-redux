@@ -354,10 +354,10 @@ VAddr _loadElfObject(ThreadContext *context, FileSys::SeekableDescription *fdesc
                 FileSys::Node *node = FileSys::Node::lookup(exeRealName);
                 if (!node)
                     fail("loadElfObject: Executable %s does not exist\n", exeLinkName.c_str());
-                FileSys::FileNode *fnode = dynamic_cast<FileSys::FileNode *>(node);
+                auto *fnode = dynamic_cast<FileSys::FileNode *>(node);
                 if (!fnode)
                     fail("loadElfObject: Executable %s is not a regular file\n", exeLinkName.c_str());
-                FileSys::FileDescription *fdesc = new FileSys::FileDescription(fnode, O_RDONLY);
+                auto *fdesc = new FileSys::FileDescription(fnode, O_RDONLY);
                 FileSys::Description::pointer pdesc(fdesc);
                 addr = _loadElfObject<mode>(context, fdesc, addr, true);
                 hasInterpreter = true;

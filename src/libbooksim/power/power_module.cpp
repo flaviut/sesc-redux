@@ -32,7 +32,7 @@
 #include "iq_router.hpp"
 
 Power_Module::Power_Module(Network *n, const Configuration &config)
-        : Module(0, "power_module") {
+        : Module(nullptr, "power_module") {
 
 
     string pfile = config.GetStr("tech_file");
@@ -143,7 +143,7 @@ void Power_Module::calcChannel(const FlitChannel *f) {
 }
 
 wire const &Power_Module::wireOptimize(double L) {
-    map<double, wire>::iterator iter = wire_map.find(L);
+    auto iter = wire_map.find(L);
     if (iter == wire_map.end()) {
 
         double W = 64;
@@ -182,7 +182,7 @@ wire const &Power_Module::wireOptimize(double L) {
     return iter->second;
 }
 
-double Power_Module::powerRepeatedWire(double L, double K, double M, double N) {
+double Power_Module::powerRepeatedWire(double L, double K, double M, double N) const {
 
     double segments = 1.0 * M * N;
     double Ca = K * (Ci + Co) + Cw * (L / segments);
@@ -191,13 +191,13 @@ double Power_Module::powerRepeatedWire(double L, double K, double M, double N) {
 
 }
 
-double Power_Module::powerRepeatedWireLeak(double K, double M, double N) {
+double Power_Module::powerRepeatedWireLeak(double K, double M, double N) const {
     double Pl = K * 0.5 * (IoffN + 2.0 * IoffP) * Vdd;
     return Pl * M * N;
 
 }
 
-double Power_Module::powerWireClk(double M, double W) {
+double Power_Module::powerWireClk(double M, double W) const {
     // number of clock wires running down one repeater bank
     double columns = H_DFQD1 * MetalPitch / ChannelPitch;
 
@@ -209,7 +209,7 @@ double Power_Module::powerWireClk(double M, double W) {
 
 }
 
-double Power_Module::powerWireDFF(double M, double W, double alpha) {
+double Power_Module::powerWireDFF(double M, double W, double alpha) const {
     double Cdin = 2 * 0.8 * (Ci + Co) + 2 * (2.0 / 3.0 * 0.8 * Co);
     double Cclk = 2 * 0.8 * (Ci + Co) + 2 * (2.0 / 3.0 * 0.8 * Cg_pwr);
     double Cint = (alpha * 0.5) * Cdin + alpha * Cclk;
@@ -248,7 +248,7 @@ void Power_Module::calcBuffer(const BufferMonitor *bm) {
 }
 
 
-double Power_Module::powerWordLine(double memoryWidth, double memoryDepth) {
+double Power_Module::powerWordLine(double memoryWidth, double memoryDepth) const {
     // wordline capacitance
     double Ccell = 2 * (4.0 * LAMBDA) * Cg_pwr + 6 * MetalPitch * Cw;
     double Cwl = memoryWidth * Ccell;
@@ -272,7 +272,7 @@ double Power_Module::powerWordLine(double memoryWidth, double memoryDepth) {
 
 }
 
-double Power_Module::powerMemoryBitRead(double memoryDepth) {
+double Power_Module::powerMemoryBitRead(double memoryDepth) const {
     // bitline capacitance
     double Ccell = 4.0 * LAMBDA * Cd_pwr + 8 * MetalPitch * Cw;
     double Cbl = memoryDepth * Ccell;
@@ -280,7 +280,7 @@ double Power_Module::powerMemoryBitRead(double memoryDepth) {
     return (Cbl) * (Vdd * Vswing) * fCLK;
 }
 
-double Power_Module::powerMemoryBitWrite(double memoryDepth) {
+double Power_Module::powerMemoryBitWrite(double memoryDepth) const {
     // bitline capacitance
     double Ccell = 4.0 * LAMBDA * Cd_pwr + 8 * MetalPitch * Cw;
     double Cbl = memoryDepth * Ccell;
@@ -291,7 +291,7 @@ double Power_Module::powerMemoryBitWrite(double memoryDepth) {
     return (0.5 * Ccc * (Vdd * Vdd)) + (Cbl) * (Vdd * Vdd) * fCLK;
 }
 
-double Power_Module::powerMemoryBitLeak(double memoryDepth) {
+double Power_Module::powerMemoryBitLeak(double memoryDepth) const {
 
     return memoryDepth * IoffSRAM * Vdd;
 }
@@ -336,7 +336,7 @@ void Power_Module::calcSwitch(const SwitchMonitor *sm) {
 
 }
 
-double Power_Module::powerCrossbar(double width, double inputs, double outputs, double from, double to) {
+double Power_Module::powerCrossbar(double width, double inputs, double outputs, double from, double to) const {
     // datapath traversal power
     double Wxbar = width * outputs * CrossbarPitch;
     double Hxbar = width * inputs * CrossbarPitch;
@@ -371,7 +371,7 @@ double Power_Module::powerCrossbar(double width, double inputs, double outputs, 
 }
 
 
-double Power_Module::powerCrossbarCtrl(double width, double inputs, double outputs) {
+double Power_Module::powerCrossbarCtrl(double width, double inputs, double outputs) const {
 
     // datapath traversal power
     double Wxbar = width * outputs * CrossbarPitch;
@@ -391,7 +391,7 @@ double Power_Module::powerCrossbarCtrl(double width, double inputs, double outpu
 
 }
 
-double Power_Module::powerCrossbarLeak(double width, double inputs, double outputs) {
+double Power_Module::powerCrossbarLeak(double width, double inputs, double outputs) const {
     // datapath traversal power
     double Wxbar = width * outputs * CrossbarPitch;
     double Hxbar = width * inputs * CrossbarPitch;
@@ -410,7 +410,7 @@ double Power_Module::powerCrossbarLeak(double width, double inputs, double outpu
 //////////////////////////////////////////////////////////////////
 //output module
 //////////////////////////////////////////////////////////////////
-double Power_Module::powerOutputCtrl(double width) {
+double Power_Module::powerOutputCtrl(double width) const {
 
     double Woutmod = channel_width * ChannelPitch;
     double Cen = Ci;
@@ -425,7 +425,7 @@ double Power_Module::powerOutputCtrl(double width) {
 //area
 //////////////////////////////////////////////////////////////////
 
-double Power_Module::areaChannel(double K, double N, double M) {
+double Power_Module::areaChannel(double K, double N, double M) const {
 
     double Adff = M * W_DFQD1 * H_DFQD1;
     double Ainv = M * N * (W_INVD2 + 3 * K) * H_INVD2;
@@ -433,16 +433,16 @@ double Power_Module::areaChannel(double K, double N, double M) {
     return channel_width * (Adff + Ainv) * MetalPitch * MetalPitch;
 }
 
-double Power_Module::areaCrossbar(double Inputs, double Outputs) {
+double Power_Module::areaCrossbar(double Inputs, double Outputs) const {
     return (Inputs * channel_width * CrossbarPitch) * (Outputs * channel_width * CrossbarPitch);
 }
 
-double Power_Module::areaInputModule(double Words) {
+double Power_Module::areaInputModule(double Words) const {
     double Asram = (channel_width * H_SRAM) * (Words * W_SRAM);
     return Asram * (MetalPitch * MetalPitch);
 }
 
-double Power_Module::areaOutputModule(double Outputs) {
+double Power_Module::areaOutputModule(double Outputs) const {
     double Adff = Outputs * W_DFQD1 * H_DFQD1;
     return channel_width * Adff * MetalPitch * MetalPitch;
 }
@@ -486,8 +486,8 @@ void Power_Module::run() {
     }
 
     vector<Router *> routers = net->GetRouters();
-    for (size_t i = 0; i < routers.size(); i++) {
-        IQRouter *temp = dynamic_cast<IQRouter *>(routers[i]);
+    for (auto & router : routers) {
+        auto *temp = dynamic_cast<IQRouter *>(router);
         const BufferMonitor *bm = temp->GetBufferMonitor();
         calcBuffer(bm);
         const SwitchMonitor *sm = temp->GetSwitchMonitor();

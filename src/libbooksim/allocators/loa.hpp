@@ -43,7 +43,7 @@ public:
     LOA(Module *parent, const string &name,
         int inputs, int outputs);
 
-    void Allocate();
+    void Allocate() override;
 };
 
 #endif

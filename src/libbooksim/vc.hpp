@@ -79,12 +79,12 @@ public:
     VC(const Configuration &config, int outputs,
        Module *parent, const string &name);
 
-    ~VC();
+    ~VC() override;
 
     void AddFlit(Flit *f);
 
     inline Flit *FrontFlit() const {
-        return _buffer.empty() ? NULL : _buffer.front();
+        return _buffer.empty() ? nullptr : _buffer.front();
     }
 
     Flit *RemoveFlit();
@@ -134,7 +134,7 @@ public:
 
     bool IsWatched() const;
 
-    void Display(ostream &os = cout) const;
+    void Display(ostream &os = cout) const override;
 };
 
 #endif

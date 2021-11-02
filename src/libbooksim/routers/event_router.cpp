@@ -55,7 +55,7 @@ EventRouter::EventRouter(const Configuration &config,
     // Routing
 
     string rf = config.GetStr("routing_function") + "_" + config.GetStr("topology");
-    map<string, tRoutingFunction>::iterator rf_iter = gRoutingFunctionMap.find(rf);
+    auto rf_iter = gRoutingFunctionMap.find(rf);
     if (rf_iter == gRoutingFunctionMap.end()) {
         Error("Invalid routing function: " + rf);
     }
@@ -188,8 +188,8 @@ void EventRouter::_InternalStep() {
         _transport_arbiter[input]->Clear();
     }
 
-    _crossbar_pipe->WriteAll(0);
-    _credit_pipe->WriteAll(0);
+    _crossbar_pipe->WriteAll(nullptr);
+    _credit_pipe->WriteAll(nullptr);
 
     // Generate transport events and their
     // requests for the inputs
@@ -304,7 +304,7 @@ void EventRouter::_IncomingFlits() {
 
     tArrivalEvent *aevt;
 
-    _arrival_pipe->WriteAll(0);
+    _arrival_pipe->WriteAll(nullptr);
 
     for (int input = 0; input < _inputs; ++input) {
         if (!_input_buffer[input].empty()) {

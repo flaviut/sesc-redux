@@ -47,14 +47,14 @@ public:
     virtual void reset();
 
     static InjectionProcess *New(string const &inject, int nodes, double load,
-                                 Configuration const *const config = NULL);
+                                 Configuration const *const config = nullptr);
 };
 
 class BernoulliInjectionProcess : public InjectionProcess {
 public:
     BernoulliInjectionProcess(int nodes, double rate);
 
-    virtual bool test(int source);
+    bool test(int source) override;
 };
 
 class OnOffInjectionProcess : public InjectionProcess {
@@ -68,9 +68,9 @@ public:
     OnOffInjectionProcess(int nodes, double rate, double alpha, double beta,
                           double r1, vector<int> initial);
 
-    virtual void reset();
+    void reset() override;
 
-    virtual bool test(int source);
+    bool test(int source) override;
 };
 
 #endif

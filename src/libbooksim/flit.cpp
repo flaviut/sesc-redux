@@ -77,7 +77,7 @@ void Flit::Reset() {
     pri = 0;
     intm = -1;
     ph = -1;
-    data = 0;
+    data = nullptr;
 }
 
 Flit *Flit::New() {

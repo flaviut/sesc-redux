@@ -36,7 +36,7 @@ AddressPrefetcher::AddressPrefetcher(MemorySystem* current
     ,bsize(SescConf->getInt(section, "bsize"))
     ,gms(current)
 {
-    MemObj *lower_level = NULL;
+    MemObj *lower_level = nullptr;
 
     SescConf->isInt(section, "numPorts");
     SescConf->isInt(section, "portOccp");
@@ -59,7 +59,7 @@ AddressPrefetcher::AddressPrefetcher(MemorySystem* current
 
     I(current);
     lower_level = current->declareMemoryObj(section, k_lowerLevel);
-    if (lower_level != NULL)
+    if (lower_level != nullptr)
         addLowerLevel(lower_level);
 }
 

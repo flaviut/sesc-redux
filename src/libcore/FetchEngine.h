@@ -101,7 +101,7 @@ protected:
     // *******************
 
 public:
-    FetchEngine(int32_t cId, int32_t i, GMemorySystem *gms, GProcessor *gp, FetchEngine *fe = 0);
+    FetchEngine(int32_t cId, int32_t i, GMemorySystem *gms, GProcessor *gp, FetchEngine *fe = nullptr);
 
     ~FetchEngine();
 

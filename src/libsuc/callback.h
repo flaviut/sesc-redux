@@ -196,7 +196,7 @@ private:
 protected:
     CallbackFunction3() {
     }
-    virtual ~CallbackFunction3() {
+    ~CallbackFunction3() override {
     }
 public:
     static CallbackFunction3 *create(Parameter1 a1, Parameter2 a2, Parameter3 a3) {
@@ -226,12 +226,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (*funcPtr)(p1,p2,p3);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -259,7 +259,7 @@ private:
 protected:
     CallbackFunction2() {
     }
-    virtual ~CallbackFunction2() {
+    ~CallbackFunction2() override {
     }
 public:
     static CallbackFunction2 *create(Parameter1 a1, Parameter2 a2) {
@@ -288,12 +288,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (*funcPtr)(p1,p2);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -320,7 +320,7 @@ private:
 protected:
     CallbackFunction1() {
     }
-    virtual ~CallbackFunction1() {
+    ~CallbackFunction1() override {
     }
 public:
     static CallbackFunction1 *create(Parameter1 a1) {
@@ -347,12 +347,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (*funcPtr)(p1);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -378,7 +378,7 @@ public:
     StaticCallbackFunction2() {
         IS(isFree=true;);
     }
-    virtual ~StaticCallbackFunction2() {}
+    ~StaticCallbackFunction2() override {}
 
     void schedule(TimeDelta_t delta, Parameter1 a1, Parameter2 a2) {
         I(isFree);
@@ -404,7 +404,7 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         IS(isFree=true);
         (*funcPtr)(p1, p2);
     }
@@ -428,7 +428,7 @@ public:
     StaticCallbackFunction0() {
         IS(isFree=true;);
     }
-    virtual ~StaticCallbackFunction0() {}
+    ~StaticCallbackFunction0() override {}
 
     void schedule(TimeDelta_t delta) {
         I(isFree);
@@ -450,7 +450,7 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         IS(isFree=true);
         (*funcPtr)();
     }
@@ -485,7 +485,7 @@ private:
 protected:
     CallbackMember4() {
     }
-    virtual ~CallbackMember4() {
+    ~CallbackMember4() override {
     }
 public:
     static CallbackMember4 *create(ClassType *i, Parameter1 a1, Parameter2 a2, Parameter3 a3, Parameter4 a4) {
@@ -517,12 +517,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (instance->*memberPtr)(p1, p2, p3, p4);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -556,7 +556,7 @@ private:
 protected:
     CallbackMember3() {
     }
-    virtual ~CallbackMember3() {
+    ~CallbackMember3() override {
     }
 public:
     static CallbackMember3 *create(ClassType *i, Parameter1 a1, Parameter2 a2, Parameter3 a3) {
@@ -587,12 +587,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (instance->*memberPtr)(p1, p2, p3);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -624,7 +624,7 @@ private:
 protected:
     CallbackMember2() {
     }
-    virtual ~CallbackMember2() {
+    ~CallbackMember2() override {
     }
 public:
     static CallbackMember2 *create(ClassType *i, Parameter1 a1, Parameter2 a2) {
@@ -654,12 +654,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (instance->*memberPtr)(p1, p2);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -690,7 +690,7 @@ private:
 protected:
     CallbackMember1() {
     }
-    virtual ~CallbackMember1() {
+    ~CallbackMember1() override {
     }
 public:
     static CallbackMember1 *create(ClassType *i, Parameter1 a1) {
@@ -719,12 +719,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (instance->*memberPtr) (p1);
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 
@@ -753,7 +753,7 @@ private:
 protected:
     CallbackMember0() {
     }
-    virtual ~CallbackMember0() {
+    ~CallbackMember0() override {
     }
 public:
     static CallbackMember0 *create(ClassType *i) {
@@ -781,12 +781,12 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         (instance->*memberPtr) ();
         destroy();
     }
 
-    void destroy() {
+    void destroy() override {
         cbPool.in(this);
     }
 };
@@ -814,7 +814,7 @@ public:
         instance= i;
         IS(isFree=true;);
     }
-    virtual ~StaticCallbackMember2() {
+    ~StaticCallbackMember2() override {
     }
 
     void schedule(TimeDelta_t delta, Parameter1 a1, Parameter2 a2) {
@@ -841,7 +841,7 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         IS(isFree=true);
         (instance->*memberPtr) (p1, p2);
     }
@@ -870,7 +870,7 @@ public:
         instance= i;
         IS(isFree=true;);
     }
-    virtual ~StaticCallbackMember1() {
+    ~StaticCallbackMember1() override {
     }
 
     void schedule(TimeDelta_t delta, Parameter1 a1) {
@@ -895,7 +895,7 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         IS(isFree=true);
         (instance->*memberPtr) (p1);
     }
@@ -919,7 +919,7 @@ public:
         instance= i;
         IS(isFree=true;);
     }
-    virtual ~StaticCallbackMember0() {
+    ~StaticCallbackMember0() override {
     }
 
     void schedule(TimeDelta_t delta) {
@@ -942,7 +942,7 @@ public:
         }
     }
 
-    void call() {
+    void call() override {
         IS(isFree=true);
         (instance->*memberPtr) ();
     }
@@ -964,8 +964,8 @@ private:
 
 public:
     CallbackContainer() {
-        first =0;
-        last  =0;
+        first =nullptr;
+        last  =nullptr;
     }
 
     ~CallbackContainer() {
@@ -974,9 +974,9 @@ public:
 
     void add(CallbackBase * c) {
         I(c->getNextCallbackBase()==0);
-        c->setNextCallbackBase(0);
+        c->setNextCallbackBase(nullptr);
 
-        if( last == 0 ) {
+        if( last == nullptr ) {
             first = c;
             last  = c;
         } else {
@@ -987,7 +987,7 @@ public:
 
     void call() {
         // optimization for te most common case
-        if( first == 0 )
+        if( first == nullptr )
             return;
 
         do {
@@ -995,32 +995,32 @@ public:
             ID2(CallbackBase *t=first);
             first = first->getNextCallbackBase();
             IS(t->setNextCallbackBase(0));
-            if (first==0)
-                last = 0;
+            if (first==nullptr)
+                last = nullptr;
             cb->call();
         } while(first);
     }
 
     void callNext() {
-        if( first == 0 )
+        if( first == nullptr )
             return;
 
         CallbackBase *cb = first;
         ID2(CallbackBase *t=first);
         first = first->getNextCallbackBase();
         IS(t->setNextCallbackBase(0));
-        if (first==0)
-            last = 0;
+        if (first==nullptr)
+            last = nullptr;
 
         cb->call();
     }
 
     bool empty() const {
-        return first == 0;
+        return first == nullptr;
     }
 
     void makeEmpty() {
-        first = 0;
+        first = nullptr;
     }
 };
 

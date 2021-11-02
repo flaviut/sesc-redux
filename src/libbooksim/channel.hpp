@@ -51,7 +51,7 @@ class Channel : public TimedModule {
 public:
     Channel(Module *parent, string const &name);
 
-    virtual ~Channel() {}
+    ~Channel() override {}
 
     // Physical Parameters
     void SetLatency(int cycles);
@@ -66,11 +66,11 @@ public:
     // Receive data
     virtual T *Receive();
 
-    virtual void ReadInputs();
+    void ReadInputs() override;
 
-    virtual void Evaluate() {}
+    void Evaluate() override {}
 
-    virtual void WriteOutputs();
+    void WriteOutputs() override;
 
 protected:
     int _delay;

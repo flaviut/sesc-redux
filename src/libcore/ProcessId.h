@@ -130,7 +130,7 @@ private:
     bool pinned;
 
     // Inserts the process into the process queue and updates its position
-    ProcessId *queueInsert(void) {
+    ProcessId *queueInsert() {
         // Should not already be in the queue
         I(queuePosition == processQueue.end());
         // Insert at end of queue
@@ -147,13 +147,13 @@ private:
     // Effectivelly, if the promoted process is not already running and there is no
     // available compatible processor, the returned process is the one that should be
     // preempted in favor of running the promoted process
-    ProcessId *queuePromote(void);
+    ProcessId *queuePromote();
 
     // Moves the process backward in the queue until it is at the end of its priority group
-    ProcessId *queueDemote(void);
+    ProcessId *queueDemote();
 
     // Removes the process from the process queue
-    void queueRemove(void) {
+    void queueRemove() {
         // The process should still be in the queue
         I(queuePosition != processQueue.end());
         // Delete the process from the queue
@@ -174,7 +174,7 @@ public:
 
     bool sysconf(int32_t flags);
 
-    int32_t getconf(void);
+    int32_t getconf() const;
 
     static ProcessId *create(Pid_t ppid, Pid_t id, int32_t flags);
 
@@ -204,7 +204,7 @@ public:
 
     static void report(const char *str);
 
-    void reportId();
+    void reportId() const;
 
     bool isMigrable() const {
         return migrable;
@@ -330,13 +330,13 @@ public:
         state = ReadyState;
     }
 
-    int32_t getPriority(void) const {
+    int32_t getPriority() const {
         return priority;
     }
 
     ProcessId *setPriority(int32_t newPriority) {
         // By default, return nothing
-        ProcessId *retVal = 0;
+        ProcessId *retVal = nullptr;
         int32_t oldPriority = priority;
         priority = newPriority;
         // If in the process queue
@@ -353,10 +353,10 @@ public:
         return retVal;
     }
 
-    long long getNGradInsts() {
+    long long getNGradInsts() const {
         return stats.nGradInsts;
     }
 };
 
 
-#endif //  _PROCESSID_H_
+#endif //  PROCESSID_H

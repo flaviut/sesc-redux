@@ -38,13 +38,13 @@ protected:
 
 public:
     Bus(MemorySystem* current, const char *device_descr_section,
-        const char *device_name = NULL);
-    ~Bus() {}
-    void access(MemRequest *mreq);
-    void returnAccess(MemRequest *mreq);
-    bool canAcceptStore(PAddr addr);
-    void invalidate(PAddr addr,ushort size,MemObj *oc);
-    Time_t getNextFreeCycle() const;
+        const char *device_name = nullptr);
+    ~Bus() override {}
+    void access(MemRequest *mreq) override;
+    void returnAccess(MemRequest *mreq) override;
+    bool canAcceptStore(PAddr addr) override;
+    void invalidate(PAddr addr,ushort size,MemObj *oc) override;
+    Time_t getNextFreeCycle() const override;
 };
 
 #endif

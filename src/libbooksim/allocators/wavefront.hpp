@@ -49,10 +49,10 @@ public:
     Wavefront(Module *parent, const string &name,
               int inputs, int outputs, bool skip_diags = false);
 
-    virtual void AddRequest(int in, int out, int label = 1,
-                            BPri_t in_pri = 0, BPri_t out_pri = 0);
+    void AddRequest(int in, int out, int label = 1,
+                            BPri_t in_pri = 0, BPri_t out_pri = 0) override;
 
-    virtual void Allocate();
+    void Allocate() override;
 };
 
 #endif

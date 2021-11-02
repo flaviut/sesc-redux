@@ -48,13 +48,13 @@ protected:
 
 public:
     AddressPrefetcher(MemorySystem* current, const char *device_descr_section,
-                      const char *device_name = NULL);
-    ~AddressPrefetcher() {}
-    void access(MemRequest *mreq);
-    void returnAccess(MemRequest *mreq);
-    bool canAcceptStore(PAddr addr);
-    virtual void invalidate(PAddr addr,ushort size,MemObj *oc);
-    Time_t getNextFreeCycle() const;
+                      const char *device_name = nullptr);
+    ~AddressPrefetcher() override {}
+    void access(MemRequest *mreq) override;
+    void returnAccess(MemRequest *mreq) override;
+    bool canAcceptStore(PAddr addr) override;
+    void invalidate(PAddr addr,ushort size,MemObj *oc) override;
+    Time_t getNextFreeCycle() const override;
 };
 
 #endif // ADDRESSPREFETCHER_H

@@ -50,16 +50,16 @@ protected:
 
     GStatsCntr chWait;
 
-    int32_t calcBank(PAddr paddr) {
+    int32_t calcBank(PAddr paddr) const {
         return GMemorySystem::calcPage(paddr) % numBanks;
     }
 
 public:
     MemCtrl(MemorySystem* current, const char *device_descr_section,
-            const char *device_name=NULL);
-    ~MemCtrl() {};
+            const char *device_name=nullptr);
+    ~MemCtrl() override {};
 
-    void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
     virtual void read(MemRequest *mreq);
     virtual void write(MemRequest *mreq);
@@ -67,12 +67,12 @@ public:
 
     Bank *getBank(uint16_t i) const;
 
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
 
-    virtual void invalidate(PAddr addr,ushort size,MemObj *oc);
-    bool canAcceptStore(PAddr addr);
+    void invalidate(PAddr addr,ushort size,MemObj *oc) override;
+    bool canAcceptStore(PAddr addr) override;
 };
 
 

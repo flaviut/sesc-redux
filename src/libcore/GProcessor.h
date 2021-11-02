@@ -111,7 +111,7 @@ protected:
     GStatsCntr *notRetired[MaxNoRetResp][MaxInstType][MaxRetOutcome];
 
     // Construction
-    void buildInstStats(GStatsCntr *nInstFake[MaxInstType], const char *txt);
+    void buildInstStats(GStatsCntr *nInstFake[MaxInstType], const char *txt) const;
 
     void
     buildUnit(const char *clusterName, GMemorySystem *ms, Cluster *cluster, InstType type, GStatsEnergyCGBase *ecg);
@@ -176,7 +176,7 @@ public:
     virtual void replay(DInst *dinst);
 
     // Returns the maximum number of flows this processor can support
-    size_t getMaxFlows(void) const {
+    size_t getMaxFlows() const {
         return MaxFlows;
     }
 

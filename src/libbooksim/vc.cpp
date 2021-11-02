@@ -52,7 +52,7 @@ VC::VC(const Configuration &config, int outputs,
           _state(idle), _out_port(-1), _out_vc(-1), _pri(0), _watched(false),
           _expected_pid(-1), _last_id(-1), _last_pid(-1) {
     _lookahead_routing = !config.GetInt("routing_delay");
-    _route_set = _lookahead_routing ? NULL : new OutputSet();
+    _route_set = _lookahead_routing ? nullptr : new OutputSet();
 
     string priority = config.GetStr("priority");
     if (priority == "local_age") {
@@ -107,7 +107,7 @@ void VC::AddFlit(Flit *f) {
 }
 
 Flit *VC::RemoveFlit() {
-    Flit *f = NULL;
+    Flit *f = nullptr;
     if (!_buffer.empty()) {
         f = _buffer.front();
         _buffer.pop_front();

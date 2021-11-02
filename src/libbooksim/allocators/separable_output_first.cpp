@@ -47,7 +47,7 @@ SeparableOutputFirstAllocator(Module *parent, const string &name, int inputs,
 
 void SeparableOutputFirstAllocator::Allocate() {
 
-    set<int>::const_iterator port_iter = _out_occ.begin();
+    auto port_iter = _out_occ.begin();
     while (port_iter != _out_occ.end()) {
 
         const int &output = *port_iter;
@@ -68,7 +68,7 @@ void SeparableOutputFirstAllocator::Allocate() {
         // input arbiters.
 
         int label = -1;
-        const int input = _output_arb[output]->Arbitrate(&label, NULL);
+        const int input = _output_arb[output]->Arbitrate(&label, nullptr);
         assert(input > -1);
 
         const sRequest &req = _in_req[input][output];
@@ -86,7 +86,7 @@ void SeparableOutputFirstAllocator::Allocate() {
 
         // Execute the input arbiters.
 
-        const int output = _input_arb[input]->Arbitrate(NULL, NULL);
+        const int output = _input_arb[input]->Arbitrate(nullptr, nullptr);
 
         if (output > -1) {
             assert((_inmatch[input] == -1) && (_outmatch[output] == -1));

@@ -100,14 +100,14 @@ private:
 
 public:
     StridePrefetcher(MemorySystem* current, const char *device_descr_section,
-                     const char *device_name = NULL);
-    ~StridePrefetcher() {}
-    void access(MemRequest *mreq);
+                     const char *device_name = nullptr);
+    ~StridePrefetcher() override {}
+    void access(MemRequest *mreq) override;
     void read(MemRequest *mreq);
-    void returnAccess(MemRequest *mreq);
-    bool canAcceptStore(PAddr addr);
-    void invalidate(PAddr addr,ushort size,MemObj *oc);
-    Time_t getNextFreeCycle() const;
+    void returnAccess(MemRequest *mreq) override;
+    bool canAcceptStore(PAddr addr) override;
+    void invalidate(PAddr addr,ushort size,MemObj *oc) override;
+    Time_t getNextFreeCycle() const override;
 
     void learnHit(PAddr addr);
     void learnMiss(PAddr addr);

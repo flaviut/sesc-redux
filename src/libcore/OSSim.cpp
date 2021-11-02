@@ -27,11 +27,11 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <ctype.h>
-#include <signal.h>
+#include <cctype>
+#include <csignal>
 #include <sys/time.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <alloca.h>
 
 #include "SescConf.h"
@@ -58,13 +58,13 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #include "libll/ThreadContext.h"
 #include "OSSim.h"
 
-OSSim *osSim = 0;
+OSSim *osSim = nullptr;
 
 /**********************
  * OSSim
  */
 
-char *OSSim::benchName = 0;
+char *OSSim::benchName = nullptr;
 
 static void sescConfSignal(int32_t sig) {
     static bool sigFaulting = false;
@@ -113,7 +113,7 @@ void OSSim::reportOnTheFly(const char *file) {
 }
 
 OSSim::OSSim(int32_t argc, char **argv, char **envp)
-        : traceFile(0), snapshotGlobalClock(0), finishWorkNowCB(&cpus) {
+        : traceFile(nullptr), snapshotGlobalClock(0), finishWorkNowCB(&cpus) {
     I(osSim == 0);
     osSim = this;
 
@@ -131,7 +131,7 @@ OSSim::OSSim(int32_t argc, char **argv, char **envp)
 
     benchRunning = tmp;
 
-    benchSection = 0;
+    benchSection = nullptr;
 
 #ifndef SESC_PASS_ENVIRONMENT
     // The problem of passign the environment is that the stack size is
@@ -161,7 +161,7 @@ OSSim::OSSim(int32_t argc, char **argv, char **envp)
         nenv[0] = buf;
         envpassed++;
     }
-    nenv[envpassed] = 0;
+    nenv[envpassed] = nullptr;
 
 //  char *nenv[2];
 //  nenv[0] = 0;
@@ -200,10 +200,10 @@ void OSSim::processParams(int32_t argc, char **argv, char **envp) {
     simMarks.end = (~0UL) - 1;
     simMarks.mtMarks = false;
 
-    const char *xtraPat = 0;
-    const char *reportTo = 0;
-    const char *confName = 0;
-    const char *extension = 0;
+    const char *xtraPat = nullptr;
+    const char *reportTo = nullptr;
+    const char *confName = nullptr;
+    const char *extension = nullptr;
     justTest = false;
     fastForward = false;
 
@@ -233,26 +233,26 @@ void OSSim::processParams(int32_t argc, char **argv, char **envp) {
         if (argv[i][0] == '-') {
             if (argv[i][1] == 'w') {
                 if (isdigit(argv[i][2]))
-                    nInst2Skip = strtoll(&argv[i][2], 0, 0);
+                    nInst2Skip = strtoll(&argv[i][2], nullptr, 0);
                 else {
                     i++;
-                    nInst2Skip = strtoll(argv[i], 0, 0);
+                    nInst2Skip = strtoll(argv[i], nullptr, 0);
                 }
             } else if (argv[i][1] == 'y') {
                 if (isdigit(argv[i][2]))
-                    nInst2Sim = strtoll(&argv[i][2], 0, 0);
+                    nInst2Sim = strtoll(&argv[i][2], nullptr, 0);
                 else {
                     i++;
-                    nInst2Sim = strtoll(argv[i], 0, 0);
+                    nInst2Sim = strtoll(argv[i], nullptr, 0);
                 }
             } else if (argv[i][1] == 'm') {
                 useMTMarks = true;
                 simMarks.mtMarks = true;
                 if (argv[i][2] != 0)
-                    mtId = strtol(&argv[i][2], 0, 0);
+                    mtId = strtol(&argv[i][2], nullptr, 0);
                 else {
                     i++;
-                    mtId = strtol(argv[i], 0, 0);
+                    mtId = strtol(argv[i], nullptr, 0);
                 }
                 idSimMarks[mtId].total = 0;
                 idSimMarks[mtId].begin = 0;
@@ -261,30 +261,30 @@ void OSSim::processParams(int32_t argc, char **argv, char **envp) {
             } else if (argv[i][1] == '1') {
                 if (argv[i][2] != 0) {
                     if (useMTMarks)
-                        idSimMarks[mtId].begin = strtol(&argv[i][2], 0, 0);
+                        idSimMarks[mtId].begin = strtol(&argv[i][2], nullptr, 0);
                     else
-                        simMarks.begin = strtol(&argv[i][2], 0, 0);
+                        simMarks.begin = strtol(&argv[i][2], nullptr, 0);
                 } else {
                     i++;
                     if (useMTMarks)
-                        idSimMarks[mtId].begin = strtol(argv[i], 0, 0);
+                        idSimMarks[mtId].begin = strtol(argv[i], nullptr, 0);
                     else
-                        simMarks.begin = strtol(argv[i], 0, 0);
+                        simMarks.begin = strtol(argv[i], nullptr, 0);
                 }
                 if (!useMTMarks)
                     simMarks.total = 0;
             } else if (argv[i][1] == '2') {
                 if (argv[i][2] != 0) {
                     if (useMTMarks)
-                        idSimMarks[mtId].end = strtol(&argv[i][2], 0, 0);
+                        idSimMarks[mtId].end = strtol(&argv[i][2], nullptr, 0);
                     else
-                        simMarks.end = strtol(&argv[i][2], 0, 0);
+                        simMarks.end = strtol(&argv[i][2], nullptr, 0);
                 } else {
                     i++;
                     if (useMTMarks)
-                        idSimMarks[mtId].end = strtol(argv[i], 0, 0);
+                        idSimMarks[mtId].end = strtol(argv[i], nullptr, 0);
                     else
-                        simMarks.end = strtol(argv[i], 0, 0);
+                        simMarks.end = strtol(argv[i], nullptr, 0);
                 }
                 if (!useMTMarks)
                     simMarks.total = 0;
@@ -548,7 +548,7 @@ void OSSim::tryWakeupParent(Pid_t cpid) {
 
     ProcessId *pproc = ProcessId::getProcessId(ppid);
     // Does the parent process still exist?
-    if (pproc == 0)
+    if (pproc == nullptr)
         return;
 
     if (pproc->getState() == WaitingState) {
@@ -612,7 +612,7 @@ void OSSim::eventSetPPid(Pid_t pid, Pid_t ppid) {
 int32_t OSSim::eventSuspend(Pid_t cpid, Pid_t pid) {
     LOG("OSSim::suspend(%d) Received from pid %d", pid, cpid);
     ProcessId *proc = ProcessId::getProcessId(pid);
-    if (proc == 0) {
+    if (proc == nullptr) {
         LOG("OSSim::suspend(%d) non existing process???", pid);
         return 0;
     }
@@ -642,7 +642,7 @@ int32_t OSSim::eventSuspend(Pid_t cpid, Pid_t pid) {
 int32_t OSSim::eventResume(Pid_t cpid, Pid_t pid) {
     LOG("OSSim::resume(%d,%d)", cpid, pid);
     ProcessId *proc = ProcessId::getProcessId(pid);
-    if (proc == 0) {
+    if (proc == nullptr) {
         LOG("OSSim::resume(%d,%d) non existing process???", cpid, pid);
         return 0;
     }
@@ -756,7 +756,7 @@ void OSSim::preBoot() {
 
     SescConf->lock();       // All the objects should be loaded
 
-    time_t t = time(0);
+    time_t t = time(nullptr);
     Report::field("OSSim:beginTime=%s", ctime(&t));
 
     Report::field("OSSim:bench=%s", benchRunning);
@@ -777,7 +777,7 @@ void OSSim::preBoot() {
         return;
     }
 
-    gettimeofday(&stTime, 0);
+    gettimeofday(&stTime, nullptr);
     if (fastForward) {
         MSG("Begin fastforwarding: skipping instructions\n");
         MSG("End skipping: skipped %lld\n", (long long int) ThreadContext::skipInsts(-1));
@@ -799,7 +799,7 @@ void OSSim::simFinish() {
     // Work finished, dump statistics
     report("Final");
 
-    time_t t = time(0);
+    time_t t = time(nullptr);
     Report::field("OSSim:endTime=%s", ctime(&t));
 
     Report::close();
@@ -822,7 +822,7 @@ void OSSim::simFinish() {
     //  Report::close();
 }
 
-void OSSim::report(const char *str) {
+void OSSim::report(const char *str) const {
 
     ProcessId::report(str);
 
@@ -835,7 +835,7 @@ void OSSim::report(const char *str) {
     Report::field("OSSim:reportName=%s", str);
 
     timeval endTime;
-    gettimeofday(&endTime, 0);
+    gettimeofday(&endTime, nullptr);
 
     double msecs = (endTime.tv_sec - stTime.tv_sec) * 1000
                    + (endTime.tv_usec - stTime.tv_usec) / 1000;
@@ -887,7 +887,7 @@ void OSSim::report(const char *str) {
 
 }
 
-GProcessor *OSSim::pid2GProcessor(Pid_t pid) {
+GProcessor *OSSim::pid2GProcessor(Pid_t pid) const {
     I(ProcessId::getProcessId(pid));
     int32_t cpu = ProcessId::getProcessId(pid)->getCPU();
     // -1 when it has never started to execute
@@ -901,7 +901,7 @@ ProcessIdState OSSim::getState(Pid_t pid) {
     return ProcessId::getProcessId(pid)->getState();
 }
 
-GProcessor *OSSim::id2GProcessor(CPU_t cpu) {
+GProcessor *OSSim::id2GProcessor(CPU_t cpu) const {
     I(cpus.getProcessor(cpu));
     I(cpus.getProcessor(cpu)->getId() == cpu);
 
@@ -916,7 +916,7 @@ void OSSim::unRegisterProc(GProcessor *core) {
     I(!core->hasWork());
     for (size_t i = 0; i < cpus.size(); i++) {
         if (cpus.getProcessor(i) == core) {
-            cpus.setProcessor(i, 0);
+            cpus.setProcessor(i, nullptr);
             return;
         }
     }

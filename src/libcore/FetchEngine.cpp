@@ -201,7 +201,7 @@ void FetchEngine::realFetch(IBucket *bucket, int32_t fetchMax) {
         nGradInsts++; // Before executePC because it can trigger a context switch
 
         DInst *dinst = flow.executePC();
-        if (dinst == 0)
+        if (dinst == nullptr)
             break;
 
         const Instruction *inst = dinst->getInst();

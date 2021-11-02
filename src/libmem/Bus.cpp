@@ -31,7 +31,7 @@ Bus::Bus(MemorySystem* current
     : MemObj(section, name)
     ,delay(SescConf->getInt(section, "delay"))
 {
-    MemObj *lower_level = NULL;
+    MemObj *lower_level = nullptr;
 
     SescConf->isInt(section, "numPorts");
     SescConf->isInt(section, "portOccp");
@@ -48,7 +48,7 @@ Bus::Bus(MemorySystem* current
 
     I(current);
     lower_level = current->declareMemoryObj(section, k_lowerLevel);
-    if (lower_level != NULL)
+    if (lower_level != nullptr)
         addLowerLevel(lower_level);
 
     opAvgBusTime[MemRead] = new GStatsAvg("%s_AvgTime_MemRead", name);

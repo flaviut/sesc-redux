@@ -46,7 +46,7 @@ protected:
     void push(MemRequest *mreq);
     void specialOp(MemRequest *mreq);
 
-    Time_t nextSlot(MemRequest *mreq);
+    Time_t nextSlot(MemRequest *mreq) const;
 
     virtual void doRead(MemRequest *mreq);
     virtual void doWrite(MemRequest *mreq);
@@ -59,29 +59,29 @@ protected:
     typedef CallbackMember1<SMPMemCtrl, MemRequest *, &SMPMemCtrl::doPush>
     doPushCB;
 
-    virtual void goToMem(MemRequest *mreq);
+    void goToMem(MemRequest *mreq) override;
     virtual unsigned getNumSnoopCaches(SMPMemRequest *sreq) {
         return upperLevel.size() - 1;
     }
 
 public:
     SMPMemCtrl(SMemorySystem *gms, const char *section, const char *name);
-    ~SMPMemCtrl();
+    ~SMPMemCtrl() override;
 
     // BEGIN MemObj interface
 
     // port usage accounting
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
     // interface with upper level
     bool canAcceptStore(PAddr addr) const;
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
 
     // interface with lower level
-    virtual void returnAccess(MemRequest *mreq);
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
+    void returnAccess(MemRequest *mreq) override;
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
 
-    bool canAcceptStore(PAddr addr) {
+    bool canAcceptStore(PAddr addr) override {
         return true;
     }
 

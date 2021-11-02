@@ -25,10 +25,10 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #ifndef CONFIGCLASS_H
 #define CONFIGCLASS_H
 
-#include <string.h>
+#include <cstring>
 #include <strings.h>
-#include <ctype.h>
-#include <stdio.h>
+#include <cctype>
+#include <cstdio>
 #include <vector>
 #include <string>
 using std::string;
@@ -45,7 +45,7 @@ protected:
     public:
         string s1;
         string s2;
-        KeyIndex(void) : s1(), s2() {
+        KeyIndex() : s1(), s2() {
         }
         KeyIndex(const char *cstr1, const char *cstr2) : s1(cstr1), s2(cstr2) {
         }
@@ -110,7 +110,7 @@ protected:
             X = 0;
             Y = 0;
         }
-        ~Record(void);
+        ~Record();
         Record(bool val);
         Record(int32_t val);
         Record(double val);
@@ -214,8 +214,8 @@ protected:
     class HashColin {
     private:
         size_t hash(const string &s, size_t hval) const {
-            for(size_t i=0; i<s.size(); i++) {
-                hval += tolower(s[i]);
+            for(char i : s) {
+                hval += tolower(i);
                 hval += (hval << 10);
                 hval ^= (hval >> 6);
             }
@@ -243,7 +243,7 @@ protected:
 
     hashRecord_t hashRecord;
 
-    bool read_config(void);
+    bool read_config();
     void getSvalue();
     bool getSimplifiedLine(char *line);
 
@@ -262,7 +262,7 @@ protected:
 public:
     Config(const char *name,
            const char *envstr);
-    virtual ~ Config(void);
+    virtual ~ Config();
 
     void notCorrect();
 
@@ -399,21 +399,21 @@ public:
                   const char *l5,
                   const char *l6,
                   const int32_t vectorPos=0) {
-        return isInList(block,name,l1,l2,l3,l4,l5,l6,0,vectorPos);
+        return isInList(block,name,l1,l2,l3,l4,l5,l6,nullptr,vectorPos);
     }
 
     bool isInList(const char *block,
                   const char *name,
                   const char *l1,
                   int32_t vectorPos=0) {
-        return isInList(block,name,l1,0,0,0,0,0,0,vectorPos);
+        return isInList(block,name,l1,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,vectorPos);
     }
     bool isInList(const char *block,
                   const char *name,
                   const char *l1,
                   const char *l2,
                   int32_t vectorPos=0) {
-        return isInList(block,name,l1,l2,0,0,0,0,0,vectorPos);
+        return isInList(block,name,l1,l2,nullptr,nullptr,nullptr,nullptr,nullptr,vectorPos);
     }
     bool isInList(const char *block,
                   const char *name,
@@ -421,7 +421,7 @@ public:
                   const char *l2,
                   const char *l3,
                   int32_t vectorPos=0) {
-        return isInList(block,name,l1,l2,l3,0,0,0,0,vectorPos);
+        return isInList(block,name,l1,l2,l3,nullptr,nullptr,nullptr,nullptr,vectorPos);
     }
     bool isInList(const char *block,
                   const char *name,
@@ -430,7 +430,7 @@ public:
                   const char *l3,
                   const char *l4,
                   int32_t vectorPos=0) {
-        return isInList(block,name,l1,l2,l3,l4,0,0,0,vectorPos);
+        return isInList(block,name,l1,l2,l3,l4,nullptr,nullptr,nullptr,vectorPos);
     }
     bool isInList(const char *block,
                   const char *name,
@@ -440,7 +440,7 @@ public:
                   const char *l4,
                   const char *l5,
                   int32_t vectorPos=0) {
-        return isInList(block,name,l1,l2,l3,l4,l5,0,0,vectorPos);
+        return isInList(block,name,l1,l2,l3,l4,l5,nullptr,nullptr,vectorPos);
     }
     void dump(bool showAll = false);
 };

@@ -60,7 +60,7 @@ void BufferState::BufferPolicy::FreeSlotFor(int vc) {
 
 BufferState::BufferPolicy *
 BufferState::BufferPolicy::New(Configuration const &config, BufferState *parent, const string &name) {
-    BufferPolicy *sp = NULL;
+    BufferPolicy *sp = nullptr;
     string buffer_policy = config.GetStr("buffer_policy");
     if (buffer_policy == "private") {
         sp = new PrivateBufferPolicy(config, parent, name);
@@ -541,7 +541,7 @@ BufferState::~BufferState() {
 void BufferState::ProcessCredit(Credit const *const c) {
     assert(c);
 
-    set<int>::iterator iter = c->vc.begin();
+    auto iter = c->vc.begin();
     while (iter != c->vc.end()) {
 
         int const vc = *iter;

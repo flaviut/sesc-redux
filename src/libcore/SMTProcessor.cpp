@@ -58,7 +58,7 @@ SMTProcessor::SMTProcessor(GMemorySystem *gm, CPU_t i)
 
     flow.resize(smtContexts);
 
-    Fetch *f = new Fetch(gm, Id, Id * smtContexts, this);
+    auto *f = new Fetch(gm, Id, Id * smtContexts, this);
     flow[0] = f;
     gRAT = (DInst ***) malloc(sizeof(DInst ***) * smtContexts);
 
@@ -79,22 +79,18 @@ SMTProcessor::SMTProcessor(GMemorySystem *gm, CPU_t i)
 }
 
 SMTProcessor::~SMTProcessor() {
-    for (FetchContainer::iterator it = flow.begin();
-         it != flow.end();
-         it++) {
-        delete *it;
+    for (auto & it : flow) {
+        delete it;
     }
 }
 
 SMTProcessor::Fetch *SMTProcessor::findFetch(Pid_t pid) const {
-    for (FetchContainer::const_iterator it = flow.begin();
-         it != flow.end();
-         it++) {
-        if ((*it)->IFID.getPid() == pid) {
-            return *it;
+    for (auto it : flow) {
+        if (it->IFID.getPid() == pid) {
+            return it;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 DInst **SMTProcessor::getRAT(const int32_t contextId) {
@@ -109,12 +105,10 @@ FetchEngine *SMTProcessor::currentFlow() {
 }
 
 void SMTProcessor::switchIn(Pid_t pid) {
-    for (FetchContainer::iterator it = flow.begin();
-         it != flow.end();
-         it++) {
-        if ((*it)->IFID.getPid() < 0) {
+    for (auto & it : flow) {
+        if (it->IFID.getPid() < 0) {
             // Free FetchEngine
-            (*it)->IFID.switchIn(pid);
+            it->IFID.switchIn(pid);
             return;
         }
     }
@@ -133,10 +127,8 @@ void SMTProcessor::switchOut(Pid_t pid) {
 size_t SMTProcessor::availableFlows() const {
     size_t freeEntries = 0;
 
-    for (FetchContainer::const_iterator it = flow.begin();
-         it != flow.end();
-         it++) {
-        if ((*it)->IFID.getPid() < 0)
+    for (auto it : flow) {
+        if (it->IFID.getPid() < 0)
             freeEntries++;
     }
 
@@ -259,7 +251,7 @@ StallCause SMTProcessor::addInst(DInst *dinst) {
     DInst **RAT = gRAT[dinst->getContextId() - firstContext];
 
     if (InOrderCore) {
-        if (RAT[inst->getSrc1()] != 0 || RAT[inst->getSrc2()] != 0) {
+        if (RAT[inst->getSrc1()] != nullptr || RAT[inst->getSrc2()] != nullptr) {
             return SmallWinStall;
         }
     }
@@ -298,10 +290,8 @@ bool SMTProcessor::hasWork() const {
     if (!ROB.empty())
         return true;
 
-    for (FetchContainer::const_iterator it = flow.begin();
-         it != flow.end();
-         it++) {
-        if ((*it)->IFID.hasWork() || (*it)->pipeQ.hasWork())
+    for (auto it : flow) {
+        if (it->IFID.hasWork() || it->pipeQ.hasWork())
             return true;
     }
 

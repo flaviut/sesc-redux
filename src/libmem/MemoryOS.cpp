@@ -26,7 +26,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // TODO: Make this a parameter in sesc.conf
 uint32_t MemoryOS::numPhysicalPages;
-PageTable *StdMemoryOS::PT=0;
+PageTable *StdMemoryOS::PT=nullptr;
 
 /** Note: bit field distribution according to PageSize:
           L1TP  L2TP   Offset
@@ -128,7 +128,7 @@ PageTable::IntlPTEntry *PageTable::getReplCandidate(uint16_t first_bank, uint16_
 {
     Time_t minTime = globalClock;
     PageTable::IntlPTEntry *pend = invertedPT + MemoryOS::numPhysicalPages;
-    PageTable::IntlPTEntry *q = 0;
+    PageTable::IntlPTEntry *q = nullptr;
 
     for(PageTable::IntlPTEntry *p = invertedPT + first_bank; p < pend; p += search_step) {
         int32_t status = p->status;
@@ -173,7 +173,7 @@ StdMemoryOS::~StdMemoryOS()
 
 void StdMemoryOS::boot()
 {
-    if(PT==0)
+    if(PT==nullptr)
         PT = new PageTable();
 }
 
@@ -191,9 +191,9 @@ PageTable::IntlPTEntry *StdMemoryOS::getReplPTEntry()
             // Otherwise we could even be replacing a page that has already
             // been translated and involved in a concurrent WR/RD process
             PT->stampPhPage(PT->L2PTEntryToPhPage(p));
-            p = 0;
+            p = nullptr;
         }
-    } while (p == 0);
+    } while (p == nullptr);
     return p;
 }
 
@@ -216,7 +216,7 @@ uint32_t StdMemoryOS::getFreePhysicalPage()
                          ,cacheObj
                          ,MemWrite
                          ,PT->getL2PTEntryPhysicalAddress(p->virtualPage)
-                         ,0);
+                         ,nullptr);
 
     uint32_t tmp = PT->L2PTEntryToPhPage(p);
 
@@ -255,7 +255,7 @@ void StdMemoryOS::accessL1PT(MemRequest *origReq, PAddr paddr)
 
     if (l2addr == -1) {
         PT->assignL1Entry(vPage, getFreePhysicalPage());
-        CBMemRequest::create(1, cacheObj, MemWrite, paddr, 0);
+        CBMemRequest::create(1, cacheObj, MemWrite, paddr, nullptr);
     }
 
     //  MSG("2.TLB Miss 0x%x page L2PT[0x%x] @%lld", origReq->getVaddr(), l2addr, globalClock);
@@ -276,7 +276,7 @@ void StdMemoryOS::accessL2PT(MemRequest *origReq, PAddr paddr)
     if (phPage == -1) {
         PT->assignL2Entry(vPage, getFreePhysicalPage());
 
-        CBMemRequest::create(1, cacheObj, MemWrite, paddr, 0);
+        CBMemRequest::create(1, cacheObj, MemWrite, paddr, nullptr);
     }
 
     completeReq(origReq, vaddr, vPage);
@@ -291,7 +291,7 @@ void StdMemoryOS::attemptToEmptyQueue(uint32_t vaddr, uint32_t phPage)
     // attempt a bypass
     int32_t vPage = GMemorySystem::calcPage(vaddr);
 
-    std::vector<MemRequest *>::iterator it = pendingReqs.begin();
+    auto it = pendingReqs.begin();
     if(it != pendingReqs.end()) {
         MemRequest *mm  = *it;
         int32_t tmpPage  = GMemorySystem::calcPage(mm->getVaddr());

@@ -25,8 +25,8 @@
 // Get native ioctl() and data type definitions for it
 #include <sys/ioctl.h>
 // Get error number and errno definitions
-#include <errno.h>
-#include <signal.h>
+#include <cerrno>
+#include <csignal>
 
 
 //#define DEBUG_FILES
@@ -68,8 +68,8 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     private:
         char *s;
     public:
-        Tstr(ThreadContext *context, Tpointer_t addr) : s(0) {
-            ssize_t len = context->readMemString(addr, 0, 0);
+        Tstr(ThreadContext *context, Tpointer_t addr) : s(nullptr) {
+            ssize_t len = context->readMemString(addr, 0, nullptr);
             if (len == -1) {
                 setSysErr(context, VEFAULT);
             } else {
@@ -79,7 +79,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
             }
         }
 
-        ~Tstr(void) {
+        ~Tstr() {
             if (s != 0)
                 delete[] s;
         }
@@ -89,7 +89,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
         }
 
         operator bool() const {
-            return (s != 0);
+            return (s != nullptr);
         }
     };
 
@@ -257,7 +257,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tauxv_t {
         typedef typename ElfBase::Tauxv_t This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -394,7 +394,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Trobust_list {
         typedef typename Base::Trobust_list This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -409,7 +409,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Trobust_list_head {
         typedef typename Base::Trobust_list_head This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -453,7 +453,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tsigset_t {
         typedef typename Base::Tsigset_t This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -499,7 +499,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tsigaction {
         typedef typename Base::Tsigaction This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -543,7 +543,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     const static decltype(Base::VSA_INTERRUPT) VSA_INTERRUPT = Base::VSA_INTERRUPT;
 
     static SaSigFlags saFlagsToLocal(Tuint flags) {
-        SaSigFlags rv(static_cast<SaSigFlags>(0));
+        auto rv(static_cast<SaSigFlags>(0));
         if (flags & VSA_NODEFER) rv = static_cast<SaSigFlags>(rv | SaNoDefer);
         if (flags & VSA_SIGINFO) rv = static_cast<SaSigFlags>(rv | SaSigInfo);
         if (flags & VSA_RESTART) rv = static_cast<SaSigFlags>(rv | SaRestart);
@@ -620,7 +620,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Ttms {
         typedef typename Base::Ttms This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -651,7 +651,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Ttimeval {
         typedef typename Base::Ttimeval This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -672,7 +672,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Ttimezone {
         typedef typename Base::Ttimezone This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -717,7 +717,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Ttimespec {
         typedef typename Base::Ttimespec This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1002,7 +1002,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tiovec {
         typedef typename Base::Tiovec This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1050,7 +1050,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tdirent {
         typedef typename Base::Tdirent This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1093,7 +1093,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tdirent64 {
         typedef typename Base::Tdirent64 This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1158,7 +1158,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Twinsize {
         typedef typename Base::Twinsize This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1189,7 +1189,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tpollfd {
         typedef typename Base::Tpollfd This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1248,7 +1248,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tstat {
         typedef typename Base::Tstat This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1266,7 +1266,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
         typename This::Type_st_size st_size;
         typename This::Type_st_nlink st_nlink;
 
-        Tstat(void)
+        Tstat()
                 :
                 st_blksize(0),
                 st_blocks(0),
@@ -1325,7 +1325,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tstat64 {
         typedef typename Base::Tstat64 This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1343,7 +1343,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
         typename This::Type_st_size st_size;
         typename This::Type_st_nlink st_nlink;
 
-        Tstat64(void)
+        Tstat64()
                 :
                 st_blksize(0),
                 st_blocks(0),
@@ -1494,7 +1494,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Trlimit {
         typedef typename Base::Trlimit This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1542,7 +1542,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Trusage {
         typedef typename Base::Trusage This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1602,7 +1602,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     class Tutsname {
         typedef typename Base::Tutsname This;
     public:
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1612,7 +1612,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
         typename This::Type_release release[This::Size_release];
         typename This::Type_machine machine[This::Size_machine];
 
-        Tutsname(void) {
+        Tutsname() {
             memset(nodename, 0, sizeof(nodename));
             memset(sysname, 0, sizeof(sysname));
             memset(version, 0, sizeof(version));
@@ -1651,7 +1651,7 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
         typename This::Type_nlen nlen;
         typename This::Type_oldlenp oldlenp;
 
-        static size_t getSize(void) {
+        static size_t getSize() {
             return This::Size_All;
         }
 
@@ -1677,12 +1677,12 @@ class RealLinuxSys : public LinuxSys, public ArchDefs<mode> {
     void madvise(ThreadContext *context, InstDesc *inst, int argPos);
 
 public:
-    virtual InstDesc *sysCall(ThreadContext *context, InstDesc *inst);
+    InstDesc *sysCall(ThreadContext *context, InstDesc *inst) override;
 
     virtual InstDesc *sysCallExecute(ThreadContext *context, InstDesc *inst, int sysCallNum, int argPos = 0);
 
 protected:
-    static int stackGrowthSign(void);
+    static int stackGrowthSign();
 
     static Tpointer_t getStackPointer(const ThreadContext *context);
 
@@ -1733,17 +1733,17 @@ protected:
     static Tint getSysCallNum(const ThreadContext *context);
 
 public:
-    virtual SignalAction handleSignal(ThreadContext *context, SigInfo *sigInfo) const;
+    SignalAction handleSignal(ThreadContext *context, SigInfo *sigInfo) const override;
 
-    virtual void createStack(ThreadContext *context) const;
+    void createStack(ThreadContext *context) const override;
 
-    virtual void initSystem(ThreadContext *context) const;
+    void initSystem(ThreadContext *context) const override;
 
-    virtual void setProgArgs(ThreadContext *context, int argc, char **argv, int envc, char **envp) const;
+    void setProgArgs(ThreadContext *context, int argc, char **argv, int envc, char **envp) const override;
 
-    virtual void exitRobustList(ThreadContext *context, VAddr robust_list);
+    void exitRobustList(ThreadContext *context, VAddr robust_list) override;
 
-    virtual void clearChildTid(ThreadContext *context, VAddr &clear_child_tid);
+    void clearChildTid(ThreadContext *context, VAddr &clear_child_tid) override;
 };
 
 #if (defined SUPPORT_MIPS32)
@@ -1764,13 +1764,13 @@ void RealLinuxSys<ExecModeMips32>::CallArgs::fill(T &ref) {
     pos = (pos + sizeof(T) - 1) & (~(sizeof(T) - 1));
     I((pos % sizeof(T)) == 0);
     if (pos < 16) {
-        uint32_t tmp1 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t));
+        auto tmp1 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t));
         switch (sizeof(T)) {
             case sizeof(uint32_t):
                 ref = static_cast<T>(tmp1);
                 break;
             case sizeof(uint64_t): {
-                uint32_t tmp2 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t) + 1);
+                auto tmp2 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t) + 1);
                 ref = static_cast<T>((uint64_t(tmp1) << 32) | uint64_t(tmp2));
             }
                 break;
@@ -1823,13 +1823,13 @@ void RealLinuxSys<ExecModeMipsel32>::CallArgs::fill(T &ref) {
     pos = (pos + sizeof(T) - 1) & (~(sizeof(T) - 1));
     I((pos % sizeof(T)) == 0);
     if (pos < 16) {
-        uint32_t tmp1 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t));
+        auto tmp1 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t));
         switch (sizeof(T)) {
             case sizeof(uint32_t):
                 ref = static_cast<T>(tmp1);
                 break;
             case sizeof(uint64_t): {
-                uint32_t tmp2 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t) + 1);
+                auto tmp2 = getReg<uint32_t, RegTypeGpr>(context, RegA0 + pos / sizeof(uint32_t) + 1);
                 ref = static_cast<T>((uint64_t(tmp1)) | (uint64_t(tmp2) << 32));
             }
                 break;
@@ -1969,7 +1969,7 @@ LinuxSys *LinuxSys::create(ExecMode mode) {
         default:
             fail("LinuxSys::create with unsupported ExecMode=%d\n", mode);
     }
-    return 0;
+    return nullptr;
 }
 
 template<ExecMode mode>
@@ -2070,7 +2070,7 @@ bool LinuxSys::handleSignals(ThreadContext *context) const {
 template<>
 SignalAction RealLinuxSys<ExecModeMips32>::handleSignal(ThreadContext *context, SigInfo *sigInfo) const {
     // Pop signal mask if it's been saved
-    uint32_t dopop = getReg<uint32_t, RegSys>(context, RegSys);
+    auto dopop = getReg<uint32_t, RegSys>(context, RegSys);
     if (dopop) {
         setReg<uint32_t, RegSys>(context, RegSys, 0);
         context->setSignalMask(popStruct<Tsigset_t>(context));
@@ -2079,7 +2079,7 @@ SignalAction RealLinuxSys<ExecModeMips32>::handleSignal(ThreadContext *context, 
 #if (defined DEBUG_SIGNALS)
     printf("handleSignal for pid=%d, signal=%d, action=0x%08x\n",context->gettid(),sigInfo->signo,sigDesc.handler);
 #endif
-    SignalAction sact((SignalAction) (sigDesc.handler));
+    auto sact((SignalAction) (sigDesc.handler));
     if (sact == SigActDefault)
         sact = getDflSigAction(sigInfo->signo);
     switch (sact) {
@@ -2105,7 +2105,7 @@ SignalAction RealLinuxSys<ExecModeMips32>::handleSignal(ThreadContext *context, 
     Tpointer_t pc(context->getIAddr());
     pushScalar(context, pc);
     for (RegName r = RegZero + 1; r <= RegRA; r++) {
-        uint32_t wrVal = getReg<uint32_t, RegTypeGpr>(context, r);
+        auto wrVal = getReg<uint32_t, RegTypeGpr>(context, r);
         pushScalar(context, wrVal);
     }
     // Save the current signal mask and use sigaction's signal mask
@@ -2127,7 +2127,7 @@ void RealLinuxSys<ExecModeMips32>::initSystem(ThreadContext *context) const {
     AddressSpace *addrSpace = context->getAddressSpace();
     sysCodeSize = 6 * sizeof(uint32_t);
     sysCodeAddr = addrSpace->newSegmentAddr(sysCodeSize);
-    addrSpace->newSegment(sysCodeAddr, alignUp(sysCodeSize, addrSpace->getPageSize()), false, true, false, false);
+    addrSpace->newSegment(sysCodeAddr, alignUp(sysCodeSize, AddressSpace::getPageSize()), false, true, false, false);
     //addrSpace->newSegment(sysCodeAddr,alignUp(sysCodeSize,addrSpace->getPageSize()),false,true,false,false,false);
     addrSpace->addFuncName(sysCodeAddr, "sysCode", "");
     addrSpace->addFuncName(sysCodeAddr + sysCodeSize, "End of sysCode", "");
@@ -2143,7 +2143,7 @@ void RealLinuxSys<ExecModeMips32>::initSystem(ThreadContext *context) const {
     context->writeMemRaw(sysCodeAddr + 4 * sizeof(uint32_t), fixEndian(uint32_t(0x1000ffff)));
     // Delay slot nop
     context->writeMemRaw(sysCodeAddr + 5 * sizeof(uint32_t), fixEndian(uint32_t(0x00000000)));
-    addrSpace->protectSegment(sysCodeAddr, alignUp(sysCodeSize, addrSpace->getPageSize()), true, false, true);
+    addrSpace->protectSegment(sysCodeAddr, alignUp(sysCodeSize, AddressSpace::getPageSize()), true, false, true);
     // Set RegSys to zero. It is used by system call functions to indicate
     // that a signal mask has been already saved to the stack and needs to be restored
     setReg<uint32_t, RegSys>(context, RegSys, 0);
@@ -2155,7 +2155,7 @@ void RealLinuxSys<ExecModeMips32>::initSystem(ThreadContext *context) const {
 template<>
 SignalAction RealLinuxSys<ExecModeMipsel32>::handleSignal(ThreadContext *context, SigInfo *sigInfo) const {
     // Pop signal mask if it's been saved
-    uint32_t dopop = getReg<uint32_t, RegSys>(context, RegSys);
+    auto dopop = getReg<uint32_t, RegSys>(context, RegSys);
     if (dopop) {
         setReg<uint32_t, RegSys>(context, RegSys, 0);
         context->setSignalMask(popStruct<Tsigset_t>(context));
@@ -2164,7 +2164,7 @@ SignalAction RealLinuxSys<ExecModeMipsel32>::handleSignal(ThreadContext *context
 #if (defined DEBUG_SIGNALS)
     printf("handleSignal for pid=%d, signal=%d, action=0x%08x\n",context->gettid(),sigInfo->signo,sigDesc.handler);
 #endif
-    SignalAction sact((SignalAction) (sigDesc.handler));
+    auto sact((SignalAction) (sigDesc.handler));
     if (sact == SigActDefault)
         sact = getDflSigAction(sigInfo->signo);
     switch (sact) {
@@ -2190,7 +2190,7 @@ SignalAction RealLinuxSys<ExecModeMipsel32>::handleSignal(ThreadContext *context
     Tpointer_t pc(context->getIAddr());
     pushScalar(context, pc);
     for (RegName r = RegZero + 1; r <= RegRA; r++) {
-        uint32_t wrVal = getReg<uint32_t, RegTypeGpr>(context, r);
+        auto wrVal = getReg<uint32_t, RegTypeGpr>(context, r);
         pushScalar(context, wrVal);
     }
     // Save the current signal mask and use sigaction's signal mask
@@ -2212,7 +2212,7 @@ void RealLinuxSys<ExecModeMipsel32>::initSystem(ThreadContext *context) const {
     AddressSpace *addrSpace = context->getAddressSpace();
     sysCodeSize = 6 * sizeof(uint32_t);
     sysCodeAddr = addrSpace->newSegmentAddr(sysCodeSize);
-    addrSpace->newSegment(sysCodeAddr, alignUp(sysCodeSize, addrSpace->getPageSize()), false, true, false, false);
+    addrSpace->newSegment(sysCodeAddr, alignUp(sysCodeSize, AddressSpace::getPageSize()), false, true, false, false);
     //addrSpace->newSegment(sysCodeAddr,alignUp(sysCodeSize,addrSpace->getPageSize()),false,true,false,false,false);
     addrSpace->addFuncName(sysCodeAddr, "sysCode", "");
     addrSpace->addFuncName(sysCodeAddr + sysCodeSize, "End of sysCode", "");
@@ -2228,7 +2228,7 @@ void RealLinuxSys<ExecModeMipsel32>::initSystem(ThreadContext *context) const {
     context->writeMemRaw(sysCodeAddr + 4 * sizeof(uint32_t), fixEndian(uint32_t(0x1000ffff)));
     // Delay slot nop
     context->writeMemRaw(sysCodeAddr + 5 * sizeof(uint32_t), fixEndian(uint32_t(0x00000000)));
-    addrSpace->protectSegment(sysCodeAddr, alignUp(sysCodeSize, addrSpace->getPageSize()), true, false, true);
+    addrSpace->protectSegment(sysCodeAddr, alignUp(sysCodeSize, AddressSpace::getPageSize()), true, false, true);
     // Set RegSys to zero. It is used by system call functions to indicate
     // that a signal mask has been already saved to the stack and needs to be restored
     setReg<uint32_t, RegSys>(context, RegSys, 0);
@@ -2486,7 +2486,7 @@ void RealLinuxSys<mode>::sysClone(ThreadContext *context, InstDesc *inst, int ar
         fail("sysCall32_clone with CLONE_STOPPED not supported yet at 0x%08x, flags=0x%08x\n", context->getIAddr(),
              flags);
     SignalID sig = (flags & VCLONE_DETACHED) ? SigDetached : sigNumToLocal(flags & VCSIGNAL);
-    ThreadContext *newContext = new ThreadContext(*context,
+    auto *newContext = new ThreadContext(*context,
                                                   flags & VCLONE_PARENT, flags & VCLONE_FS, flags & VCLONE_NEWNS,
                                                   flags & VCLONE_FILES, flags & VCLONE_SIGHAND,
                                                   flags & VCLONE_VM, flags & VCLONE_THREAD,
@@ -2517,7 +2517,7 @@ void RealLinuxSys<mode>::sysClone(ThreadContext *context, InstDesc *inst, int ar
 
 template<ExecMode mode>
 void RealLinuxSys<mode>::sysFork(ThreadContext *context, InstDesc *inst, int argPos) {
-    ThreadContext *newContext = new ThreadContext(*context, false, false, false, false, false, false, false, SigChld,
+    auto *newContext = new ThreadContext(*context, false, false, false, false, false, false, false, SigChld,
                                                   0);
     I(newContext != 0);
     // Fork returns an error only if there is no memory, which should not happen here
@@ -2548,12 +2548,12 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
         setSysErr(context, VENOENT);
         return inst;
     }
-    FileSys::FileNode *fnode = dynamic_cast<FileSys::FileNode *>(node);
+    auto *fnode = dynamic_cast<FileSys::FileNode *>(node);
     if (!fnode) {
         setSysErr(context, VEACCES);
         return inst;
     }
-    FileSys::FileDescription *fdesc = new FileSys::FileDescription(fnode, O_RDONLY);
+    auto *fdesc = new FileSys::FileDescription(fnode, O_RDONLY);
     FileSys::Description::pointer pdesc(fdesc);
     ExecMode emode = getExecMode(fdesc);
     if (emode == ExecModeNone) {
@@ -2563,7 +2563,7 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
     // Pipeline flush to avoid mixing old and new InstDesc's in the pipeline
     if (context->getNDInsts()) {
         context->updIAddr(-inst->aupdate, -1);
-        return 0;
+        return nullptr;
     }
     // Find the length of the argv list
     size_t argvNum = 0;
@@ -2572,7 +2572,7 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
         Tpointer_t argAddr = fixEndian(context->readMemRaw<Tpointer_t>(argv + sizeof(Tpointer_t) * argvNum));
         if (!argAddr)
             break;
-        ssize_t argLen = context->readMemString(argAddr, 0, 0);
+        ssize_t argLen = context->readMemString(argAddr, 0, nullptr);
         I(argLen >= 1);
         argvLen += argLen;
         argvNum++;
@@ -2584,7 +2584,7 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
         Tpointer_t envAddr = fixEndian(context->readMemRaw<Tpointer_t>(envp + sizeof(Tpointer_t) * envpNum));
         if (!envAddr)
             break;
-        ssize_t envLen = context->readMemString(envAddr, 0, 0);
+        ssize_t envLen = context->readMemString(envAddr, 0, nullptr);
         I(envLen >= 1);
         envpLen += envLen;
         envpNum++;
@@ -2594,7 +2594,7 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
     char *argvPtr = argvBuf;
     for (size_t arg = 0; arg < argvNum; arg++) {
         Tpointer_t argAddr = fixEndian(context->readMemRaw<Tpointer_t>(argv + sizeof(Tpointer_t) * arg));
-        ssize_t argLen = context->readMemString(argAddr, 0, 0);
+        ssize_t argLen = context->readMemString(argAddr, 0, nullptr);
         I(argLen >= 1);
         context->readMemString(argAddr, argLen, argvPtr);
         argvArr[arg] = argvPtr;
@@ -2605,7 +2605,7 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
     char *envpPtr = envpBuf;
     for (size_t env = 0; env < envpNum; env++) {
         Tpointer_t envAddr = fixEndian(context->readMemRaw<Tpointer_t>(envp + sizeof(Tpointer_t) * env));
-        ssize_t envLen = context->readMemString(envAddr, 0, 0);
+        ssize_t envLen = context->readMemString(envAddr, 0, nullptr);
         I(envLen >= 1);
         context->readMemString(envAddr, envLen, envpPtr);
         envpArr[env] = envpPtr;
@@ -2635,7 +2635,7 @@ InstDesc *RealLinuxSys<mode>::sysExecVe(ThreadContext *context, InstDesc *inst, 
     context->clearCallStack();
 #endif
     // The InstDesc is gone now and we can't put it through the pipeline
-    return 0;
+    return nullptr;
 }
 
 template<ExecMode mode>
@@ -2643,7 +2643,7 @@ InstDesc *RealLinuxSys<mode>::sysExit(ThreadContext *context, InstDesc *inst, in
     Tint status;
     CallArgs(context, argPos) >> status;
     if (context->exit(status))
-        return 0;
+        return nullptr;
 #if (defined DEBUG_SIGNALS)
                                                                                                                             printf("Suspend %d in sysExit\n",context->gettid());
     context->dumpCallStack();
@@ -2658,10 +2658,10 @@ InstDesc *RealLinuxSys<mode>::sysExit(ThreadContext *context, InstDesc *inst, in
     // If no signal to be delivered, just wait to be reaped
     if (exitSig == SigDetached) {
         context->reap();
-        return 0;
+        return nullptr;
     }
     if (exitSig != SigNone) {
-        SigInfo *sigInfo = new SigInfo(exitSig, SigCodeChldExit);
+        auto *sigInfo = new SigInfo(exitSig, SigCodeChldExit);
         sigInfo->pid = context->gettid();
         sigInfo->data = status;
         ThreadContext::getContext(context->getParentID())->signal(sigInfo);
@@ -2674,13 +2674,13 @@ InstDesc *RealLinuxSys<mode>::sysExitGroup(ThreadContext *context, InstDesc *ins
     /*if(context->gettgtids(0,0)>0)
       fail("RealLinuxSys::sysExitGroup can't handle live thread grup members\n");*/
     //kill the other threads in the group
-    int groupSize = context->gettgtids(0, 0);
+    int groupSize = context->gettgtids(nullptr, 0);
     int *group = new int[groupSize];
     context->gettgtids(group, groupSize);
     for (int i = 0; i < groupSize; i++) {
         ThreadContext *thread = osSim->getContext(group[i]);
         //send a kill signal
-        SigInfo *sigInfo = new SigInfo(sigNumToLocal(SIGKILL), SigCodeChldExit);
+        auto *sigInfo = new SigInfo(sigNumToLocal(SIGKILL), SigCodeChldExit);
         sigInfo->pid = thread->gettid();
         thread->signal(sigInfo);
     }
@@ -2990,7 +2990,7 @@ void RealLinuxSys<mode>::sysKill(ThreadContext *context, InstDesc *inst, int arg
     ThreadContext *kcontext = osSim->getContext(pid - BaseSimTid);
     if (!kcontext)
         return setSysErr(context, VESRCH);
-    SigInfo *sigInfo = new SigInfo(sigNumToLocal(sig), SigCodeUser);
+    auto *sigInfo = new SigInfo(sigNumToLocal(sig), SigCodeUser);
     sigInfo->pid = context->gettid();
     kcontext->signal(sigInfo);
 #if (defined DEBUG_SIGNALS)
@@ -3009,7 +3009,7 @@ void RealLinuxSys<mode>::sysTKill(ThreadContext *context, InstDesc *inst, int ar
     ThreadContext *kcontext = osSim->getContext(tid - BaseSimTid);
     if (!kcontext)
         return setSysErr(context, VESRCH);
-    SigInfo *sigInfo = new SigInfo(sigNumToLocal(sig), SigCodeUser);
+    auto *sigInfo = new SigInfo(sigNumToLocal(sig), SigCodeUser);
     sigInfo->pid = context->gettid();
     kcontext->signal(sigInfo);
 #if (defined DEBUG_SIGNALS)
@@ -3031,7 +3031,7 @@ void RealLinuxSys<mode>::sysTgKill(ThreadContext *context, InstDesc *inst, int a
         return setSysErr(context, VESRCH);
     if (kcontext->gettgid() != tgid)
         return setSysErr(context, VESRCH);
-    SigInfo *sigInfo = new SigInfo(sigNumToLocal(sig), SigCodeUser);
+    auto *sigInfo = new SigInfo(sigNumToLocal(sig), SigCodeUser);
     sigInfo->pid = context->gettid();
     kcontext->signal(sigInfo);
 #if (defined DEBUG_SIGNALS)
@@ -3108,7 +3108,7 @@ void RealLinuxSys<mode>::sysRtSigProcMask(ThreadContext *context, InstDesc *inst
 template<>
 void RealLinuxSys<ExecModeMips32>::sysRtSigSuspend(ThreadContext *context, InstDesc *inst, int argPos) {
     // If this is a suspend following a wakeup, we need to pop the already-saved mask
-    uint32_t dopop = getReg<uint32_t, RegSys>(context, RegSys);
+    auto dopop = getReg<uint32_t, RegSys>(context, RegSys);
     if (dopop) {
         setReg<uint32_t, RegSys>(context, RegSys, 0);
         context->setSignalMask(popStruct<Tsigset_t>(context));
@@ -3161,7 +3161,7 @@ void RealLinuxSys<ExecModeMips32>::sysRtSigReturn(ThreadContext *context, InstDe
     Tsigset_t oldMask(popStruct<Tsigset_t>(context));
     // Restore registers, then PC
     for (RegName r = RegRA; r > RegZero; r--) {
-        uint32_t rdVal = popScalar<uint32_t>(context);
+        auto rdVal = popScalar<uint32_t>(context);
         setReg<uint32_t, RegTypeGpr>(context, r, rdVal);
     }
     context->setIAddr(popScalar<Tpointer_t>(context));
@@ -3174,7 +3174,7 @@ void RealLinuxSys<ExecModeMips32>::sysRtSigReturn(ThreadContext *context, InstDe
 template<>
 void RealLinuxSys<ExecModeMipsel32>::sysRtSigSuspend(ThreadContext *context, InstDesc *inst, int argPos) {
     // If this is a suspend following a wakeup, we need to pop the already-saved mask
-    uint32_t dopop = getReg<uint32_t, RegSys>(context, RegSys);
+    auto dopop = getReg<uint32_t, RegSys>(context, RegSys);
     if (dopop) {
         setReg<uint32_t, RegSys>(context, RegSys, 0);
         context->setSignalMask(popStruct<Tsigset_t>(context));
@@ -3227,7 +3227,7 @@ void RealLinuxSys<ExecModeMipsel32>::sysRtSigReturn(ThreadContext *context, Inst
     Tsigset_t oldMask(popStruct<Tsigset_t>(context));
     // Restore registers, then PC
     for (RegName r = RegRA; r > RegZero; r--) {
-        uint32_t rdVal = popScalar<uint32_t>(context);
+        auto rdVal = popScalar<uint32_t>(context);
         setReg<uint32_t, RegTypeGpr>(context, r, rdVal);
     }
     context->setIAddr(popScalar<Tpointer_t>(context));
@@ -3498,7 +3498,7 @@ void RealLinuxSys<mode>::sysTime(ThreadContext *context, InstDesc *inst, int arg
     CallArgs(context, argPos) >> tloc;
     // TODO: This should actually take into account simulated time
     if (wallClock == (time_t) -1)
-        wallClock = time(0);
+        wallClock = time(nullptr);
     I(wallClock > 0);
     Ttime_t rv = wallClock;
     if (tloc != (VAddr) 0) {
@@ -3680,7 +3680,7 @@ void RealLinuxSys<mode>::sysMMap(ThreadContext *context, InstDesc *inst, int arg
         }
     }
     // Now figure out the file maping (if any)
-    FileSys::SeekableDescription *sdesc = 0;
+    FileSys::SeekableDescription *sdesc = nullptr;
     size_t offs = 0;
     if (!(flags & VMAP_ANONYMOUS)) {
         FileSys::OpenFiles *openFiles = context->getOpenFiles();
@@ -3869,11 +3869,11 @@ void RealLinuxSys<mode>::sysOpenAt(ThreadContext *context, InstDesc *inst, int a
 
 template<ExecMode mode>
 void RealLinuxSys<mode>::sysPipe(ThreadContext *context, InstDesc *inst, int argPos) {
-    FileSys::PipeNode *node = new FileSys::PipeNode();
+    auto *node = new FileSys::PipeNode();
     I(node);
-    FileSys::PipeDescription *rdescription = new FileSys::PipeDescription(node, O_RDONLY);
+    auto *rdescription = new FileSys::PipeDescription(node, O_RDONLY);
     I(rdescription);
-    FileSys::PipeDescription *wdescription = new FileSys::PipeDescription(node, O_WRONLY);
+    auto *wdescription = new FileSys::PipeDescription(node, O_WRONLY);
     I(wdescription);
     FileSys::OpenFiles *openFiles = context->getOpenFiles();
     Tint rfd(openFiles->nextFreeFd(0));
@@ -3996,7 +3996,7 @@ void RealLinuxSys<mode>::sysRead(ThreadContext *context, InstDesc *inst, int arg
         return setSysErr(context, VEBADF);
     if (!context->canWrite(buf, count))
         return setSysErr(context, VEFAULT);
-    FileSys::StreamDescription *sdescription = dynamic_cast<FileSys::StreamDescription *>(description);
+    auto *sdescription = dynamic_cast<FileSys::StreamDescription *>(description);
     if (sdescription && sdescription->willRdBlock()) {
         if (sdescription->isNonBlock())
             return setSysErr(context, VEAGAIN);
@@ -4024,7 +4024,7 @@ void RealLinuxSys<mode>::sysRead(ThreadContext *context, InstDesc *inst, int arg
         context->suspend();
         return;
     }
-    uint8_t *rbuf = new uint8_t[count];
+    auto *rbuf = new uint8_t[count];
     ssize_t rcount = description->read(rbuf, count);
     I(rcount >= 0);
 #ifdef DEBUG_FILES
@@ -4053,7 +4053,7 @@ void RealLinuxSys<mode>::sysWrite(ThreadContext *context, InstDesc *inst, int ar
         return setSysErr(context, VEBADF);
     if (!context->canRead(buf, count))
         return setSysErr(context, VEFAULT);
-    FileSys::StreamDescription *sdescription = dynamic_cast<FileSys::StreamDescription *>(description);
+    auto *sdescription = dynamic_cast<FileSys::StreamDescription *>(description);
     if (sdescription && sdescription->willWrBlock()) {
         if (sdescription->isNonBlock())
             return setSysErr(context, VEAGAIN);
@@ -4081,7 +4081,7 @@ void RealLinuxSys<mode>::sysWrite(ThreadContext *context, InstDesc *inst, int ar
         context->suspend();
         return;
     }
-    uint8_t *rbuf = new uint8_t[count];
+    auto *rbuf = new uint8_t[count];
     context->readMemToBuf(buf, (size_t) count, rbuf);
     ssize_t wcount = description->write(rbuf, count);
     delete[] rbuf;
@@ -4127,7 +4127,7 @@ void RealLinuxSys<mode>::sysWriteV(ThreadContext *context, InstDesc *inst, int a
         context->readMemToBuf(iov.iov_base, iov.iov_len, wbuf + pos);
         pos += iov.iov_len;
     }
-    FileSys::StreamDescription *sdescription = dynamic_cast<FileSys::StreamDescription *>(description);
+    auto *sdescription = dynamic_cast<FileSys::StreamDescription *>(description);
     if (sdescription && sdescription->willWrBlock()) {
         fail("writev would block!\n");
     }
@@ -4151,7 +4151,7 @@ void RealLinuxSys<mode>::sysLSeek(ThreadContext *context, InstDesc *inst, int ar
     FileSys::OpenFiles *openFiles = context->getOpenFiles();
     if (!openFiles->isOpen(fd))
         return setSysErr(context, VEBADF);
-    FileSys::SeekableDescription *description = dynamic_cast<FileSys::SeekableDescription *>(openFiles->getDescription(
+    auto *description = dynamic_cast<FileSys::SeekableDescription *>(openFiles->getDescription(
             fd));
     if (!description)
         return setSysErr(context, VESPIPE);
@@ -4190,11 +4190,11 @@ void RealLinuxSys<mode>::sysLLSeek(ThreadContext *context, InstDesc *inst, int a
         return setSysErr(context, VEBADF);
     if (!context->canWrite(result, sizeof(Tloff_t)))
         return setSysErr(context, VEFAULT);
-    FileSys::SeekableDescription *description = dynamic_cast<FileSys::SeekableDescription *>(openFiles->getDescription(
+    auto *description = dynamic_cast<FileSys::SeekableDescription *>(openFiles->getDescription(
             fd));
     if (!description)
         return setSysErr(context, VESPIPE);
-    off_t newOffset = (off_t) ((((uint64_t) offset_high) << 32) | ((uint64_t) offset_low));
+    auto newOffset = (off_t) ((((uint64_t) offset_high) << 32) | ((uint64_t) offset_low));
     switch (whence) {
         case VSEEK_SET:
             break;
@@ -4232,7 +4232,7 @@ void RealLinuxSys<mode>::sysGetDEnts(ThreadContext *context, InstDesc *inst, int
 #ifdef DEBUG_FILES
     printf("[%d] getdents from %d (%ld entries to 0x%08lx)\n",context->gettid(),fd,(long)count,(long unsigned)dirp);
 #endif
-    FileSys::DirectoryDescription *desc = dynamic_cast<FileSys::DirectoryDescription *>(openFiles->getDescription(fd));
+    auto *desc = dynamic_cast<FileSys::DirectoryDescription *>(openFiles->getDescription(fd));
     if (!desc) {
 #ifdef DEBUG_FILES
         printf("Returning ENOTDIR\n");
@@ -4287,7 +4287,7 @@ void RealLinuxSys<mode>::sysIOCtl(ThreadContext *context, InstDesc *inst, int ar
         case VTCGETS:
         case VTIOCGWINSZ:
         case VTCSETSW: {
-            FileSys::TtyDescription *ttydescription = dynamic_cast<FileSys::TtyDescription *>(description);
+            auto *ttydescription = dynamic_cast<FileSys::TtyDescription *>(description);
             if (!ttydescription)
                 return setSysErr(context, VENOTTY);
             // TODO: For now, it never succeeds (assume no file is a terminal)
@@ -4334,7 +4334,7 @@ void RealLinuxSys<mode>::sysPoll(ThreadContext *context, InstDesc *inst, int arg
         } else if (!openFiles->isOpen(myFd.fd)) {
             myFd.revents |= VPOLLNVAL;
         } else {
-            FileSys::StreamDescription *sdesc = dynamic_cast<FileSys::StreamDescription *>(openFiles->getDescription(
+            auto *sdesc = dynamic_cast<FileSys::StreamDescription *>(openFiles->getDescription(
                     myFd.fd));
             if (myFd.events & VPOLLIN) {
                 if ((!sdesc) || (!sdesc->willRdBlock()))
@@ -4371,10 +4371,10 @@ void RealLinuxSys<mode>::sysPoll(ThreadContext *context, InstDesc *inst, int arg
         delete sigInfo;
         return;
     }
-    for (size_t ri = 0; ri < rdList.size(); ri++)
-        rdList[ri]->rdBlock(context->gettid());
-    for (size_t wi = 0; wi < wrList.size(); wi++)
-        wrList[wi]->wrBlock(context->gettid());
+    for (auto & ri : rdList)
+        ri->rdBlock(context->gettid());
+    for (auto & wi : wrList)
+        wi->wrBlock(context->gettid());
 #if (defined DEBUG_SIGNALS)
                                                                                                                             printf("Suspending %d in sysPoll. Also suspended:",context->gettid());
     for(PidSet::iterator suspIt=suspSet.begin(); suspIt!=suspSet.end(); suspIt++)
@@ -4421,7 +4421,7 @@ void RealLinuxSys<mode>::sysTruncate(ThreadContext *context, InstDesc *inst, int
     FileSys::Node *node = FileSys::Node::lookup(realName);
     if (!node)
         return setSysErr(context, VENOENT);
-    FileSys::FileNode *fnode = dynamic_cast<FileSys::FileNode *>(node);
+    auto *fnode = dynamic_cast<FileSys::FileNode *>(node);
     if (!fnode) {
         if (dynamic_cast<FileSys::DirectoryNode *>(node))
             return setSysErr(context, VEISDIR);
@@ -4448,7 +4448,7 @@ void RealLinuxSys<mode>::sysFTruncate(ThreadContext *context, InstDesc *inst, in
     FileSys::Description *desc = openFiles->getDescription(fd);
     if (!desc->canWr())
         return setSysErr(context, VEBADF);
-    FileSys::FileNode *node = dynamic_cast<FileSys::FileNode *>(desc->getNode());
+    auto *node = dynamic_cast<FileSys::FileNode *>(desc->getNode());
     if (!node)
         return setSysErr(context, VEINVAL);
     node->setSize(length);
@@ -4519,10 +4519,10 @@ void RealLinuxSys<mode>::sysFStat(ThreadContext *context, InstDesc *inst, int ar
     simStat.st_mode = node->getMode();
     simStat.st_nlink = 1;
     simStat.st_blksize = context->getAddressSpace()->getPageSize();
-    const FileSys::SeekableNode *seeknode = dynamic_cast<const FileSys::SeekableNode *>(node);
+    const auto *seeknode = dynamic_cast<const FileSys::SeekableNode *>(node);
     simStat.st_size = seeknode ? seeknode->getSize() : 0;
     simStat.st_blocks = context->getAddressSpace()->pageAlignUp(simStat.st_size);
-    const FileSys::StreamNode *streamnode = dynamic_cast<const FileSys::StreamNode *>(node);
+    const auto *streamnode = dynamic_cast<const FileSys::StreamNode *>(node);
     simStat.st_rdev = streamnode ? streamnode->getRdev() : 0;
     simStat.write(context, buf);
     return setSysRet(context);
@@ -4924,7 +4924,7 @@ void RealLinuxSys<ExecModeMipsel64>::setThreadArea(ThreadContext *context, Tpoin
 #if (defined SUPPORT_MIPS32)
 
 template<>
-int RealLinuxSys<ExecModeMips32>::stackGrowthSign(void) {
+int RealLinuxSys<ExecModeMips32>::stackGrowthSign() {
     return -1;
 }
 
@@ -4932,7 +4932,7 @@ int RealLinuxSys<ExecModeMips32>::stackGrowthSign(void) {
 #if (defined SUPPORT_MIPSEL32)
 
 template<>
-int RealLinuxSys<ExecModeMipsel32>::stackGrowthSign(void) {
+int RealLinuxSys<ExecModeMipsel32>::stackGrowthSign() {
     return -1;
 }
 

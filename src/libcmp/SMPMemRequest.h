@@ -106,7 +106,7 @@ protected:
 
 public:
     SMPMemRequest();
-    ~SMPMemRequest() {
+    ~SMPMemRequest() override {
     }
 
     // JJO
@@ -147,7 +147,7 @@ public:
     SMPMemRequest *duplicate();
 
     MemObj *msgOwner;
-    MeshOperation getMeshOperation() {
+    MeshOperation getMeshOperation() const {
         return meshOp;
     }
     MeshOperation mutateMemAccess() {
@@ -174,13 +174,13 @@ public:
     void clearDstNodes() {
         dst.clear();
     }
-    int numDstNode() {
+    int numDstNode() const {
         return dst.size();
     }
     bool isDstNode(int32_t d) {
         return (dst.find(d)!=dst.end());
     }
-    void getDstNodes(std::set<int32_t> &l) {
+    void getDstNodes(std::set<int32_t> &l) const {
         IJ(l.size()==0);
         if(dst.empty()) {
             l.clear();
@@ -188,7 +188,7 @@ public:
             l.insert(dst.begin(), dst.end());
         }
     }
-    void getDstObjs(std::set<MemObj *> &l) {
+    void getDstObjs(std::set<MemObj *> &l) const {
         IJ(l.size()==0);
         if(dstObj.empty()) {
             l.clear();
@@ -197,7 +197,7 @@ public:
         }
     }
 
-    int32_t getFirstDstNode() {
+    int32_t getFirstDstNode() const {
         if(dst.size()>0) {
             return (*dst.begin());
         }
@@ -207,12 +207,12 @@ public:
 
     void setDirInfo(DirectoryEntry *de);
     //void setDstInfo(DirectoryEntry *de);
-    void dumpDstNodes() {
+    void dumpDstNodes() const {
         if(dst.empty()) {
             printf("MEM ");
         } else {
-            for(std::set<int32_t>::iterator it = dst.begin(); it!=dst.end(); it++) {
-                printf("%d, ", (*it));
+            for(int it : dst) {
+                printf("%d, ", it);
             }
         }
     }
@@ -226,11 +226,11 @@ public:
     void setSrcNode(int32_t s) {
         src = s;
     }
-    int32_t getSrcNode(void) {
+    int32_t getSrcNode() const {
         return src;
     }
 
-    int32_t getSize()	{ // in Bytes
+    int32_t getSize() const	{ // in Bytes
         return (meshOp&0xFF);
     }
 	bool isDataPacket() {
@@ -263,12 +263,12 @@ public:
 
 
     void incUses();
-    void destroy();
+    void destroy() override;
 // void destroyAll();
 
-    VAddr getVaddr() const;
+    VAddr getVaddr() const override;
     PAddr getPAddr() const;
-    void  ack(TimeDelta_t lat);
+    void  ack(TimeDelta_t lat) override;
 
     // END: MemRequest interface
 
@@ -282,12 +282,12 @@ public:
     MemRequest  *getOriginalRequest();
     MemOperation getMemOperation();
 
-    uint32_t getState();
+    uint32_t getState() const;
     MemObj      *getRequestor();
     MemObj      *getSupplier();
 
     //bool         needsData()  { return needData; }
-    bool         needsSnoop() {
+    bool         needsSnoop() const {
         return needSnoop;
     }
     void         noSnoop()    {
@@ -295,14 +295,14 @@ public:
     }
 
 
-    bool         isFound()  {
+    bool         isFound() const  {
         return found;
     }
     void         setFound() {
         found = true;
     }
 
-    bool         needsWriteDown() {
+    bool         needsWriteDown() const {
         return writeDown;
     }
     void         setWriteDown()   {

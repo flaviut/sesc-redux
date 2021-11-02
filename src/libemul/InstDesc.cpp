@@ -20,11 +20,11 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 // We need to emulate all sorts of floating point operations
-#include <math.h>
+#include <cmath>
 // We need to control the rounding mode for floating point operations
 #if !(defined NO_FENV_H)
 
-#include <fenv.h>
+#include <cfenv>
 
 #endif
 // We use functionals in our implementation
@@ -557,7 +557,7 @@ namespace fns {
     };
 }
 
-InstDesc::~InstDesc(void) {
+InstDesc::~InstDesc() {
     if (sescInst)
         delete sescInst;
     ID(sescInst = 0);
@@ -729,11 +729,11 @@ namespace Mips {
                 return (mask == other.mask) && (val == other.val);
             }
 
-            RawInst getMask(void) const {
+            RawInst getMask() const {
                 return mask;
             }
 
-            RawInst getVal(void) const {
+            RawInst getVal() const {
                 return val;
             }
 
@@ -767,7 +767,7 @@ namespace Mips {
             InstImmInfo imm;
             Opcode next;
 
-            OpData(void) {
+            OpData() {
             }
 
             OpData(const char *name, InstCtlInfo ctl, InstTypInfo typ,
@@ -777,11 +777,11 @@ namespace Mips {
                       imm(imm) {
             }
 
-            bool addDSlot(void) const {
+            bool addDSlot() const {
                 return (ctl & CtlAdDS);
             }
 
-            bool mapDSlot(void) const {
+            bool mapDSlot() const {
                 return (ctl & CtlMpDS);
             }
         };
@@ -790,7 +790,7 @@ namespace Mips {
         public:
             RawInst mask;
 
-            OpEntry(void) : std::vector<OpData>(), mask(0) {
+            OpEntry() : std::vector<OpData>(), mask(0) {
             }
 
             OpEntry(RawInst mask, const OpEntry &src)
@@ -809,10 +809,10 @@ namespace Mips {
             void build(const OpMapBase &src, OpKey key);
 
         public:
-            OpMap(void);
+            OpMap();
 
             const OpEntry &operator[](RawInst raw) const {
-                typename OpMapBase::const_iterator it = this->find(OpKey(0, 0));
+                auto it = this->find(OpKey(0, 0));
                 while (true) {
                     const OpEntry &curEntry = it->second;
                     if (!curEntry.mask)
@@ -836,7 +836,7 @@ namespace Mips {
         static inline void writeMem(ThreadContext *context, Taddr_t addr, const T &val) {
             context->writeMemRaw(addr, fixEndian(val));
             if (!linkset.empty()) {
-                PidSet::iterator pidIt = linkset.begin();
+                auto pidIt = linkset.begin();
                 while (pidIt != linkset.end()) {
                     if ((*pidIt == context->getPid()) ||
                         (getReg<Taddr_t, RegTypeSpc>(osSim->getContext(*pidIt), static_cast<RegName>(RegLink)) ==
@@ -932,7 +932,7 @@ namespace Mips {
         }
 
         static bool isNop(ThreadContext *context, VAddr addr) {
-            RawInst raw = readMem<RawInst>(context, addr);
+            auto raw = readMem<RawInst>(context, addr);
             const OpEntry &entry = opMap[raw];
             return (entry.front().typ == TypNop) && !(entry.front().ctl & CtlMore);
         }
@@ -947,10 +947,10 @@ namespace Mips {
                 tsize += hset.size();
                 hset.clear();
             }
-            RawInst raw = readMem<RawInst>(context, curAddr);
+            auto raw = readMem<RawInst>(context, curAddr);
             curAddr += sizeof(RawInst);
             const OpEntry &entry = opMap[raw];
-            typename OpEntry::const_iterator opIt(entry.begin());
+            auto opIt(entry.begin());
             I(opIt != entry.end());
             // If this is an optimized decoding for no-delay-slot branches and there is a delay slot, skip to non-optimized decoding
             if ((opIt->ctl & CtlNoDS) && !isNop(context, curAddr)) {
@@ -963,7 +963,7 @@ namespace Mips {
             }
             while (true) {
                 const OpData &data = *opIt;
-                InstTypInfo typ = static_cast<InstTypInfo>(data.typ & TypSubMask);
+                auto typ = static_cast<InstTypInfo>(data.typ & TypSubMask);
                 // Function return may need to call a handler
                 if ((typ == BrOpRet) && context->getAddressSpace()->getRetHandlers(funcAddr, hset)) {
                     I(domap);
@@ -986,7 +986,7 @@ namespace Mips {
             }
             // Is this the end of this trace?
             if (domap && (curAddr >= endAddr)) {
-                InstTypInfo typ = static_cast<InstTypInfo>(entry.back().typ & TypSubMask);
+                auto typ = static_cast<InstTypInfo>(entry.back().typ & TypSubMask);
                 // Unconditional jumps, calls, and returns allow clean trace breaks
                 if ((typ == BrOpJump) || (typ == BrOpCall) || (typ == BrOpRet))
                     return false;
@@ -1008,7 +1008,7 @@ namespace Mips {
             if ((curAddr == funcAddr) && context->getAddressSpace()->getCallHandlers(funcAddr, hset)) {
                 I(domap);
                 while (!hset.empty()) {
-                    AddressSpace::HandlerSet::iterator it = hset.begin();
+                    auto it = hset.begin();
                     trace->emul = *it;
 #if (defined DEBUG)
                     trace->addr=curAddr;
@@ -1018,10 +1018,10 @@ namespace Mips {
                 }
             }
             VAddr origiaddr = curAddr;
-            RawInst raw = readMem<RawInst>(context, curAddr);
+            auto raw = readMem<RawInst>(context, curAddr);
             curAddr += sizeof(RawInst);
             const OpEntry &entry = opMap[raw];
-            typename OpEntry::const_iterator opIt(entry.begin());
+            auto opIt(entry.begin());
             I(opIt != entry.end());
             // If this is an optimized decoding for no-delay-slot branches and there is a delay slot, skip to non-optimized decoding
             if ((opIt->ctl & CtlNoDS) && !isNop(context, curAddr)) {
@@ -1032,15 +1032,15 @@ namespace Mips {
                 opIt++;
                 I(opIt != entry.end());
             }
-            InstDesc *myinst = 0;
+            InstDesc *myinst = nullptr;
             while (opIt != entry.end()) {
                 const OpData &data = *opIt;
-                InstTypInfo typ = static_cast<InstTypInfo>(data.typ & TypSubMask);
+                auto typ = static_cast<InstTypInfo>(data.typ & TypSubMask);
                 // Function return may need to call a handler
                 if ((typ == BrOpRet) && context->getAddressSpace()->getRetHandlers(funcAddr, hset)) {
                     I(domap);
                     while (!hset.empty()) {
-                        AddressSpace::HandlerSet::iterator it = hset.begin();
+                        auto it = hset.begin();
                         trace->emul = *it;
 #if (defined DEBUG)
                         trace->addr=curAddr;
@@ -1089,7 +1089,7 @@ namespace Mips {
                 myinst->aupdate = curAddr - origiaddr;
             // Is this the end of this trace?
             if (domap && (curAddr == endAddr)) {
-                InstTypInfo typ = static_cast<InstTypInfo>(entry.back().typ & TypSubMask);
+                auto typ = static_cast<InstTypInfo>(entry.back().typ & TypSubMask);
                 // Unconditional jumps, calls, and returns don't continue directly to next instruction
                 // Everything else needs an OpCut to link to the continuation in another trace
                 if ((typ != BrOpJump) && (typ != BrOpCall) && (typ != BrOpRet)) {
@@ -1104,7 +1104,7 @@ namespace Mips {
                 ctinst->typ=TypNop;
                 ctinst->name="_cut";
 #endif
-                    ctinst->sescInst = 0;
+                    ctinst->sescInst = nullptr;
                 }
             }
         }
@@ -1112,7 +1112,7 @@ namespace Mips {
         // Create a SESC Instruction for this static instruction
         static Instruction *
         createSescInst(const InstDesc *inst, VAddr iaddr, size_t deltaAddr, InstTypInfo typ, InstCtlInfo ctl) {
-            Instruction *sescInst = new Instruction();
+            auto *sescInst = new Instruction();
             sescInst->addr = iaddr;
             InstType iType = iOpInvalid;
             InstSubType iSubType = iSubInvalid;
@@ -1382,7 +1382,7 @@ namespace Mips {
                         getSrc<DTyp, S1Typ, S2Typ, Func::SVal2, typename Func::TArg2>(inst, context));
                 // Catch stack pointer updates to track alloc/dealloc and stack growth
                 if (DTyp == RegSP) {
-                    VAddr newsp = VAddr(dst);
+                    auto newsp = VAddr(dst);
                     VAddr oldsp = getReg<Taddr_t, RegSP>(context, RegSP);
                     if (newsp > oldsp) {
                         // Stack deallocation
@@ -1650,9 +1650,9 @@ namespace Mips {
     template<ExecMode mode>
     void DecodeInst<mode>::OpMap::build(const OpMapBase &src, OpKey key) {
         RawInst newMask = 0xFFFFFFFF;
-        const OpEntry *entry(0);
+        const OpEntry *entry(nullptr);
         bool changeMask = false;
-        for (typename OpMapBase::const_iterator it = src.begin(); it != src.end(); it++) {
+        for (auto it = src.begin(); it != src.end(); it++) {
             if (!it->first.getMask())
                 fail("buildOpMap: mask is zero\n");
             OpKey itKey(it->first);
@@ -1668,7 +1668,7 @@ namespace Mips {
         OpMapBase::operator[](key) = OpEntry(changeMask ? newMask : 0, entry ? (*entry) : OpEntry());
         if (!changeMask)
             return;
-        for (typename OpMapBase::const_iterator it = src.begin(); it != src.end(); it++) {
+        for (auto it = src.begin(); it != src.end(); it++) {
             OpKey itKey(it->first);
             if (!key.contains(itKey))
                 continue;
@@ -1680,7 +1680,7 @@ namespace Mips {
     }
 
     template<ExecMode mode>
-    DecodeInst<mode>::OpMap::OpMap(void) {
+    DecodeInst<mode>::OpMap::OpMap() {
 
         OpMapBase ops;
 
@@ -2479,7 +2479,7 @@ void decodeTrace(ThreadContext *context, VAddr addr, size_t len) {
     while (sizaddr < endAddr)
         decodeInstSize<mode>(context, funcAddr, sizaddr, endAddr, tsize, true);
     context->getAddressSpace()->delInsts(addr, endAddr);
-    InstDesc *trace = new InstDesc[tsize];
+    auto *trace = new InstDesc[tsize];
     InstDesc *curtrace = trace;
     VAddr trcaddr = addr;
     while (trcaddr < endAddr)

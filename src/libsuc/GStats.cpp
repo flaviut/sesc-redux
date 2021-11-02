@@ -23,18 +23,18 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <stdio.h>
-#include <stddef.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstddef>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
 #include <strings.h>
-#include <math.h>
+#include <cmath>
 
 #include "GStats.h"
 #include "ReportGen.h"
 
-GStats::Container *GStats::store=0;
+GStats::Container *GStats::store=nullptr;
 
 GStats::~GStats()
 {
@@ -221,7 +221,7 @@ char *GStats::getText(const char *format,
 
 void GStats::subscribe()
 {
-    if( store == 0 )
+    if( store == nullptr )
         store = new Container;
     cpos=store->insert(store->end(),this);
 }
@@ -249,9 +249,9 @@ void GStats::report(const char *str)
 {
     Report::field("BEGIN GStats::report %s", str);
     if (store) {
-        for(ContainerIter i = store->begin(); i != store->end(); i++) {
-            (*i)->prepareReport(); //give class a chance to do any calculations
-            (*i)->reportValue();
+        for(auto & i : *store) {
+            i->prepareReport(); //give class a chance to do any calculations
+            i->reportValue();
         }
     }
 
@@ -260,8 +260,8 @@ void GStats::report(const char *str)
 
 void GStats::reset() {
     if (store) {
-        for(ContainerIter i = store->begin(); i != store->end(); i++) {
-            (*i)->resetValue();
+        for(auto & i : *store) {
+            i->resetValue();
         }
     }
 }
@@ -270,13 +270,13 @@ void GStats::reset() {
 
 GStats *GStats::getRef(const char *str)
 {
-    for(ContainerIter i = store->begin(); i != store->end(); i++) {
+    for(auto & i : *store) {
 
-        if(strcasecmp((*i)->name, str) == 0)
-            return *i;
+        if(strcasecmp(i->name, str) == 0)
+            return i;
     }
 
-    return 0;
+    return nullptr;
 }
 
 /*********************** GStatsProfiler */
@@ -297,7 +297,7 @@ GStatsProfiler::GStatsProfiler(const char *format, ...)
 
 void GStatsProfiler::sample(uint32_t key)
 {
-    ProfHash::iterator it = p.find(key);
+    auto it = p.find(key);
     if(it != p.end()) {
         (*it).second++;
     } else {

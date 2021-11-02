@@ -32,11 +32,11 @@ protected:
 
     MemObj *buildMemoryObj(const char *type,
                            const char *section,
-                           const char *name);
+                           const char *name) override;
 
 public:
     SMemorySystem(int32_t processorId);
-    virtual ~SMemorySystem() {
+    ~SMemorySystem() override {
     }
 };
 

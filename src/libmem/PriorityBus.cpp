@@ -31,7 +31,7 @@ PriorityBus::PriorityBus(MemorySystem* current, const char *section,
     ,nBypassDirection("PBusPort%s_nBypassDirection", name)
     ,processQCB(this)
 {
-    MemObj *lower_level = NULL;
+    MemObj *lower_level = nullptr;
 
     NumUnits_t  num = SescConf->getInt(section, "numPorts");
     dataOcc = SescConf->getInt(section, "dataOccp");
@@ -59,7 +59,7 @@ PriorityBus::PriorityBus(MemorySystem* current, const char *section,
 
     I(current);
     lower_level = current->declareMemoryObj(section, k_lowerLevel);
-    if (lower_level != NULL)
+    if (lower_level != nullptr)
         addLowerLevel(lower_level);
 }
 

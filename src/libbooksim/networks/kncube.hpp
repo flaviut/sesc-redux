@@ -37,17 +37,17 @@ class KNCube : public Network {
     int _k;
     int _n;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
-    int _LeftChannel(int node, int dim);
+    int _LeftChannel(int node, int dim) const;
 
-    int _RightChannel(int node, int dim);
+    int _RightChannel(int node, int dim) const;
 
-    int _LeftNode(int node, int dim);
+    int _LeftNode(int node, int dim) const;
 
-    int _RightNode(int node, int dim);
+    int _RightNode(int node, int dim) const;
 
 public:
     KNCube(const Configuration &config, const string &name, bool mesh);
@@ -58,9 +58,9 @@ public:
 
     int GetK() const;
 
-    double Capacity() const;
+    double Capacity() const override;
 
-    void InsertRandomFaults(const Configuration &config);
+    void InsertRandomFaults(const Configuration &config) override;
 
 };
 

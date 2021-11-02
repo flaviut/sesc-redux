@@ -48,7 +48,7 @@ private:
 
 	int dimX;
 	int dimY;
-	int calcDist(int s, int d);
+	int calcDist(int s, int d) const;
 
 protected:
     PortGeneric *busPort;
@@ -70,7 +70,7 @@ protected:
     void push(MemRequest *mreq);
     void specialOp(MemRequest *mreq);
 
-    Time_t nextSlot(MemRequest *mreq);
+    Time_t nextSlot(MemRequest *mreq) const;
 
     virtual void doRead(MemRequest *mreq);
     virtual void doWrite(MemRequest *mreq);
@@ -86,14 +86,14 @@ protected:
     virtual void finalizeRead(MemRequest *mreq);
     virtual void finalizeWrite(MemRequest *mreq);
     void finalizeAccess(MemRequest *mreq);
-    virtual void goToMem(MemRequest *mreq);
+    void goToMem(MemRequest *mreq) override;
     virtual unsigned getNumSnoopCaches(SMPMemRequest *sreq) {
         return upperLevel.size() - 1;
     }
 
 public:
     SMPRouter(SMemorySystem *gms, const char *section, const char *name);
-    ~SMPRouter();
+    ~SMPRouter() override;
 
     // BEGIN MemObj interface
 
@@ -102,10 +102,10 @@ public:
     static void reset();
 
     int32_t maxNodeID;
-    int32_t getMaxNodeID() {
+    int32_t getMaxNodeID() override {
         return maxNodeID;
     }
-    int32_t getNodeID() {
+    int32_t getNodeID() override {
         return nodeID;
     }
 
@@ -117,19 +117,19 @@ public:
 	static uint64_t sizeStat;
 
     // port usage accounting
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
     // interface with upper level
     bool canAcceptStore(PAddr addr) const;
-    void access(MemRequest *mreq);
+    void access(MemRequest *mreq) override;
 
     // interface with lower level
-    virtual void returnAccess(MemRequest *mreq);
+    void returnAccess(MemRequest *mreq) override;
 
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
-    void doInvalidate(PAddr addr, ushort size);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
+    void doInvalidate(PAddr addr, ushort size) override;
 
-    bool canAcceptStore(PAddr addr) {
+    bool canAcceptStore(PAddr addr) override {
         return true;
     }
 

@@ -48,7 +48,7 @@ SCTable::SCTable(int32_t id, const char *str, size_t size, uchar bits)
     }
 }
 
-SCTable::~SCTable(void) {
+SCTable::~SCTable() {
     delete [] table;
 }
 

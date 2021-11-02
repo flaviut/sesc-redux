@@ -75,7 +75,7 @@ protected:
 public:
     Network(const Configuration &config, const string &name);
 
-    virtual ~Network();
+    ~Network() override;
 
     static Network *New(const Configuration &config, const string &name);
 
@@ -97,13 +97,13 @@ public:
 
     virtual double Capacity() const;
 
-    virtual void ReadInputs();
+    void ReadInputs() override;
 
-    virtual void Evaluate();
+    void Evaluate() override;
 
-    virtual void WriteOutputs();
+    void WriteOutputs() override;
 
-    void Display(ostream &os = cout) const;
+    void Display(ostream &os = cout) const override;
 
     void DumpChannelMap(ostream &os = cout, string const &prefix = "") const;
 

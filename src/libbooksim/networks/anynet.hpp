@@ -46,9 +46,9 @@ class AnyNet : public Network {
     //[router][dest_node]=port
     vector<map<int, int> > routing_table;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
     void readFile();
 
@@ -59,7 +59,7 @@ class AnyNet : public Network {
 public:
     AnyNet(const Configuration &config, const string &name);
 
-    ~AnyNet();
+    ~AnyNet() override;
 
     int GetN() const { return -1; }
 
@@ -67,9 +67,9 @@ public:
 
     static void RegisterRoutingFunctions();
 
-    double Capacity() const { return -1; }
+    double Capacity() const override { return -1; }
 
-    void InsertRandomFaults(const Configuration &config) {}
+    void InsertRandomFaults(const Configuration &config) override {}
 };
 
 void min_anynet(const Router *r, const Flit *f, int in_channel,

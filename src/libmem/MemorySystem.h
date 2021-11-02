@@ -25,7 +25,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #ifndef MEMORYSYSTEM_H
 #define MEMORYSYSTEM_H
 
-#include <string.h>
+#include <cstring>
 
 #include "libcore/GMemorySystem.h"
 
@@ -35,8 +35,8 @@ class MemorySystem : public GMemorySystem {
 private:
     void calcGlobalParameters();
 protected:
-    virtual MemObj *buildMemoryObj(const char *type, const char *section, const char *name);
-    virtual GMemoryOS *buildMemoryOS(const char *descr_section);
+    MemObj *buildMemoryObj(const char *type, const char *section, const char *name) override;
+    GMemoryOS *buildMemoryOS(const char *descr_section) override;
 
     uint32_t procsPerNode;
     uint32_t pID;
@@ -46,10 +46,10 @@ public:
     MemorySystem(int32_t processorId);
 
 #if (defined SESC_CMP)
-    uint32_t getPID() {
+    uint32_t getPID() const {
         return pID;
     }
-    uint32_t getPPN() {
+    uint32_t getPPN() const {
         return procsPerNode;
     }
 #endif

@@ -44,9 +44,9 @@ public:
     MaxSizeMatch(Module *parent, const string &name,
                  int inputs, int ouputs);
 
-    ~MaxSizeMatch();
+    ~MaxSizeMatch() override;
 
-    void Allocate();
+    void Allocate() override;
 };
 
 #endif

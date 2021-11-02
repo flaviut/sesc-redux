@@ -27,12 +27,12 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 SMPSystemBus::SMPSystemBus(SMemorySystem *dms, const char *section, const char *name)
     : MemObj(section, name)
 {
-    MemObj *ll = NULL;
+    MemObj *ll = nullptr;
 
     I(dms);
     ll = dms->declareMemoryObj(section, "lowerLevel");
 
-    if (ll != NULL)
+    if (ll != nullptr)
         addLowerLevel(ll);
 
     SescConf->isInt(section, "numPorts");
@@ -65,7 +65,7 @@ Time_t SMPSystemBus::getNextFreeCycle() const
     return busPort->nextSlot();
 }
 
-Time_t SMPSystemBus::nextSlot(MemRequest *mreq)
+Time_t SMPSystemBus::nextSlot(MemRequest *mreq) const
 {
     return getNextFreeCycle();
 }
@@ -124,7 +124,7 @@ void SMPSystemBus::read(MemRequest *mreq)
 
 void SMPSystemBus::write(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     if(pendReqsTable.find(mreq) == pendReqsTable.end()) {
         doWriteCB::scheduleAbs(nextSlot(mreq)+delay, this, mreq);
@@ -145,7 +145,7 @@ void SMPSystemBus::specialOp(MemRequest *mreq)
 
 void SMPSystemBus::doRead(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     // no need to snoop, go straight to memory
     if(!sreq->needsSnoop()) {
@@ -169,9 +169,9 @@ void SMPSystemBus::doRead(MemRequest *mreq)
         }
 
         // distribute requests to other caches, wait for responses
-        for(uint32_t i = 0; i < upperLevel.size(); i++) {
-            if(upperLevel[i] != static_cast<SMPMemRequest *>(mreq)->getRequestor()) {
-                upperLevel[i]->returnAccess(mreq);
+        for(auto & i : upperLevel) {
+            if(i != static_cast<SMPMemRequest *>(mreq)->getRequestor()) {
+                i->returnAccess(mreq);
             }
         }
     }
@@ -199,7 +199,7 @@ void SMPSystemBus::finalizeRead(MemRequest *mreq)
 
 void SMPSystemBus::doWrite(MemRequest *mreq)
 {
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     // no need to snoop, go straight to memory
     if(!sreq->needsSnoop()) {
@@ -223,9 +223,9 @@ void SMPSystemBus::doWrite(MemRequest *mreq)
         }
 
         // distribute requests to other caches, wait for responses
-        for(uint32_t i = 0; i < upperLevel.size(); i++) {
-            if(upperLevel[i] != static_cast<SMPMemRequest *>(mreq)->getRequestor()) {
-                upperLevel[i]->returnAccess(mreq);
+        for(auto & i : upperLevel) {
+            if(i != static_cast<SMPMemRequest *>(mreq)->getRequestor()) {
+                i->returnAccess(mreq);
             }
         }
     }
@@ -254,7 +254,7 @@ void SMPSystemBus::finalizeWrite(MemRequest *mreq)
 void SMPSystemBus::finalizeAccess(MemRequest *mreq)
 {
     PAddr addr  = mreq->getPAddr();
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     pendReqsTable.erase(mreq);
 

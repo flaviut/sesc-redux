@@ -44,7 +44,7 @@ class match {
 public:
     match(const char *s) : str(s) {}
 
-    const char *getstr(void) const {
+    const char *getstr() const {
         return str;
     }
 };
@@ -98,7 +98,7 @@ public:
     std::map<const void *, size_t> objectMap;
 
     ChkWriter(std::streambuf *sb) : std::ostream(sb), objectMap() {
-        objectMap[0] = 0;
+        objectMap[nullptr] = 0;
     }
 
     bool hasIndex(const void *obj) const {
@@ -138,7 +138,7 @@ public:
     std::vector<void *> objectMap;
 
     ChkReader(std::streambuf *sb) : std::istream(sb), objectMap() {
-        objectMap.push_back(0);
+        objectMap.push_back(nullptr);
     }
 
     bool hasObject(size_t index) const {
@@ -160,7 +160,7 @@ public:
 
     void newObject(size_t index) {
         I(objectMap.size() == index);
-        objectMap.push_back(0);
+        objectMap.push_back(nullptr);
     }
 
     void setObject(size_t index, void *obj) {
@@ -185,7 +185,7 @@ public:
     }
 
     template<class T>
-    T *readobj(void) {
+    T *readobj() {
         size_t _obj;
         (*this) >> _obj;
         (*this) >> endl;

@@ -42,7 +42,7 @@ bool LDSTQ::executed(DInst *dinst) {
     I(inflightInsts.find(dinst) != inflightInsts.end());
 
     const Instruction *inst = dinst->getInst();
-    AddrDInstQMap::iterator addrIt = instMap.find(calcWord(dinst));
+    auto addrIt = instMap.find(calcWord(dinst));
 
     I(addrIt != instMap.end());
 
@@ -50,7 +50,7 @@ bool LDSTQ::executed(DInst *dinst) {
 
     bool beforeInst = true;
 
-    DInstQueue::iterator instIt = addrIt->second.end();
+    auto instIt = addrIt->second.end();
     instIt--;
     while (instIt != addrIt->second.begin()) {
         DInst *qdinst = *instIt;
@@ -93,11 +93,11 @@ bool LDSTQ::executed(DInst *dinst) {
 
 void LDSTQ::remove(DInst *dinst) {
     I(inflightInsts.find(dinst) != inflightInsts.end());
-    AddrDInstQMap::iterator addrIt = instMap.find(calcWord(dinst));
+    auto addrIt = instMap.find(calcWord(dinst));
 
     I(addrIt != instMap.end());
 
-    DInstQueue::iterator instIt = addrIt->second.begin();
+    auto instIt = addrIt->second.begin();
     while (instIt != addrIt->second.end()) {
         if (*instIt == dinst)
             break;

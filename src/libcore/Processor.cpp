@@ -144,8 +144,8 @@ StallCause Processor::addInst(DInst *dinst) {
     const Instruction *inst = dinst->getInst();
 
     if (InOrderCore) {
-        if (RAT[inst->getSrc1()] != 0 || RAT[inst->getSrc2()] != 0
-            || RAT[inst->getDest()] != 0
+        if (RAT[inst->getSrc1()] != nullptr || RAT[inst->getSrc2()] != nullptr
+            || RAT[inst->getDest()] != nullptr
                 ) {
             return SmallWinStall;
         }

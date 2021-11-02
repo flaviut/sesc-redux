@@ -41,7 +41,7 @@ void RunningProcs::finishWorkNow() {
 }
 
 void RunningProcs::workingListRemove(GProcessor *core) {
-    ProcessorMultiSet::iterator availIt = availableProcessors.find(core);
+    auto availIt = availableProcessors.find(core);
     if (availIt == availableProcessors.end())
         availableProcessors.insert(core);
 
@@ -65,14 +65,14 @@ void RunningProcs::workingListRemove(GProcessor *core) {
 }
 
 void RunningProcs::workingListAdd(GProcessor *core) {
-    ProcessorMultiSet::iterator availIt = availableProcessors.find(core);
+    auto availIt = availableProcessors.find(core);
     if (availIt != availableProcessors.end())
         availableProcessors.erase(availIt);
 
 // TODO: Ein?  I(core->hasWork());
 
-    for (size_t i = 0; i < workingList.size(); i++) {
-        if (workingList[i] == core)
+    for (auto & i : workingList) {
+        if (i == core)
             return;
     }
 
@@ -249,9 +249,9 @@ void RunningProcs::switchOut(CPU_t id, ProcessId *proc) {
     workingListRemove(core);
 }
 
-GProcessor *RunningProcs::getAvailableProcessor(void) {
+GProcessor *RunningProcs::getAvailableProcessor() {
     // Get the first processor in the avaialable multiset
-    ProcessorMultiSet::iterator availIt = availableProcessors.begin();
+    auto availIt = availableProcessors.begin();
 
     if (availIt == availableProcessors.end()) {
         //UGLY UGLY fix for the bug, i'll fix it soon. --luis
@@ -259,7 +259,7 @@ GProcessor *RunningProcs::getAvailableProcessor(void) {
             if (getProcessor(cpuId)->availableFlows() > 0)
                 return getProcessor(cpuId);
         }
-        return 0;
+        return nullptr;
     }
 
     // SMTs have multiple available processors. Give more priority to

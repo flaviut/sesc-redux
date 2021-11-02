@@ -149,51 +149,51 @@ protected:
 
     wire const &wireOptimize(double l);
 
-    double powerRepeatedWire(double L, double K, double M, double N);
+    double powerRepeatedWire(double L, double K, double M, double N) const;
 
-    double powerRepeatedWireLeak(double K, double M, double N);
+    double powerRepeatedWireLeak(double K, double M, double N) const;
 
-    double powerWireClk(double M, double W);
+    double powerWireClk(double M, double W) const;
 
-    double powerWireDFF(double M, double W, double alpha);
+    double powerWireDFF(double M, double W, double alpha) const;
 
     //memory
     void calcBuffer(const BufferMonitor *bm);
 
-    double powerWordLine(double memoryWidth, double memoryDepth);
+    double powerWordLine(double memoryWidth, double memoryDepth) const;
 
-    double powerMemoryBitRead(double memoryDepth);
+    double powerMemoryBitRead(double memoryDepth) const;
 
-    double powerMemoryBitWrite(double memoryDepth);
+    double powerMemoryBitWrite(double memoryDepth) const;
 
-    double powerMemoryBitLeak(double memoryDepth);
+    double powerMemoryBitLeak(double memoryDepth) const;
 
     //switch
     void calcSwitch(const SwitchMonitor *sm);
 
-    double powerCrossbar(double width, double inputs, double outputs, double from, double to);
+    double powerCrossbar(double width, double inputs, double outputs, double from, double to) const;
 
-    double powerCrossbarCtrl(double width, double inputs, double outputs);
+    double powerCrossbarCtrl(double width, double inputs, double outputs) const;
 
-    double powerCrossbarLeak(double width, double inputs, double outputs);
+    double powerCrossbarLeak(double width, double inputs, double outputs) const;
 
     //output
-    double powerOutputCtrl(double width);
+    double powerOutputCtrl(double width) const;
 
     //area
 
-    double areaChannel(double K, double N, double M);
+    double areaChannel(double K, double N, double M) const;
 
-    double areaCrossbar(double Inputs, double Outputs);
+    double areaCrossbar(double Inputs, double Outputs) const;
 
-    double areaInputModule(double Words);
+    double areaInputModule(double Words) const;
 
-    double areaOutputModule(double Outputs);
+    double areaOutputModule(double Outputs) const;
 
 public:
     Power_Module(Network *net, const Configuration &config);
 
-    ~Power_Module();
+    ~Power_Module() override;
 
     void run();
 

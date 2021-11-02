@@ -70,7 +70,7 @@ void Wavefront::Allocate() {
 
         // otherwise we have to loop through the diagonals of request matrix
 
-        for (set<pair<BPri_t, BPri_t> >::const_reverse_iterator iter =
+        for (auto iter =
                 _priorities.rbegin();
              iter != _priorities.rend(); ++iter) {
 

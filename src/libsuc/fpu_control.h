@@ -98,4 +98,4 @@ typedef uint32_t fpu_control_t __attribute__ ((__mode__ (__HI__)));
 /* Default control word set at startup.  */
 extern fpu_control_t __fpu_control;
 
-#endif	/* fpu_control.h */
+#endif	/* _FPU_CONTROL_H */

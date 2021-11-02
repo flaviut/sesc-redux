@@ -122,13 +122,13 @@ protected:
 public:
     BPRas(int32_t i, int32_t fetchWidth, const char *section);
 
-    ~BPRas();
+    ~BPRas() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPBTB : public BPred {
@@ -154,17 +154,17 @@ private:
 
 protected:
 public:
-    BPBTB(int32_t i, int32_t fetchWidth, const char *section, const char *name = 0);
+    BPBTB(int32_t i, int32_t fetchWidth, const char *section, const char *name = nullptr);
 
-    ~BPBTB();
+    ~BPBTB() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
     void updateOnly(const Instruction *inst, InstID oracleID);
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPOracle : public BPred {
@@ -177,11 +177,11 @@ public:
             : BPred(i, fetchWidth, section, "Oracle"), btb(i, fetchWidth, section) {
     }
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPNotTaken : public BPred {
@@ -193,11 +193,11 @@ public:
         // Done
     }
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPTaken : public BPred {
@@ -211,11 +211,11 @@ public:
         // Done
     }
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPStatic : public BPred {
@@ -229,11 +229,11 @@ public:
         // Done
     }
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BP2bit : public BPred {
@@ -245,11 +245,11 @@ protected:
 public:
     BP2bit(int32_t i, int32_t fetchWidth, const char *section);
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BP2level : public BPred {
@@ -269,13 +269,13 @@ protected:
 public:
     BP2level(int32_t i, int32_t fetchWidth, const char *section);
 
-    ~BP2level();
+    ~BP2level() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPHybrid : public BPred {
@@ -296,13 +296,13 @@ protected:
 public:
     BPHybrid(int32_t i, int32_t fetchWidth, const char *section);
 
-    ~BPHybrid();
+    ~BPHybrid() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BP2BcgSkew : public BPred {
@@ -328,13 +328,13 @@ protected:
 public:
     BP2BcgSkew(int32_t i, int32_t fetchWidth, const char *section);
 
-    ~BP2BcgSkew();
+    ~BP2BcgSkew() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPyags : public BPred {
@@ -362,13 +362,13 @@ protected:
 public:
     BPyags(int32_t i, int32_t fetchWidth, const char *section);
 
-    ~BPyags();
+    ~BPyags() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPOgehl : public BPred {
@@ -404,13 +404,13 @@ protected:
 public:
     BPOgehl(int32_t i, int32_t fetchWidth, const char *section);
 
-    ~BPOgehl();
+    ~BPOgehl() override;
 
-    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate);
+    PredType predict(const Instruction *inst, InstID oracleID, bool doUpdate) override;
 
-    void switchIn(Pid_t pid);
+    void switchIn(Pid_t pid) override;
 
-    void switchOut(Pid_t pid);
+    void switchOut(Pid_t pid) override;
 };
 
 class BPredictor {
@@ -429,7 +429,7 @@ private:
 
 protected:
 public:
-    BPredictor(int32_t i, int32_t fetchWidth, const char *section, BPredictor *bpred = 0);
+    BPredictor(int32_t i, int32_t fetchWidth, const char *section, BPredictor *bpred = nullptr);
 
     ~BPredictor();
 

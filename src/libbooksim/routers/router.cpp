@@ -124,7 +124,7 @@ Router *Router::NewRouter(const Configuration &config,
                           Module *parent, const string &name, int id,
                           int inputs, int outputs) {
     const string type = config.GetStr("router");
-    Router *r = NULL;
+    Router *r = nullptr;
     if (type == "iq") {
         r = new IQRouter(config, parent, name, id, inputs, outputs);
     } else if (type == "event") {

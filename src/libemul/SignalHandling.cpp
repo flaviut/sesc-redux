@@ -29,15 +29,15 @@ void SigInfo::restore(ChkReader &in) {
     code = static_cast<SigCode>(_code);
 }
 
-SignalTable::~SignalTable(void) {
+SignalTable::~SignalTable() {
 }
 
 void SignalTable::save(ChkWriter &out) const {
-    for (size_t s = 0; s < NumSignals; s++)
-        out << "Handler " << hex << table[s].handler << dec << " Mask " << table[s].mask << endl;
+    for (const auto & s : table)
+        out << "Handler " << hex << s.handler << dec << " Mask " << s.mask << endl;
 }
 
 void SignalTable::restore(ChkReader &in) {
-    for (size_t s = 0; s < NumSignals; s++)
-        in >> "Handler " >> hex >> table[s].handler >> dec >> " Mask " >> table[s].mask >> endl;
+    for (auto & s : table)
+        in >> "Handler " >> hex >> s.handler >> dec >> " Mask " >> s.mask >> endl;
 }

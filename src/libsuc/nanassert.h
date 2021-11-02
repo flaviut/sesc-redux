@@ -71,11 +71,11 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #ifndef _NANASSERT_H_
 #define _NANASSERT_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdarg.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdarg>
 
 /* By default cerr, but you can redefine it. */
 #ifndef ASSERTSTREAM

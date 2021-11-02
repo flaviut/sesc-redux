@@ -52,9 +52,9 @@ class Tree4 : public Network {
 
     int _channelWidth;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
 
     Router *&_Router(int height, int pos);

@@ -20,12 +20,12 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstring>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdarg>
+#include <cctype>
 
 #ifdef __cplusplus
 #include "estl.h"
@@ -40,7 +40,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // templetes.
 const char *NanassertID = "";
 
-#include <signal.h>
+#include <csignal>
 
 void nanassertexit() {
     return;
@@ -162,4 +162,4 @@ void nanassertTRACE(const char *envvar,
     va_end(ap);
     fprintf(ASSERTSTREAM, "\n");
 }
-#endif   /* TRACE */
+#endif   /* SAFE */

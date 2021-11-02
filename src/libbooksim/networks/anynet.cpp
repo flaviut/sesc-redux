@@ -70,10 +70,8 @@ AnyNet::AnyNet(const Configuration &config, const string &name)
 
 AnyNet::~AnyNet() {
     for (int i = 0; i < 2; ++i) {
-        for (map<int, map<int, pair<int, int> > >::iterator iter = router_list[i].begin();
-             iter != router_list[i].end();
-             ++iter) {
-            iter->second.clear();
+        for (auto & iter : router_list[i]) {
+            iter.second.clear();
         }
     }
 }
@@ -141,7 +139,7 @@ void AnyNet::_BuildNet(const Configuration &config) {
     //adding the injection/ejection chanenls first
     map<int, map<int, pair<int, int> > >::iterator niter;
     for (niter = router_list[0].begin(); niter != router_list[0].end(); niter++) {
-        map<int, map<int, pair<int, int> > >::iterator riter = router_list[1].find(niter->first);
+        auto riter = router_list[1].find(niter->first);
         //calculate radix
         int radix = niter->second.size() + riter->second.size();
         int node = niter->first;
@@ -179,7 +177,7 @@ void AnyNet::_BuildNet(const Configuration &config) {
     //the map, is a mapping of output->input
     int channel_count = 0;
     for (niter = router_list[0].begin(); niter != router_list[0].end(); niter++) {
-        map<int, map<int, pair<int, int> > >::iterator riter = router_list[1].find(niter->first);
+        auto riter = router_list[1].find(niter->first);
         int node = niter->first;
         map<int, pair<int, int> >::iterator rriter;
         cout << "router " << node << endl;
@@ -266,18 +264,16 @@ void AnyNet::route(int r_start) {
         //find min
         int min_dist = numeric_limits<int>::max();
         int min_cand = -1;
-        for (set<int>::iterator i = rlist.begin();
-             i != rlist.end();
-             i++) {
-            if (dist[*i] < min_dist) {
-                min_dist = dist[*i];
-                min_cand = *i;
+        for (int i : rlist) {
+            if (dist[i] < min_dist) {
+                min_dist = dist[i];
+                min_cand = i;
             }
         }
         rlist.erase(min_cand);
 
         //neighbor
-        for (map<int, pair<int, int> >::iterator i = router_list[1][min_cand].begin();
+        for (auto i = router_list[1][min_cand].begin();
              i != router_list[1][min_cand].end();
              i++) {
             int new_dist = dist[min_cand] + i->second.second;//distance is hops not cycles
@@ -292,10 +288,8 @@ void AnyNet::route(int r_start) {
     for (int i = 0; i < _size; i++) {
         if (prev[i] == -1) { //self
             assert(i == r_start);
-            for (map<int, pair<int, int> >::iterator iter = router_list[0][i].begin();
-                 iter != router_list[0][i].end();
-                 iter++) {
-                routing_table[r_start][iter->first] = iter->second.first;
+            for (auto & iter : router_list[0][i]) {
+                routing_table[r_start][iter.first] = iter.second.first;
                 //cout<<"node "<<iter->first<<" port "<< iter->second.first<<endl;
             }
         } else {
@@ -310,10 +304,8 @@ void AnyNet::route(int r_start) {
 
             assert(router_list[1][r_start].count(neighbor) != 0);
             int port = router_list[1][r_start][neighbor].first;
-            for (map<int, pair<int, int> >::iterator iter = router_list[0][i].begin();
-                 iter != router_list[0][i].end();
-                 iter++) {
-                routing_table[r_start][iter->first] = port;
+            for (auto & iter : router_list[0][i]) {
+                routing_table[r_start][iter.first] = port;
                 //cout<<"node "<<iter->first<<" port "<< port<<" dist "<<distance<<endl;
             }
         }
@@ -488,10 +480,8 @@ void AnyNet::readFile() {
 
     //traffic generator assumes node list is sequenctial and starts at 0
     vector<int> node_check;
-    for (map<int, int>::iterator i = node_list.begin();
-         i != node_list.end();
-         i++) {
-        node_check.push_back(i->first);
+    for (auto & i : node_list) {
+        node_check.push_back(i.first);
     }
     sort(node_check.begin(), node_check.end());
     for (size_t i = 0; i < node_check.size(); i++) {

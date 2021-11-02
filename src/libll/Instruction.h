@@ -110,12 +110,12 @@ public:
     }
 
     static const Instruction *getSharedInstByPC(int32_t addr) {
-        InstHash::iterator it = instHash.find(addr);
+        auto it = instHash.find(addr);
 
         if(it != instHash.end())
             return it->second;
 
-        return 0;
+        return nullptr;
     }
 
     bool hasDestRegister() const {

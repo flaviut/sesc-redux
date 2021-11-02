@@ -180,24 +180,24 @@ class EventRouter : public Router {
 
     void _SendCredits();
 
-    virtual void _InternalStep();
+    void _InternalStep() override;
 
 public:
     EventRouter(const Configuration &config,
                 Module *parent, const string &name, int id,
                 int inputs, int outputs);
 
-    virtual ~EventRouter();
+    ~EventRouter() override;
 
-    virtual void ReadInputs();
+    void ReadInputs() override;
 
-    virtual void WriteOutputs();
+    void WriteOutputs() override;
 
-    virtual int GetUsedCredit(int o) const {
+    int GetUsedCredit(int o) const override {
         return 0;
     }
 
-    virtual int GetBufferOccupancy(int i) const {
+    int GetBufferOccupancy(int i) const override {
         return 0;
     }
 
@@ -212,19 +212,19 @@ public:
     }
 #endif
 
-    virtual vector<int> UsedCredits() const {
+    vector<int> UsedCredits() const override {
         return vector<int>();
     }
 
-    virtual vector<int> FreeCredits() const {
+    vector<int> FreeCredits() const override {
         return vector<int>();
     }
 
-    virtual vector<int> MaxCredits() const {
+    vector<int> MaxCredits() const override {
         return vector<int>();
     }
 
-    void Display(ostream &os = cout) const;
+    void Display(ostream &os = cout) const override;
 };
 
 #endif

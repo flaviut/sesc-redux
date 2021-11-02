@@ -23,12 +23,12 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <ctype.h>
-#include <string.h>
+#include <cctype>
+#include <cstring>
 
 #include "SescConf.h"
 
-SConfig *SescConf=0;
+SConfig *SescConf=nullptr;
 
 #define isalnum_or_(p) ((p)=='_' || isalnum(p))
 #define jump_spaces(p) {while (*(p)==' ' || *(p)=='\t') (p)++;}
@@ -78,12 +78,12 @@ const SConfig::Record * SConfig::getRecord(const char *block,
 
     rec = Config::getRecord("", block, vectorPos);
 
-    if(rec == 0)
+    if(rec == nullptr)
         return Config::getRecord(block, name, vectorPos);
 
     const char *secName = rec->getCharPtr();
 
-    if(secName == 0) {
+    if(secName == nullptr) {
         return rec;
     }
 

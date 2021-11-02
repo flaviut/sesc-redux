@@ -41,7 +41,7 @@ SMPRouter::SMPRouter(SMemorySystem *dms, const char *section, const char *name)
     , DATAmsgLatS2Hist( "%s_DATAmsgS2Hist", name)
 {
 
-    MemObj *ll = NULL;
+    MemObj *ll = nullptr;
 
     I(dms);
     ll = dms->declareMemoryObj(section, "lowerLevel");
@@ -98,7 +98,7 @@ Time_t SMPRouter::getNextFreeCycle() const
     return busPort->nextSlot();
 }
 
-Time_t SMPRouter::nextSlot(MemRequest *mreq)
+Time_t SMPRouter::nextSlot(MemRequest *mreq) const
 {
     return getNextFreeCycle();
 }
@@ -109,7 +109,7 @@ bool SMPRouter::canAcceptStore(PAddr addr) const
 }
 
 
-int SMPRouter::calcDist(int s, int d) {
+int SMPRouter::calcDist(int s, int d) const {
     int sx = s%dimX;
     int sy = s/dimX;
 
@@ -186,7 +186,7 @@ void SMPRouter::doRead(MemRequest *mreq)
 {
     // For whatever read miss, access whatever network below.
     // First, go to home directory node to identify who's having it.
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
 #if 0
     SMPMemRequest *newSreq = SMPMemRequest::create(mreq, this, true, sreq->meshOp);
@@ -226,7 +226,7 @@ void SMPRouter::doRead(MemRequest *mreq)
             DEBUGPRINT("       [%s] Converting Inv message to %d packets for %x at %lld\n",
                        getSymbolicName(), (int)sreq->dstObj.size(), addr, globalClock);
 
-            for(std::set<MemObj*>::iterator it = sreq->dstObj.begin(); it!=sreq->dstObj.end(); it++) {
+            for(auto it = sreq->dstObj.begin(); it!=sreq->dstObj.end(); it++) {
                 SMPMemRequest *nsreq = SMPMemRequest::create(sreq, Invalidation);
 	
                 nsreq->addDstNode((*it)->getNodeID());
@@ -375,7 +375,7 @@ void SMPRouter::returnAccess(MemRequest *mreq)
 {
     //mreq->goUpAbs(nextSlot(mreq)+delay);
     // If broadcast, filter which is not mine
-    SMPMemRequest *sreq = static_cast<SMPMemRequest *>(mreq);
+    auto *sreq = static_cast<SMPMemRequest *>(mreq);
 
     std::set<MemObj*> dstObjCopy;
     sreq->getDstObjs(dstObjCopy);

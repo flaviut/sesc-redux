@@ -200,7 +200,7 @@ public:
 
     virtual bool issue(Addr_t paddr, MemOperation mo = MemRead) = 0;
     virtual void addEntry(Addr_t paddr, CallbackBase *c,
-                          CallbackBase *ovflwc = 0, MemOperation mo = MemRead) = 0;
+                          CallbackBase *ovflwc = nullptr, MemOperation mo = MemRead) = 0;
     virtual bool retire(Addr_t paddr) = 0;
 
     //This function is address independent, and implements conventional
@@ -304,7 +304,7 @@ public:
     }
 
     void addEntry(Addr_t paddr, CallbackBase *c,
-                  CallbackBase *ovflwc = 0, MemOperation mo = MemRead) {
+                  CallbackBase *ovflwc = nullptr, MemOperation mo = MemRead) {
         I(0);
     }
 
@@ -359,7 +359,7 @@ public:
     bool issue(Addr_t paddr, MemOperation mo = MemRead);
 
     void addEntry(Addr_t paddr, CallbackBase *c,
-                  CallbackBase *ovflwc = 0, MemOperation mo = MemRead);
+                  CallbackBase *ovflwc = nullptr, MemOperation mo = MemRead);
 
     bool retire(Addr_t paddr);
 
@@ -436,7 +436,7 @@ public:
     bool issue(Addr_t paddr, MemOperation mo = MemRead);
 
     void addEntry(Addr_t paddr, CallbackBase *c,
-                  CallbackBase *ovflwc = 0, MemOperation mo = MemRead);
+                  CallbackBase *ovflwc = nullptr, MemOperation mo = MemRead);
 
     bool retire(Addr_t paddr);
 
@@ -691,7 +691,7 @@ public:
     bool issue(Addr_t paddr, MemOperation mo = MemRead);
 
     void addEntry(Addr_t paddr, CallbackBase *c,
-                  CallbackBase *ovflwc = 0, MemOperation mo = MemRead);
+                  CallbackBase *ovflwc = nullptr, MemOperation mo = MemRead);
 
     bool retire(Addr_t paddr);
 
@@ -798,7 +798,7 @@ public:
     bool issue(Addr_t paddr, MemOperation mo = MemRead);
 
     void addEntry(Addr_t paddr, CallbackBase *c,
-                  CallbackBase *ovflwc = 0, MemOperation mo = MemRead);
+                  CallbackBase *ovflwc = nullptr, MemOperation mo = MemRead);
 
     bool retire(Addr_t paddr);
 

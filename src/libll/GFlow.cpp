@@ -27,7 +27,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 long long GFlow::nExec  = 0;
 bool GFlow::goingRabbit = true; // Until everything boots, it is in running mode
-MemObj *GFlow::trainCache = 0;
+MemObj *GFlow::trainCache = nullptr;
 
 GFlow::GFlow(int32_t i, int32_t cId, GMemorySystem *gmem)
     : fid(i),
@@ -38,7 +38,7 @@ GFlow::GFlow(int32_t i, int32_t cId, GMemorySystem *gmem)
 
     //gproc = osSim->id2GProcessor(cpuId);
 
-    if (trainCache == 0) {
+    if (trainCache == nullptr) {
         if (SescConf->checkCharPtr("cpucore","trainCache", cId)) {
             const char *cpuSection = SescConf->getCharPtr("", "cpucore", cId);
             std::vector<char *> vPars = SescConf->getSplitCharPtr(cpuSection, "trainCache");
@@ -52,21 +52,21 @@ GFlow::GFlow(int32_t i, int32_t cId, GMemorySystem *gmem)
             const char *cacheName = vPars[1];
 
             trainCache = gms->searchMemoryObj(true, cacheSection, cacheName);
-            if(trainCache == 0) {
+            if(trainCache == nullptr) {
                 // Maybe it got privatized
                 char *ret=(char*)malloc(strlen(cacheName) + 20);
                 sprintf(ret,"P(%i)_%s", cId, cacheName);
 
                 trainCache = gms->searchMemoryObj(false, cacheSection, ret);
             }
-            GMSG(trainCache==0,"Unknown cache to train [%s:%s]",cacheName, cacheSection);
+            GMSG(trainCache==nullptr,"Unknown cache to train [%s:%s]",cacheName, cacheSection);
         }
     }
 }
 
 void GFlow::dump()
 {
-    if (trainCache == 0)
+    if (trainCache == nullptr)
         return;
 
     // Finish the in-fligh operations

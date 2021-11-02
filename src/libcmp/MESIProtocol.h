@@ -53,27 +53,27 @@ protected:
 public:
 
     MESIProtocol(SMPCache *cache, const char *name);
-    ~MESIProtocol();
+    ~MESIProtocol() override;
 
-    void changeState(Line *l, unsigned newstate);
-    void makeDirty(Line *l);
-    void preInvalidate(Line *l);
+    void changeState(Line *l, unsigned newstate) override;
+    void makeDirty(Line *l) override;
+    void preInvalidate(Line *l) override;
 
-    void read(MemRequest *mreq);
+    void read(MemRequest *mreq) override;
     void doRead(MemRequest *mreq);
     typedef CallbackMember1<MESIProtocol, MemRequest *,
             &MESIProtocol::doRead> doReadCB;
 
-    void write(MemRequest *mreq);
+    void write(MemRequest *mreq) override;
     void doWrite(MemRequest *mreq);
     typedef CallbackMember1<MESIProtocol, MemRequest *,
             &MESIProtocol::doWrite> doWriteCB;
 
     //  void returnAccess(SMPMemRequest *sreq);
 
-    void sendReadMiss(MemRequest *mreq);
-    void sendWriteMiss(MemRequest *mreq);
-    void sendInvalidate(MemRequest *mreq);
+    void sendReadMiss(MemRequest *mreq) override;
+    void sendWriteMiss(MemRequest *mreq) override;
+    void sendInvalidate(MemRequest *mreq) override;
 
     void doSendReadMiss(MemRequest *mreq);
     void doSendWriteMiss(MemRequest *mreq);
@@ -86,15 +86,15 @@ public:
     typedef CallbackMember1<MESIProtocol, MemRequest *,
             &MESIProtocol::doSendInvalidate> doSendInvalidateCB;
 
-    void sendReadMissAck(SMPMemRequest *sreq);
-    void sendWriteMissAck(SMPMemRequest *sreq);
-    void sendInvalidateAck(SMPMemRequest *sreq);
+    void sendReadMissAck(SMPMemRequest *sreq) override;
+    void sendWriteMissAck(SMPMemRequest *sreq) override;
+    void sendInvalidateAck(SMPMemRequest *sreq) override;
 
     //void sendDisplaceNotify(PAddr addr, CallbackBase *cb);
 
-    void readMissHandler(SMPMemRequest *sreq);
-    void writeMissHandler(SMPMemRequest *sreq);
-    void invalidateHandler(SMPMemRequest *sreq);
+    void readMissHandler(SMPMemRequest *sreq) override;
+    void writeMissHandler(SMPMemRequest *sreq) override;
+    void invalidateHandler(SMPMemRequest *sreq) override;
 
     typedef CallbackMember1<MESIProtocol, SMPMemRequest *,
             &MESIProtocol::sendWriteMissAck> sendWriteMissAckCB;
@@ -105,13 +105,13 @@ public:
     typedef CallbackMember1<MESIProtocol, SMPMemRequest *,
             &MESIProtocol::invalidateHandler> invalidateHandlerCB;
 
-    void readMissAckHandler(SMPMemRequest *sreq);
-    void writeMissAckHandler(SMPMemRequest *sreq);
-    void invalidateAckHandler(SMPMemRequest *sreq);
+    void readMissAckHandler(SMPMemRequest *sreq) override;
+    void writeMissAckHandler(SMPMemRequest *sreq) override;
+    void invalidateAckHandler(SMPMemRequest *sreq) override;
 
     // data related
-    void sendData(SMPMemRequest *sreq);
-    void dataHandler(SMPMemRequest *sreq);
+    void sendData(SMPMemRequest *sreq) override;
+    void dataHandler(SMPMemRequest *sreq) override;
 
     void combineResponses(SMPMemRequest *sreq, MESIState_t localState);
 };

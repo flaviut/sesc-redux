@@ -1,7 +1,7 @@
 #ifndef THREADCONTEXT_H
 #define THREADCONTEXT_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <cstring>
 #include <vector>
 #include <set>
@@ -25,7 +25,7 @@ public:
     static Time_t resetTS;
 private:
     void initialize(bool child);
-	void cleanup();
+	void cleanup() const;
     typedef std::vector<pointer> ContextVector;
     // Static variables
     static ContextVector pid2context;
@@ -57,11 +57,11 @@ private:
 private:
 
 public:
-    static inline int32_t getPidUb(void) {
+    static inline int32_t getPidUb() {
         return pid2context.size();
     }
     void setMode(ExecMode mode);
-    inline ExecMode getMode(void) const {
+    inline ExecMode getMode() const {
         return execMode;
     }
 
@@ -71,12 +71,12 @@ public:
     inline void *getReg(RegName name) {
         return &(regs[name]);
     }
-    void clearRegs(void) {
+    void clearRegs() {
         memset(regs,0,sizeof(regs));
     }
 
     // Returns the pid of the context
-    Pid_t getPid(void) const {
+    Pid_t getPid() const {
         return pid;
     }
 
@@ -84,7 +84,7 @@ public:
 
     static ThreadContext *getContext(Pid_t pid);
 
-    static ThreadContext *getMainThreadContext(void) {
+    static ThreadContext *getMainThreadContext() {
         return &(*(pid2context[0]));
     }
 
@@ -103,7 +103,7 @@ public:
 
     ThreadContext *createChild(bool shareAddrSpace, bool shareSigTable, bool shareOpenFiles, SignalID sig);
     void setAddressSpace(AddressSpace *newAddressSpace);
-    AddressSpace *getAddressSpace(void) const {
+    AddressSpace *getAddressSpace() const {
         I(addressSpace);
         return addressSpace;
     }
@@ -111,10 +111,10 @@ public:
         myStackAddrLb=stackLb;
         myStackAddrUb=stackUb;
     }
-    inline VAddr getStackAddr(void) const {
+    inline VAddr getStackAddr() const {
         return myStackAddrLb;
     }
-    inline VAddr getStackSize(void) const {
+    inline VAddr getStackSize() const {
         return myStackAddrUb-myStackAddrLb;
     }
 
@@ -136,14 +136,14 @@ public:
     }
     // END Memory Mapping
 
-    inline InstDesc *getIDesc(void) const {
+    inline InstDesc *getIDesc() const {
         return iDesc;
     }
     inline void updIDesc(ssize_t ddiff) {
         I((ddiff>=-1)&&(ddiff<4));
         iDesc+=ddiff;
     }
-    inline VAddr getIAddr(void) const {
+    inline VAddr getIAddr() const {
         return iAddr;
     }
     inline void setIAddr(VAddr addr) {
@@ -156,19 +156,19 @@ public:
         iAddr+=adiff;
         iDesc+=ddiff;
     }
-    inline VAddr getDAddr(void) const {
+    inline VAddr getDAddr() const {
         return dAddr;
     }
     inline void setDAddr(VAddr addr) {
         dAddr=addr;
     }
-    inline void addDInst(void) {
+    inline void addDInst() {
         nDInsts++;
     }
-    inline void delDInst(void) {
+    inline void delDInst() {
         nDInsts--;
     }
-    inline size_t getNDInsts(void) {
+    inline size_t getNDInsts() const {
         return nDInsts;
     }
     static inline int32_t nextReady(int32_t startPid) {
@@ -183,7 +183,7 @@ public:
         } while(foundPid!=startPid);
         return -1;
     }
-    inline bool skipInst(void);
+    inline bool skipInst();
     static int64_t skipInsts(int64_t skipCount);
 #if (defined HAS_MEM_STATE)
     inline const MemState &getState(VAddr addr) const {
@@ -253,10 +253,10 @@ private:
     FileSys::FileSys::pointer fileSys;
     FileSys::OpenFiles::pointer openFiles;
 public:
-    FileSys::FileSys *getFileSys(void) const {
+    FileSys::FileSys *getFileSys() const {
         return fileSys;
     }
-    FileSys::OpenFiles *getOpenFiles(void) const {
+    FileSys::OpenFiles *getOpenFiles() const {
         return openFiles;
     }
 
@@ -273,13 +273,13 @@ public:
     void setSignalTable(SignalTable *newSigTable) {
         sigTable=newSigTable;
     }
-    SignalTable *getSignalTable(void) const {
+    SignalTable *getSignalTable() const {
         return sigTable;
     }
-    void suspend(void);
+    void suspend();
     void signal(SigInfo *sigInfo);
-    void resume(void);
-    const SignalSet &getSignalMask(void) const {
+    void resume();
+    const SignalSet &getSignalMask() const {
         return sigMask;
     }
     void setSignalMask(const SignalSet &newMask) {
@@ -303,10 +303,10 @@ public:
         if((!readySig.empty())&&suspSig)
             resume();
     }
-    bool hasReadySignal(void) const {
+    bool hasReadySignal() const {
         return !readySig.empty();
     }
-    SigInfo *nextReadySignal(void) {
+    SigInfo *nextReadySignal() {
         I(hasReadySignal());
         SigInfo *sigInfo=readySig.back();
         readySig.pop_back();
@@ -316,7 +316,7 @@ public:
     // System state
 
     LinuxSys *mySystem;
-    LinuxSys *getSystem(void) const {
+    LinuxSys *getSystem() const {
         return mySystem;
     }
 
@@ -343,7 +343,7 @@ private:
     // Robust list head pointer
     VAddr robust_list;
 public:
-    int32_t gettgid(void) const {
+    int32_t gettgid() const {
         return tgid;
     }
     size_t gettgtids(int tids[], size_t slots) const {
@@ -352,13 +352,13 @@ public:
             tids[i]=*it;
         return tgtids.size();
     }
-    int32_t gettid(void) const {
+    int32_t gettid() const {
         return tid;
     }
-    int32_t getpgid(void) const {
+    int32_t getpgid() const {
         return pgid;
     }
-    int getppid(void) const {
+    int getppid() const {
         return parentID;
     }
     void setRobustList(VAddr headptr) {
@@ -367,17 +367,17 @@ public:
     void setTidAddress(VAddr tidptr) {
         clear_child_tid=tidptr;
     }
-    int32_t  getParentID(void) const {
+    int32_t  getParentID() const {
         return parentID;
     }
-    bool hasChildren(void) const {
+    bool hasChildren() const {
         return !childIDs.empty();
     }
     bool isChildID(int32_t id) const {
         return (childIDs.find(id)!=childIDs.end());
     }
-    int32_t findZombieChild(void) const;
-    SignalID getExitSig(void) {
+    int32_t findZombieChild() const;
+    SignalID getExitSig() {
         return exitSig;
     }
 private:
@@ -385,26 +385,26 @@ private:
     int32_t      exitCode;
     SignalID killSignal;
 public:
-    bool isSuspended(void) const {
+    bool isSuspended() const {
         return suspSig;
     }
-    bool isExited(void) const {
+    bool isExited() const {
         return exited;
     }
-    int32_t getExitCode(void) const {
+    int32_t getExitCode() const {
         return exitCode;
     }
-    bool isKilled(void) const {
+    bool isKilled() const {
         return (killSignal!=SigNone);
     }
-    SignalID getKillSignal(void) const {
+    SignalID getKillSignal() const {
         return killSignal;
     }
     // Exit this process
     // Returns: true if exit complete, false if process is now zombie
     bool exit(int32_t code);
     // Reap an exited process
-    void reap();
+    void reap() const;
     void doKill(SignalID sig) {
         I(!isExited());
         I(!isKilled());
@@ -429,8 +429,8 @@ public:
 
     void execCall(VAddr entry, VAddr  ra, VAddr sp);
     void execRet(VAddr entry, VAddr ra, VAddr sp);
-    void dumpCallStack(void);
-    void clearCallStack(void);
+    void dumpCallStack();
+    void clearCallStack();
 
 public:
     int numThreads;

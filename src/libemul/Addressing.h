@@ -3,7 +3,7 @@
 
 #include "SizedTypes.h"
 // We need size_t for VAddr_hash
-#include <stddef.h>
+#include <cstddef>
 
 // There are three types of addresses used in the simulator
 

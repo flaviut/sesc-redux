@@ -69,7 +69,7 @@ public:
     }
 
     // Returns a processor that has an avaialable flow
-    GProcessor *getAvailableProcessor(void);
+    GProcessor *getAvailableProcessor();
 
     size_t size() const {
         return cpuVector.size();

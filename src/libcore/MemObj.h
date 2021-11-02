@@ -95,8 +95,8 @@ protected:
 
         I(oc);
 
-        for (uint32_t i = 0; i < upperLevel.size(); i++)
-            upperLevel[i]->invalidate(addr, size, oc);
+        for (auto & i : upperLevel)
+            i->invalidate(addr, size, oc);
     }
 
 public:
@@ -224,17 +224,17 @@ public:
 class DummyMemObj : public MemObj {
 private:
 protected:
-    Time_t getNextFreeCycle() const;
+    Time_t getNextFreeCycle() const override;
 
-    void access(MemRequest *req);
+    void access(MemRequest *req) override;
 
-    bool canAcceptStore(PAddr addr);
+    bool canAcceptStore(PAddr addr) override;
 
-    void invalidate(PAddr addr, ushort size, MemObj *oc);
+    void invalidate(PAddr addr, ushort size, MemObj *oc) override;
 
-    void doInvalidate(PAddr addr, ushort size);
+    void doInvalidate(PAddr addr, ushort size) override;
 
-    void returnAccess(MemRequest *req);
+    void returnAccess(MemRequest *req) override;
 
 public:
     DummyMemObj();

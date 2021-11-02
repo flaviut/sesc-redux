@@ -83,14 +83,14 @@ public:
 
     virtual int NumInputRequests(int in) const = 0;
 
-    virtual void PrintRequests(ostream *os = NULL) const = 0;
+    virtual void PrintRequests(ostream *os = nullptr) const = 0;
 
-    void PrintGrants(ostream *os = NULL) const;
+    void PrintGrants(ostream *os = nullptr) const;
 
     static Allocator *NewAllocator(Module *parent, const string &name,
                                    const string &alloc_type,
                                    int inputs, int outputs,
-                                   Configuration const *const config = NULL);
+                                   Configuration const *const config = nullptr);
 };
 
 //==================================================
@@ -106,26 +106,26 @@ public:
     DenseAllocator(Module *parent, const string &name,
                    int inputs, int outputs);
 
-    void Clear();
+    void Clear() override;
 
-    int ReadRequest(int in, int out) const;
+    int ReadRequest(int in, int out) const override;
 
-    bool ReadRequest(sRequest &req, int in, int out) const;
+    bool ReadRequest(sRequest &req, int in, int out) const override;
 
     void AddRequest(int in, int out, int label = 1,
-                    BPri_t in_pri = 0, BPri_t out_pri = 0);
+                    BPri_t in_pri = 0, BPri_t out_pri = 0) override;
 
-    void RemoveRequest(int in, int out, int label = 1);
+    void RemoveRequest(int in, int out, int label = 1) override;
 
-    bool OutputHasRequests(int out) const;
+    bool OutputHasRequests(int out) const override;
 
-    bool InputHasRequests(int in) const;
+    bool InputHasRequests(int in) const override;
 
-    int NumOutputRequests(int out) const;
+    int NumOutputRequests(int out) const override;
 
-    int NumInputRequests(int in) const;
+    int NumInputRequests(int in) const override;
 
-    void PrintRequests(ostream *os = NULL) const;
+    void PrintRequests(ostream *os = nullptr) const override;
 
 };
 
@@ -146,26 +146,26 @@ public:
     SparseAllocator(Module *parent, const string &name,
                     int inputs, int outputs);
 
-    void Clear();
+    void Clear() override;
 
-    int ReadRequest(int in, int out) const;
+    int ReadRequest(int in, int out) const override;
 
-    bool ReadRequest(sRequest &req, int in, int out) const;
+    bool ReadRequest(sRequest &req, int in, int out) const override;
 
     void AddRequest(int in, int out, int label = 1,
-                    BPri_t in_pri = 0, BPri_t out_pri = 0);
+                    BPri_t in_pri = 0, BPri_t out_pri = 0) override;
 
-    void RemoveRequest(int in, int out, int label = 1);
+    void RemoveRequest(int in, int out, int label = 1) override;
 
-    bool OutputHasRequests(int out) const;
+    bool OutputHasRequests(int out) const override;
 
-    bool InputHasRequests(int in) const;
+    bool InputHasRequests(int in) const override;
 
-    int NumOutputRequests(int out) const;
+    int NumOutputRequests(int out) const override;
 
-    int NumInputRequests(int in) const;
+    int NumInputRequests(int in) const override;
 
-    void PrintRequests(ostream *os = NULL) const;
+    void PrintRequests(ostream *os = nullptr) const override;
 
 };
 

@@ -61,10 +61,10 @@ SMPMemRequest::SMPMemRequest()
 }
 
 SMPMemRequest *SMPMemRequest::duplicate() {
-    if(oreq==NULL) {
-        SMPMemRequest *r = SMPMemRequest::create(requestor, pAddr, memOp, false, NULL, meshOp);
+    if(oreq==nullptr) {
+        SMPMemRequest *r = SMPMemRequest::create(requestor, pAddr, memOp, false, nullptr, meshOp);
 
-        if(msgOwner==NULL) {
+        if(msgOwner==nullptr) {
             r->msgOwner = requestor;
         } else {
             r->msgOwner = msgOwner;
@@ -138,7 +138,7 @@ SMPMemRequest *SMPMemRequest::create(MemRequest *mreq,
 
     I(reqCache);
     sreq->requestor = reqCache;
-    sreq->supplier = 0;
+    sreq->supplier = nullptr;
     sreq->currentMemObj = reqCache;
 
     sreq->writeDown = false;
@@ -153,12 +153,12 @@ SMPMemRequest *SMPMemRequest::create(MemRequest *mreq,
     sreq->found = false;
     sreq->nUses = 1;
 
-    sreq->cb = 0;
+    sreq->cb = nullptr;
 
     sreq->src = reqCache->getNodeID();
     sreq->dst.clear();
     sreq->dstObj.clear();
-    sreq->dentry = NULL;
+    sreq->dentry = nullptr;
     //printf("%s src %d\n",reqCache->getSymbolicName(), sreq->src);
 
     IJ(msh!=NOP);
@@ -167,7 +167,7 @@ SMPMemRequest *SMPMemRequest::create(MemRequest *mreq,
 #if (defined SIGDEBUG)
     nDEBUGSMPMsg[msh]++;
 #endif
-    sreq->invCB = NULL;
+    sreq->invCB = nullptr;
     //sreq->dead = false;
 	
 	sreq->clearValue();
@@ -194,7 +194,7 @@ void SMPMemRequest::clearValue()
 	plat = -1;
     routerTime = 0;
 
-    saveReq = NULL;
+    saveReq = nullptr;
 }
 
 SMPMemRequest *SMPMemRequest::create(MemObj *reqCache,
@@ -208,7 +208,7 @@ SMPMemRequest *SMPMemRequest::create(MemObj *reqCache,
 	outStandingSMPReq.push_back(sreq);
 #endif
 
-    sreq->oreq = 0;
+    sreq->oreq = nullptr;
     IS(sreq->acknowledged = false);
     I(sreq->memStack.empty());
 
@@ -228,7 +228,7 @@ SMPMemRequest *SMPMemRequest::create(MemObj *reqCache,
 
     I(reqCache);
     sreq->requestor = reqCache;
-    sreq->supplier = 0;
+    sreq->supplier = nullptr;
     sreq->currentMemObj = reqCache;
 
     sreq->writeDown = needsWriteDown;
@@ -245,7 +245,7 @@ SMPMemRequest *SMPMemRequest::create(MemObj *reqCache,
     sreq->src = reqCache->getNodeID();
     sreq->dst.clear();
     sreq->dstObj.clear();
-    sreq->dentry = NULL;
+    sreq->dentry = nullptr;
     
 	IJ(msh!=NOP);
     //printf("%p (%s)\n", sreq, reqCache->getSymbolicName());
@@ -253,7 +253,7 @@ SMPMemRequest *SMPMemRequest::create(MemObj *reqCache,
 #if (defined SIGDEBUG)
     nDEBUGSMPMsg[msh]++;
 #endif
-    sreq->invCB = NULL;
+    sreq->invCB = nullptr;
     //sreq->dead = false;
 
 	sreq->clearValue();
@@ -324,12 +324,12 @@ void SMPMemRequest::destroy()
     }
     dst.clear();
     dstObj.clear();
-    dentry = NULL;
+    dentry = nullptr;
     meshOp=NOP;
     //saveMeshOp=NOP;
-    saveReq = NULL;
-    msgDst=NULL;
-    msgOwner=NULL;
+    saveReq = nullptr;
+    msgDst=nullptr;
+    msgOwner=nullptr;
     //dead = true;
     //saveisSnoop = false;
     //isOwner = false;
@@ -337,7 +337,7 @@ void SMPMemRequest::destroy()
     
 	routerTime = 0;
 
-    if(invCB!=NULL) {
+    if(invCB!=nullptr) {
         //printf("shit?\n");
         invCB->destroy();
     }
@@ -370,13 +370,13 @@ void SMPMemRequest::ack(TimeDelta_t lat)
     IS(acknowledged = true);
     I(lat == 0);
 
-    if (cb==0) {
+    if (cb==nullptr) {
         destroy();
         return; // avoid double ack
     }
 
     CallbackBase *ncb=cb;
-    cb = 0;
+    cb = nullptr;
     ncb->call();
     destroy();
 }
@@ -401,7 +401,7 @@ MemOperation SMPMemRequest::getMemOperation()
     return memOp;
 }
 
-uint32_t SMPMemRequest::getState()
+uint32_t SMPMemRequest::getState() const
 {
     return state;
 }

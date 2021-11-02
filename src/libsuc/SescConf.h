@@ -62,12 +62,12 @@ protected:
     // SESC_bpred_b = 7 // unless getInt("bpred","b") it is ignored
     //
 
-    virtual const char *getEnvVar(const char *block,
-                                  const char *name);
+    const char *getEnvVar(const char *block,
+                                  const char *name) override;
 
-    virtual const Record *getRecord(const char *block,
+    const Record *getRecord(const char *block,
                                     const char *name,
-                                    int32_t vectorPos);
+                                    int32_t vectorPos) override;
 
 public:
     SConfig(const char *name);

@@ -1,7 +1,7 @@
 #if !(defined LINUXSYS_H)
 #define LINUXSYS_H
 
-#include <stddef.h>
+#include <cstddef>
 #include "Addressing.h"
 #include "SignalHandling.h"
 //To get ExecMode
@@ -19,7 +19,7 @@ public:
     static LinuxSys *create(ExecMode mode);
 
     // Destroys a Linuxsys object
-    virtual ~LinuxSys(void) {
+    virtual ~LinuxSys() {
     }
 
     virtual SignalAction handleSignal(ThreadContext *context, SigInfo *sigInfo) const = 0;

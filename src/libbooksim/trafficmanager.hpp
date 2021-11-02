@@ -45,7 +45,7 @@
 #include "injection.hpp"
 
 #include "pool.h"
-#include <math.h>
+#include <cmath>
 
 //register the requests to a node
 class PacketReplyInfo;
@@ -292,8 +292,8 @@ protected:
 
     virtual void _ClearStats();
 
-    void _ComputeStats(const vector<int> &stats, int *sum, int *min = NULL, int *max = NULL, int *min_pos = NULL,
-                       int *max_pos = NULL) const;
+    void _ComputeStats(const vector<int> &stats, int *sum, int *min = nullptr, int *max = nullptr, int *min_pos = nullptr,
+                       int *max_pos = nullptr) const;
 
     //virtual bool _SingleSim( );
 
@@ -322,8 +322,8 @@ protected:
 
         void Free();
 
-        int GetSize() { return _msgSize; };  // Size in Bytes
-        int GetDest() { return _to; };
+        int GetSize() const { return _msgSize; };  // Size in Bytes
+        int GetDest() const { return _to; };
 
         void *GetSESCPkt() { return _pkt; };
     private:
@@ -358,7 +358,7 @@ public:
 
     TrafficManager(const Configuration &config, const vector<Network *> &net);
 
-    virtual ~TrafficManager();
+    ~TrafficManager() override;
 
     //bool Run( );
 
@@ -386,7 +386,7 @@ public:
 
     virtual void DisplayOverallStatsCSV(ostream &os = cout) const;
 
-    inline BTime_t getTime() {
+    inline BTime_t getTime() const {
         return _time;
     }
 

@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
 #include "SescConf.h"
 
@@ -139,7 +139,7 @@ MemObj *MemorySystem::buildMemoryObj(const char *device_type,
 
     } else if (!strcasecmp(device_type, k_void)) {      // For testing purposes
 
-        return NULL;
+        return nullptr;
 
     } else {
 

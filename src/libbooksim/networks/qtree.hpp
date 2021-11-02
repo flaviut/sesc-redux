@@ -50,13 +50,13 @@ class QTree : public Network {
     int _k;
     int _n;
 
-    void _ComputeSize(const Configuration &config);
+    void _ComputeSize(const Configuration &config) override;
 
-    void _BuildNet(const Configuration &config);
+    void _BuildNet(const Configuration &config) override;
 
-    int _RouterIndex(int height, int pos);
+    int _RouterIndex(int height, int pos) const;
 
-    int _InputIndex(int height, int pos, int port);
+    int _InputIndex(int height, int pos, int port) const;
 
     int _OutputIndex(int height, int pos, int port);
 

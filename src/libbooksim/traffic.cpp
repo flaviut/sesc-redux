@@ -60,7 +60,7 @@ TrafficPattern *TrafficPattern::New(string const &pattern, int nodes,
     }
     vector<string> params = tokenize_str(param_str);
 
-    TrafficPattern *result = NULL;
+    TrafficPattern *result = nullptr;
     if (pattern_name == "bitcomp") {
         result = new BitCompTrafficPattern(nodes);
     } else if (pattern_name == "transpose") {
@@ -169,9 +169,9 @@ TrafficPattern *TrafficPattern::New(string const &pattern, int nodes,
             params.push_back("-1");
         }
         vector<int> hotspots = tokenize_int(params[0]);
-        for (size_t i = 0; i < hotspots.size(); ++i) {
-            if (hotspots[i] < 0) {
-                hotspots[i] = RandomInt(nodes - 1);
+        for (int & hotspot : hotspots) {
+            if (hotspot < 0) {
+                hotspot = RandomInt(nodes - 1);
             }
         }
         vector<int> rates;
@@ -359,8 +359,7 @@ int UniformRandomTrafficPattern::dest(int source) {
 
 UniformBackgroundTrafficPattern::UniformBackgroundTrafficPattern(int nodes, vector<int> excluded_nodes)
         : RandomTrafficPattern(nodes) {
-    for (size_t i = 0; i < excluded_nodes.size(); ++i) {
-        int const node = excluded_nodes[i];
+    for (int node : excluded_nodes) {
         assert((node >= 0) && (node < _nodes));
         _excluded.insert(node);
     }

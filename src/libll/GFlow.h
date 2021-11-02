@@ -61,7 +61,7 @@ public:
     virtual void switchIn(int32_t i) = 0;
     virtual void switchOut(int32_t i) = 0;
 
-    virtual int32_t currentPid(void) = 0;
+    virtual int32_t currentPid() = 0;
 
     virtual void goRabbitMode(long long n2skip=0) = 0;
     virtual void dump(const char *str) const = 0;

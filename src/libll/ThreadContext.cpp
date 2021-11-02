@@ -38,7 +38,7 @@ void ThreadContext::initialize(bool child) {
     }
 }
 
-void ThreadContext::cleanup() {
+void ThreadContext::cleanup() const {
 	getMainThreadContext()->decParallel(pid);
 }
 
@@ -72,7 +72,7 @@ ThreadContext::ThreadContext(FileSys::FileSys *fileSys)
     maskedSig(),
     readySig(),
     suspSig(false),
-    mySystem(0),
+    mySystem(nullptr),
     parentID(-1),
     childIDs(),
     exitSig(SigNone),
@@ -113,7 +113,7 @@ ThreadContext::ThreadContext(ThreadContext &parent,
     maskedSig(),
     readySig(),
     suspSig(false),
-    mySystem(0),
+    mySystem(nullptr),
     parentID(cloneParent?parent.parentID:parent.pid),
     childIDs(),
     exitSig(sig),
@@ -159,7 +159,7 @@ ThreadContext::ThreadContext(ThreadContext &parent,
     initialize(true);
 }
 
-ThreadContext::~ThreadContext(void) {
+ThreadContext::~ThreadContext() {
     I(!nDInsts);
     while(!maskedSig.empty()) {
         delete maskedSig.back();
@@ -170,7 +170,7 @@ ThreadContext::~ThreadContext(void) {
         readySig.pop_back();
     }
     if(getAddressSpace())
-        setAddressSpace(0);
+        setAddressSpace(nullptr);
     if(mySystem)
         delete mySystem;
 }
@@ -183,16 +183,16 @@ void ThreadContext::setAddressSpace(AddressSpace *newAddressSpace) {
 
 #include "libcore/OSSim.h"
 
-int32_t ThreadContext::findZombieChild(void) const {
-    for(IntSet::iterator childIt=childIDs.begin(); childIt!=childIDs.end(); childIt++) {
-        ThreadContext *childContext=getContext(*childIt);
+int32_t ThreadContext::findZombieChild() const {
+    for(int childID : childIDs) {
+        ThreadContext *childContext=getContext(childID);
         if(childContext->isExited()||childContext->isKilled())
-            return *childIt;
+            return childID;
     }
     return 0;
 }
 
-void ThreadContext::suspend(void) {
+void ThreadContext::suspend() {
     I(!isSuspended());
     I(!isExited());
     suspSig=true;
@@ -211,7 +211,7 @@ void ThreadContext::signal(SigInfo *sigInfo) {
     }
 }
 
-void ThreadContext::resume(void) {
+void ThreadContext::resume() {
     I(suspSig);
     I(!exited);
     suspSig=false;
@@ -223,8 +223,8 @@ bool ThreadContext::exit(int32_t code) {
     I(!isExited());
     I(!isKilled());
     I(!isSuspended());
-    openFiles=0;
-    sigTable=0;
+    openFiles=nullptr;
+    sigTable=nullptr;
     exited=true;
     exitCode=code;
     if(tgid!=tid) {
@@ -258,7 +258,7 @@ bool ThreadContext::exit(int32_t code) {
     I(parent->childIDs.count(pid));
     return false;
 }
-void ThreadContext::reap() {
+void ThreadContext::reap() const {
     I(exited);
     if(parentID!=-1) {
         ThreadContext *parent=getContext(parentID);
@@ -267,10 +267,10 @@ void ThreadContext::reap() {
         I(parent->childIDs.count(pid));
         parent->childIDs.erase(pid);
     }
-    pid2context[pid]=0;
+    pid2context[pid]=nullptr;
 }
 
-inline bool ThreadContext::skipInst(void) {
+inline bool ThreadContext::skipInst() {
     if(isSuspended())
         return false;
     if(isExited())
@@ -392,7 +392,7 @@ void ThreadContext::writeMemWithByte(VAddr addr, size_t len, uint8_t c) {
 }
 void ThreadContext::readMemToBuf(VAddr addr, size_t len, void *buf) {
     I(canRead(addr,len));
-    uint8_t *byteBuf=(uint8_t *)buf;
+    auto *byteBuf=(uint8_t *)buf;
     while(len) {
         if((addr&sizeof(uint8_t))||(len<sizeof(uint16_t))) {
             *((uint8_t *)byteBuf)=readMemRaw<uint8_t>(addr);
@@ -502,18 +502,18 @@ void ThreadContext::execRet(VAddr entry, VAddr ra, VAddr sp) {
     I(ra==callStack.back().ra);
     callStack.pop_back();
 }
-void ThreadContext::dumpCallStack(void) {
+void ThreadContext::dumpCallStack() {
     printf("Call stack dump for thread %d begins\n",pid);
-    for(size_t i=0; i<callStack.size(); i++)
+    for(auto & i : callStack)
         printf("  Entry 0x%08llx from 0x%08llx with sp 0x%08llx tail %d Name %s File %s\n",
-               (unsigned long long)(callStack[i].entry),(unsigned long long)(callStack[i].ra),
-               (unsigned long long)(callStack[i].sp),callStack[i].tailr,
-               addressSpace->getFuncName(callStack[i].entry).c_str(),
-               addressSpace->getFuncFile(callStack[i].entry).c_str());
+               (unsigned long long)(i.entry),(unsigned long long)(i.ra),
+               (unsigned long long)(i.sp),i.tailr,
+               addressSpace->getFuncName(i.entry).c_str(),
+               addressSpace->getFuncFile(i.entry).c_str());
     printf("Call stack dump for thread %d ends\n",pid);
 }
 
-void ThreadContext::clearCallStack(void) {
+void ThreadContext::clearCallStack() {
     printf("Clearing call stack for %d\n",pid);
     callStack.clear();
 }

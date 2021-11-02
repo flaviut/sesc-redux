@@ -22,9 +22,9 @@ SESC; see the file COPYING.  If not, write to the  Free Software Foundation, 59
 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include <iostream>
 
 #include "nanassert.h"
@@ -72,7 +72,7 @@ Cache::Cache(MemorySystem *gms, const char *section, const char *name)
     ,mshrBWHist(100, "%s:mshrAcceses", name)
 #endif
 {
-    MemObj *lower_level = NULL;
+    MemObj *lower_level = nullptr;
     char busName[512];
     char tmpName[512];
 
@@ -116,7 +116,7 @@ Cache::Cache(MemorySystem *gms, const char *section, const char *name)
     if(SescConf->checkBool(section,"SetMSHRL2")
             && SescConf->getBool(section,"SetMSHRL2")) {
         const char *cName = SescConf->getCharPtr(section,"l2cache");
-        Cache *temp = dynamic_cast<Cache*>(gms->searchMemoryObj(true,cName));
+        auto *temp = dynamic_cast<Cache*>(gms->searchMemoryObj(true,cName));
 
         for(int32_t b = 0; b < nBanks; b++) {
             bankMSHRs[b]->setLowerCache(temp);
@@ -193,7 +193,7 @@ Cache::Cache(MemorySystem *gms, const char *section, const char *name)
     }
 #endif
 
-    if (lower_level != NULL)
+    if (lower_level != nullptr)
         addLowerLevel(lower_level);
 }
 
@@ -255,7 +255,7 @@ void Cache::doRead(MemRequest *mreq)
 {
     Line *l = getCacheBank(mreq->getPAddr())->readLine(mreq->getPAddr());
 
-    if (l == 0) {
+    if (l == nullptr) {
         if(isInWBuff(mreq->getPAddr())) {
             nForwarded.inc();
             mreq->goUp(fwdDelay);
@@ -319,7 +319,7 @@ void Cache::activateOverflow(MemRequest *mreq)
 
         Line *l = getCacheBank(mreq->getPAddr())->readLine(mreq->getPAddr());
 
-        if (l == 0) {
+        if (l == nullptr) {
             // no need to add to the MSHR, it is already there
             // since it came from the overflow
             readMiss.inc();
@@ -341,7 +341,7 @@ void Cache::activateOverflow(MemRequest *mreq)
 
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if (l == 0) {
+    if (l == nullptr) {
         // no need to add to the MSHR, it is already there
         // since it came from the overflow
         writeMiss.inc();
@@ -380,7 +380,7 @@ void Cache::doWrite(MemRequest *mreq)
 {
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if (l == 0) {
+    if (l == nullptr) {
         writeMissHandler(mreq);
         return;
     }
@@ -465,12 +465,12 @@ void Cache::preReturnAccess(MemRequest *mreq)
 
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(addr);
 
-    if (l == 0) {
+    if (l == nullptr) {
         nextBankSlot(addr); // had to check the bank if it can accept the new line
         CallbackBase *cb = doReturnAccessCB::create(this, mreq);
         l = allocateLine(mreq->getPAddr(), cb);
 
-        if(l != 0) {
+        if(l != nullptr) {
             // the allocation was successfull, no need for the callback
             cb->destroy();
         } else {
@@ -508,9 +508,9 @@ Cache::Line *Cache::allocateLine(PAddr addr, CallbackBase *cb)
     Line *l = getCacheBank(addr)->fillLine(addr, rpl_addr);
     lineFill.inc();
 
-    if(l == 0) {
+    if(l == nullptr) {
         doAllocateLineRetryCB::scheduleAbs(globalClock + 100, this, addr, cb);
-        return 0;
+        return nullptr;
     }
 
     if(!l->isValid()) {
@@ -545,7 +545,7 @@ Cache::Line *Cache::allocateLine(PAddr addr, CallbackBase *cb)
     pendInvTable[rpl_addr].outsResps = getNumCachesInUpperLevels();
     pendInvTable[rpl_addr].cb = doAllocateLineCB::create(this, addr, rpl_addr, cb);
     invUpperLevel(rpl_addr, cacheBanks[0]->getLineSize(), this);
-    return 0;
+    return nullptr;
 }
 
 void Cache::doAllocateLine(PAddr addr, PAddr rpl_addr, CallbackBase *cb)
@@ -634,9 +634,9 @@ void Cache::invalidate(PAddr addr, ushort size, MemObj *lowerCache)
 void Cache::doInvalidate(PAddr addr, ushort size)
 {
     I(pendInvTable.find(addr) != pendInvTable.end());
-    CallbackBase *cb = 0;
+    CallbackBase *cb = nullptr;
 
-    PendInvTable::iterator it = pendInvTable.find(addr);
+    auto it = pendInvTable.find(addr);
     Entry *record = &(it->second);
     record->outsResps--;
 
@@ -701,7 +701,7 @@ void Cache::wbuffAdd(PAddr addr)
 
 void Cache::wbuffRemove(PAddr addr)
 {
-    WBuff::iterator it = wbuff.find(addr);
+    auto it = wbuff.find(addr);
     if(it == wbuff.end())
         return;
 
@@ -761,10 +761,10 @@ void WBCache::pushLine(MemRequest *mreq)
     nextBankSlot(mreq->getPAddr());
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if (inclusiveCache || l != 0) {
+    if (inclusiveCache || l != nullptr) {
         // l == 0 if the upper level is sending a push due to a
         // displacement of the lower level
-        if (l != 0) {
+        if (l != nullptr) {
             l->validate();
             l->makeDirty();
         }
@@ -790,7 +790,7 @@ void WBCache::doWriteBack(PAddr addr)
 {
     writeBack.inc();
     //FIXME: right now we are assuming all lines are the same size
-    CBMemRequest::create(1, lowerLevel[0], MemPush, addr, 0);
+    CBMemRequest::create(1, lowerLevel[0], MemPush, addr, nullptr);
 }
 
 void WBCache::doReturnAccess(MemRequest *mreq)
@@ -830,7 +830,7 @@ void WTCache::doWrite(MemRequest *mreq)
 {
     Line *l = getCacheBank(mreq->getPAddr())->writeLine(mreq->getPAddr());
 
-    if(l == 0) {
+    if(l == nullptr) {
         writeMissHandler(mreq);
         return;
     }
@@ -859,7 +859,7 @@ void WTCache::reexecuteDoWrite(MemRequest *mreq)
 {
     Line *l = getCacheBank(mreq->getPAddr())->findLine(mreq->getPAddr());
 
-    if(l == 0)
+    if(l == nullptr)
         sendMiss(mreq);
     else
         propagateDown(mreq);
@@ -975,7 +975,7 @@ void SVCache::preReturnAccess(MemRequest *mreq)
         // checking if the whole set is locked.
         uint32_t index = getCacheBank(addr)->calcIndex4Addr(addr);
         bool allLocked = true;
-        Line *lastLine = 0;
+        Line *lastLine = nullptr;
         for(uint32_t i = 0; i < getCacheBank(addr)->getAssoc(); i++) {
             Line *l = getCacheBank(addr)->getPLine(index+i);
             if(l->isValid() && l->isSpec()) {

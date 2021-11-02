@@ -112,10 +112,10 @@ class PortUnlimited : public PortGeneric {
 public:
     PortUnlimited(const char *name);
 
-    Time_t nextSlot();
-    Time_t occupySlots(int32_t nSlots);
-    Time_t calcNextSlot() const;
-    void lock4nCycles(TimeDelta_t clks);
+    Time_t nextSlot() override;
+    Time_t occupySlots(int32_t nSlots) override;
+    Time_t calcNextSlot() const override;
+    void lock4nCycles(TimeDelta_t clks) override;
 };
 
 class PortFullyPipe : public PortGeneric {
@@ -126,10 +126,10 @@ protected:
 public:
     PortFullyPipe(const char *name);
 
-    Time_t nextSlot();
-    Time_t occupySlots(int32_t nSlots);
-    Time_t calcNextSlot() const;
-    void lock4nCycles(TimeDelta_t clks);
+    Time_t nextSlot() override;
+    Time_t occupySlots(int32_t nSlots) override;
+    Time_t calcNextSlot() const override;
+    void lock4nCycles(TimeDelta_t clks) override;
 };
 
 class PortFullyNPipe : public PortGeneric {
@@ -141,10 +141,10 @@ protected:
 public:
     PortFullyNPipe(const char *name, NumUnits_t nFU);
 
-    Time_t nextSlot();
-    Time_t occupySlots(int32_t nSlots);
-    Time_t calcNextSlot() const;
-    void lock4nCycles(TimeDelta_t clks);
+    Time_t nextSlot() override;
+    Time_t occupySlots(int32_t nSlots) override;
+    Time_t calcNextSlot() const override;
+    void lock4nCycles(TimeDelta_t clks) override;
 };
 
 class PortPipe : public PortGeneric {
@@ -155,10 +155,10 @@ protected:
 public:
     PortPipe(const char *name, TimeDelta_t occ);
 
-    Time_t nextSlot();
-    Time_t occupySlots(int32_t nSlots);
-    Time_t calcNextSlot() const;
-    void lock4nCycles(TimeDelta_t clks);
+    Time_t nextSlot() override;
+    Time_t occupySlots(int32_t nSlots) override;
+    Time_t calcNextSlot() const override;
+    void lock4nCycles(TimeDelta_t clks) override;
 };
 
 class PortNPipe : public PortGeneric {
@@ -170,13 +170,13 @@ protected:
     Time_t  *portBusyUntil;
 public:
     PortNPipe(const char *name, NumUnits_t nFU, TimeDelta_t occ);
-    virtual ~PortNPipe();
+    ~PortNPipe() override;
 
-    Time_t nextSlot();
+    Time_t nextSlot() override;
     Time_t nextSlot(int32_t occupancy);
-    Time_t occupySlots(int32_t nSlots);
-    Time_t calcNextSlot() const;
-    void lock4nCycles(TimeDelta_t clks);
+    Time_t occupySlots(int32_t nSlots) override;
+    Time_t calcNextSlot() const override;
+    void lock4nCycles(TimeDelta_t clks) override;
 };
 
 #endif // PORT_H

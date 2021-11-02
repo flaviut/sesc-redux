@@ -113,11 +113,11 @@ public:
         return _output_channels[output];
     }
 
-    virtual void ReadInputs() = 0;
+    void ReadInputs() override = 0;
 
-    virtual void Evaluate();
+    void Evaluate() override;
 
-    virtual void WriteOutputs() = 0;
+    void WriteOutputs() override = 0;
 
     void OutChannelFault(int c, bool fault = true);
 

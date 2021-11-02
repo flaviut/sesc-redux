@@ -78,17 +78,17 @@ public:
 
     DummyMemoryOS(int32_t i);
 
-    virtual ~DummyMemoryOS();
+    ~DummyMemoryOS() override;
 
-    int32_t ITLBTranslate(VAddr iAddr);
+    int32_t ITLBTranslate(VAddr iAddr) override;
 
-    int32_t TLBTranslate(VAddr vAddr);
+    int32_t TLBTranslate(VAddr vAddr) override;
 
-    void solveRequest(MemRequest *r);
+    void solveRequest(MemRequest *r) override;
 
-    void boot();
+    void boot() override;
 
-    void report(const char *str);
+    void report(const char *str) override;
 };
 
 #endif /* GMEMORYOS_H */

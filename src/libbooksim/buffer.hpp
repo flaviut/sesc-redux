@@ -52,7 +52,7 @@ public:
     Buffer(const Configuration &config, int outputs,
            Module *parent, const string &name);
 
-    ~Buffer();
+    ~Buffer() override;
 
     void AddFlit(int vc, Flit *f);
 
@@ -139,7 +139,7 @@ public:
     }
 #endif
 
-    void Display(ostream &os = cout) const;
+    void Display(ostream &os = cout) const override;
 };
 
 #endif

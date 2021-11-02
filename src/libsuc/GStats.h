@@ -27,7 +27,7 @@ Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #define GSTATSD_H
 
 #include <list>
-#include <stdarg.h>
+#include <cstdarg>
 #include <vector>
 #include <set>
 
@@ -69,7 +69,7 @@ public:
     static void report(const char *str);
     static GStats *getRef(const char *str);
 
-    static void reset(void);
+    static void reset();
 
     GStats() {
     }
@@ -125,9 +125,9 @@ public:
         return data;
     }
 
-    double getDouble() const;
-    void reportValue() const;
-    void resetValue() {
+    double getDouble() const override;
+    void reportValue() const override;
+    void resetValue() override {
         data = 0;
     }
 };
@@ -156,14 +156,14 @@ public:
         nData += n;
     }
 
-    double getDouble() const;
+    double getDouble() const override;
 
-    long long getSamples() const {
+    long long getSamples() const override {
         return nData;
     }
 
-    virtual void reportValue() const;
-    virtual void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         data = 0;
         nData = 0;
     }
@@ -177,18 +177,18 @@ public:
     GStatsPDF(const char *format,...);
     GStatsPDF() { }
 
-    void sample(const int32_t v);
+    void sample(const int32_t v) override;
 
     // Merge two GStatsPDF together
     void sample(GStatsPDF &g);
 
-    void msamples(const long long v, long long n);
+    void msamples(const long long v, long long n) override;
 
     double getStdDev() const;
     double getSpread(double p) const;
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         data = 0;
         nData = 0;
         density.clear();
@@ -206,8 +206,8 @@ protected:
 public:
     GStatsProfiler(const char *format,...);
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         p.clear();
     }
 
@@ -227,8 +227,8 @@ public:
         nData++;
     }
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         maxValue = 0;
         nData = 0;
     }
@@ -244,7 +244,7 @@ protected:
 public:
     GStatsTimingAvg(const char *format,...);
 
-    void sample(const int32_t v);
+    void sample(const int32_t v) override;
 };
 
 class GStatsHist : public GStats {
@@ -262,8 +262,8 @@ public:
     GStatsHist(const char *format,...);
     GStatsHist() { }
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         H.clear();
         numSample = 0;
         cumulative = 0;
@@ -281,8 +281,8 @@ private:
 public:
     GStatsTimingHist(const char *format,...);
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         H.clear();
         numSample = 0;
         cumulative = 0;
@@ -308,8 +308,8 @@ private:
     Time_t lastUpdate;
 public:
     GStatsChangeHist(const char *format,...);
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         H.clear();
         numSample = 0;
         cumulative = 0;
@@ -351,15 +351,15 @@ protected:
     Time_t lastHistEvent;
 
     void buildHistogram(bool limit);
-    void prepareReport() {
+    void prepareReport() override {
         buildHistogram(false);
     }
 
 public:
     GStatsEventTimingHist(const char *format,...);
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         H.clear();
         numSample = 0;
         cumulative = 0;
@@ -382,8 +382,8 @@ public:
     GStatsPeriodicHist(int32_t p, const char* format, ...);
 
 
-    void reportValue() const;
-    void resetValue() {
+    void reportValue() const override;
+    void resetValue() override {
         H.clear();
         numSample = 0;
         cumulative = 0;

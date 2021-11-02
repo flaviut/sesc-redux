@@ -107,9 +107,9 @@ void Cluster::buildUnit(const char *clusterName, GMemorySystem *ms, Cluster *clu
         gen = e.gen;
     }
 
-    Resource *r = 0;
+    Resource *r = nullptr;
     GStatsEnergyCG *eng;
-    char *strtmp = 0;
+    char *strtmp = nullptr;
 
     char name[100];
     sprintf(name, "Cluster(%d)", (int) gproc->getId());
@@ -170,7 +170,7 @@ void Cluster::buildUnit(const char *clusterName, GMemorySystem *ms, Cluster *clu
 
             // Those resources go together with the store unit (TODO: LD/ST unit
             // should go to the same cluster)
-            if (res[iFence] == 0) {
+            if (res[iFence] == nullptr) {
                 res[iFence] = new FUMemory(cluster, ms, gproc->getId());
                 I(res[iEvent] == 0);
                 res[iEvent] = new FUEvent(cluster);
@@ -213,7 +213,7 @@ Cluster *Cluster::create(const char *clusterName, GMemorySystem *ms, GProcessor 
 
     char strtmp[128];
     sprintf(strtmp, "%s_energy", clusterName);
-    GStatsEnergyCGBase *ecgbase = new GStatsEnergyCGBase(strtmp, gproc->getId());
+    auto *ecgbase = new GStatsEnergyCGBase(strtmp, gproc->getId());
 
     cluster->buildUnit(clusterName, ms, cluster, iOpInvalid, ecgbase);
     cluster->buildUnit(clusterName, ms, cluster, iALU, ecgbase);
@@ -284,7 +284,7 @@ ClusterManager::ClusterManager(GMemorySystem *ms, GProcessor *gproc) {
     bzero(res, sizeof(Resource *) * MaxInstType);
 
     const char *coreSection = SescConf->getCharPtr("", "cpucore", gproc->getId());
-    if (coreSection == 0)
+    if (coreSection == nullptr)
         return;  // No core section, bad conf
 
     int32_t nClusters = SescConf->getRecordSize(coreSection, "cluster");
