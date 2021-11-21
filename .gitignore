@@ -4,6 +4,7 @@ cross-compiler/crosstool-ng/
 *.err
 *.rpt
 Changed/
+perf.data*
 
 # Created by https://www.toptal.com/developers/gitignore/api/vim,c,cpp,scons,linux,macos,python,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=vim,c,cpp,scons,linux,macos,python,windows
