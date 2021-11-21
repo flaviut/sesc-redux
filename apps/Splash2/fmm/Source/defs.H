@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <float.h>
 #include <limits.h>
 #include <float.h>
 
@@ -33,8 +34,6 @@
 #endif
 #define NUM_DIMENSIONS 2
 #define NUM_DIM_POW_2 4
-
-#define DBL_MIN        2.225073858507201e-308 /* min > 0 val of "double" */
 
 #define TIME_ALL 1  /* non-0 means time each phase within a time step */
 #define MY_TIMING (Local[my_id].Timing)
@@ -137,7 +136,8 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
  * precision, simply change double to float and recompile! */
 typedef double real;
 
-typedef struct {
+typedef struct defsComplex complex;
+struct defsComplex {
   real r;
   real i;
 } complex;
