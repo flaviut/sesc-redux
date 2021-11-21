@@ -99,7 +99,7 @@ public:
                              Module *parent, const string &name, int id,
                              int inputs, int outputs);
 
-    virtual void AddInputChannel(FlitChannel *channel, CreditChannel *backchannel);
+    virtual void AddInputChannel(FlitChannel *channel, CreditChannel *backchannel) final;
 
     virtual void AddOutputChannel(FlitChannel *channel, CreditChannel *backchannel);
 
@@ -115,7 +115,7 @@ public:
 
     void ReadInputs() override = 0;
 
-    void Evaluate() override;
+    void Evaluate() final;
 
     void WriteOutputs() override = 0;
 

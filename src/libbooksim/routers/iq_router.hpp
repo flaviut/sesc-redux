@@ -55,7 +55,7 @@ class SwitchMonitor;
 
 class BufferMonitor;
 
-class IQRouter : public Router {
+class IQRouter final : public Router {
 
     int _vcs;
 
@@ -122,7 +122,7 @@ class IQRouter : public Router {
 
     bool _ReceiveCredits();
 
-    void _InternalStep() override;
+    void _InternalStep() final;
 
     bool _SWAllocAddReq(int input, int vc, int output);
 
@@ -171,30 +171,30 @@ public:
              Module *parent, string const &name, int id,
              int inputs, int outputs);
 
-    ~IQRouter() override;
+    ~IQRouter() final;
 
-    void AddOutputChannel(FlitChannel *channel, CreditChannel *backchannel) override;
+    void AddOutputChannel(FlitChannel *channel, CreditChannel *backchannel) final;
 
-    void ReadInputs() override;
+    void ReadInputs() final;
 
-    void WriteOutputs() override;
+    void WriteOutputs() final;
 
-    void Display(ostream &os = cout) const override;
+    void Display(ostream &os = cout) const final;
 
-    int GetUsedCredit(int o) const override;
+    int GetUsedCredit(int o) const final;
 
-    int GetBufferOccupancy(int i) const override;
+    int GetBufferOccupancy(int i) const final;
 
 #ifdef TRACK_BUFFERS
     virtual int GetUsedCreditForClass(int output, int cl) const;
     virtual int GetBufferOccupancyForClass(int input, int cl) const;
 #endif
 
-    vector<int> UsedCredits() const override;
+    vector<int> UsedCredits() const final;
 
-    vector<int> FreeCredits() const override;
+    vector<int> FreeCredits() const final;
 
-    vector<int> MaxCredits() const override;
+    vector<int> MaxCredits() const final;
 
     SwitchMonitor const *GetSwitchMonitor() const {
         return _switchMonitor;

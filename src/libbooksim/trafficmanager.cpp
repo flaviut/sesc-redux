@@ -138,6 +138,7 @@ TrafficManager::TrafficManager(const Configuration &config, const vector<Network
     // ============ Traffic ============
 
     _classes = config.GetInt("classes");
+    assert(_classes % 2 == 0 || _classes == 1);
 
     _use_read_write = config.GetIntArray("use_read_write");
     if (_use_read_write.empty()) {
@@ -1252,6 +1253,8 @@ bool TrafficManager::IsFlitInFlight() const {
 
 void TrafficManager::CallEveryCycle() {
     assert(_sim_state == running || _sim_state == draining);
+    if (_classes % 2 != 0 || _classes == 1) __builtin_unreachable();
+
     bool flits_in_flight = false;
     for (int c = 0; c < _classes; ++c) {
         flits_in_flight |= !_total_in_flight_flits[c].empty();
@@ -1335,7 +1338,7 @@ void TrafficManager::CallEveryCycle() {
 
             for (int i = 1; i <= class_limit; ++i) {
 
-                int const c = (last_class + i) % _classes;
+                int const c = _classes == 1 ? 0 : (last_class + i) % _classes;
 
                 deque<Flit *> const &pp = _partial_packets[n][c];
 

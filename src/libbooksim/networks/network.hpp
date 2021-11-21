@@ -97,13 +97,13 @@ public:
 
     virtual double Capacity() const;
 
-    void ReadInputs() override;
+    void ReadInputs() final;
 
-    void Evaluate() override;
+    void Evaluate() final;
 
-    void WriteOutputs() override;
+    void WriteOutputs() final;
 
-    void Display(ostream &os = cout) const override;
+    void Display(ostream &os = cout) const final;
 
     void DumpChannelMap(ostream &os = cout, string const &prefix = "") const;
 

@@ -68,7 +68,7 @@ public:
 
     void ReadInputs() override;
 
-    void Evaluate() override {}
+    void Evaluate() final {}
 
     void WriteOutputs() override;
 

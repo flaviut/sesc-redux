@@ -111,24 +111,24 @@ class ChaosRouter : public Router {
 
     void _SendCredits();
 
-    void _InternalStep() override;
+    void _InternalStep() final;
 
 public:
     ChaosRouter(const Configuration &config,
                 Module *parent, const string &name, int id,
                 int inputs, int outputs);
 
-    ~ChaosRouter() override;
+    ~ChaosRouter() final;
 
-    void ReadInputs() override;
+    void ReadInputs() final;
 
-    void WriteOutputs() override;
+    void WriteOutputs() final;
 
-    int GetUsedCredit(int out) const override {
+    int GetUsedCredit(int out) const final {
         return 0;
     }
 
-    int GetBufferOccupancy(int i) const override {
+    int GetBufferOccupancy(int i) const final {
         return 0;
     }
 
@@ -143,19 +143,19 @@ public:
     }
 #endif
 
-    vector<int> UsedCredits() const override {
+    vector<int> UsedCredits() const final {
         return vector<int>();
     }
 
-    vector<int> FreeCredits() const override {
+    vector<int> FreeCredits() const final {
         return vector<int>();
     }
 
-    vector<int> MaxCredits() const override {
+    vector<int> MaxCredits() const final {
         return vector<int>();
     }
 
-    void Display(ostream &os = cout) const override;
+    void Display(ostream &os = cout) const final;
 };
 
 #endif
