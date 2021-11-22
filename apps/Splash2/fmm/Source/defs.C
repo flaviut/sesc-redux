@@ -65,14 +65,14 @@ PrintVector (vector *v)
 
 
 void
-LockedPrint (char *format, ...)
+LockedPrint (char *formatStr, ...)
 {
    va_list ap;
 
-   va_start(ap, format);
+   va_start(ap, formatStr);
    LOCK(G_Memory->io_lock);
    fflush(stdout);
-   vfprintf(stdout, format, ap);
+   vfprintf(stdout, formatStr, ap);
    fflush(stdout);
    UNLOCK(G_Memory->io_lock);
    va_end(ap);

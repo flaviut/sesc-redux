@@ -49,8 +49,9 @@ extern g_mem *G_Memory;
 
 typedef struct _Local_Memory local_memory;
 struct _Local_Memory {
+#if !(defined NO_PADDING)
    int pad_begin[PAD_SIZE];
-
+#endif
    box *B_Heap;
    int Index_B_Heap;
    int Max_B_Heap;
@@ -78,7 +79,9 @@ struct _Local_Memory {
    unsigned int init_done_times;
    time_info Timing[MAX_TIME_STEPS];
    
+#if !(defined NO_PADDING)
    int pad_end[PAD_SIZE];
+#endif
 };
 extern local_memory Local[MAX_PROCS];
 

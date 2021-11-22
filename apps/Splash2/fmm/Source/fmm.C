@@ -110,6 +110,9 @@ void GetArguments();
 void PrintTimes();
 void Help();
 
+int NCPU;
+int NumPart;
+extern char *optarg;
 
 void
 main (int argc, char *argv[])
@@ -120,11 +123,15 @@ main (int argc, char *argv[])
   
    CLOCK(starttime);
 
-   while ((c = getopt(argc, argv, "osh")) != -1) {
+   NCPU=-1;
+   NumPart=-1;
+   while ((c = getopt(argc, argv, "oshn:p:")) != -1) {
      switch(c) {
        case 'o': do_output = 1; break;
        case 's': do_stats = 1; break;
        case 'h': Help(); break;
+       case 'n': NumPart=atoi(optarg); break;
+       case 'p': NCPU=atoi(optarg); break;
      }
    }
 
@@ -342,6 +349,8 @@ GetArguments ()
    }
 
    Total_Particles = atoi(gets(input));
+   if(NumPart!=-1)
+     Total_Particles=NumPart;
    if (Total_Particles <= 0) {
       fprintf(stderr, "ERROR: The number of particles should be an int ");
       fprintf(stderr, "greater than 0.\n");
@@ -366,6 +375,8 @@ GetArguments ()
    }
 
    Number_Of_Processors = atoi(gets(input));
+   if(NCPU!=-1)
+     Number_Of_Processors=NCPU;
    if (Number_Of_Processors == 0) {
       fprintf(stderr, "ERROR: The Number_Of_Processors has no default.\n");
       fprintf(stderr, "If you need help, type \"nbody -help\".\n");

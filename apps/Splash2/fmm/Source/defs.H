@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <limits.h>
+#include <float.h>
 
 /* Define booleans */
 #ifdef TRUE
@@ -136,12 +137,10 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
  * precision, simply change double to float and recompile! */
 typedef double real;
 
-typedef struct _Complex complex;
-struct _Complex {
+typedef struct {
   real r;
   real i;
-};
-
+} complex;
 typedef struct _Vector vector;
 struct _Vector {
   real x;
